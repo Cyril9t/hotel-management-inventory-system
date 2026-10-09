@@ -17,6 +17,7 @@ export const errorHandler = (
   if (isHttpError(err)) {
     const httpErr = err as HttpError;
     const apiError: ApiError = {
+      code: httpErr.code ?? "BAD_REQUEST",
       message: httpErr.message,
       details: httpErr.details,
     };
@@ -24,6 +25,7 @@ export const errorHandler = (
       {
         Status: `${httpErr.status} ${httpErr.name}`,
         Message: httpErr.message,
+        Code: apiError.code,
       },
       msg,
     );
@@ -41,6 +43,7 @@ export const errorHandler = (
   );
   return res.status(500).json(
     failure({
+      code: "INTERNAL_ERROR",
       message: "Internal Server Error",
     }),
   );

@@ -4,6 +4,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { httpLogger } from "./shared/config/logger";
 import { errorHandler } from "./shared/middleware/error-handler";
+import { notFoundHandler } from "./shared/middleware/notfound-handler";
 import { env } from "./shared/config/env";
 import { success } from "./shared/utils/api-response";
 // import identityRouter from "./modules/identity/routes";
@@ -24,6 +25,7 @@ app.get("/", (_req, res) =>
 
 // app.use("/api/auth", identityRouter);
 
+app.use(notFoundHandler);
 app.use(errorHandler);
 
 export default app;

@@ -57,12 +57,26 @@ export const logger = pino(
 
 export const httpLogger = pinoHttp({
   logger,
-  // Automatically select log level based on response status code
+  // Custom log messages instead of "request completed" / "request errored"
+  customSuccessMessage: (req) => `${req.method} ${req.url}`,
+  customErrorMessage: (req) => `${req.method} ${req.url}`,
+
+  // Trim req and res output to only essential attributes
+  serializers: {
+    req: (req) => ({
+      id: req.id,
+      method: req.method,
+      url: req.url,
+    }),
+    res: (res) => ({
+      statusCode: res.statusCode,
+    }),
+  },
   customLogLevel: (_req, res, err) => {
     if (res.statusCode >= 500 || err) return "error";
     if (res.statusCode >= 400) return "warn";
     return "info";
   },
-  // Auto-generate or reuse request IDs
-  genReqId: (req) => req.headers["x-request-id"] || crypto.randomUUID(),
+  genReqId: (req) =>
+    (req.headers["x-request-id"] as string) || crypto.randomUUID(),
 });

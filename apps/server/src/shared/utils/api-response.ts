@@ -1,3 +1,5 @@
+import type { ErrorDetails } from "../errors/http-errors";
+
 export interface ApiSuccess<T> {
   success: true;
   data: T;
@@ -9,8 +11,9 @@ export interface ApiFailure {
 }
 
 export interface ApiError {
+  code: string;
   message: string;
-  details?: Record<string, unknown[]>;
+  details?: ErrorDetails;
 }
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
@@ -22,10 +25,11 @@ export function success<T>(data: T): ApiSuccess<T> {
   };
 }
 
-export function failure({ message, details }: ApiError): ApiFailure {
+export function failure({ code, message, details }: ApiError): ApiFailure {
   return {
     success: false as const,
     error: {
+      code,
       message,
       ...(details !== undefined && { details }),
     },
