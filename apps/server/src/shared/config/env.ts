@@ -1,7 +1,12 @@
 import { config } from "@dotenvx/dotenvx";
 import { cleanEnv, str, port, url, num } from "envalid";
 
-config({ quiet: true });
+config({ path: ".env", quiet: true });
+config({
+  path: `.env.${process.env.NODE_ENV || "development"}`,
+  quiet: true,
+  override: true,
+});
 
 export const env = cleanEnv(process.env, {
   NODE_ENV: str({
@@ -18,7 +23,7 @@ export const env = cleanEnv(process.env, {
   JWT_ACCESS_EXPIRES_IN: str({ default: "15m" }),
   JWT_REFRESH_EXPIRES_IN: str({ default: "7d" }),
 
-  REDIS_URL: str({ default: "redis://localhost:6379" }),
+  REDIS_URL: str(),
 
   CLIENT_ORIGIN: url({ default: "http://localhost:5173" }),
 

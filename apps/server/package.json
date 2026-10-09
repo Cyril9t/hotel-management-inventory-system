@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "db:generate": "prisma generate",
     "db:push": "prisma push",
-    "db:migrate": "prisma migrate",
+    "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
   "keywords": [],

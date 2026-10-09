@@ -2,5 +2,5 @@
   "watch": ["src"],
   "ext": "ts,json",
   "ignore": ["src/**/*.test.ts", "src/**/*.spec.ts", "dist", "node_modules"],
-  "exec": "tsx --tsconfig tsconfig.app.json src/index.ts"
+  "exec": "tsx src/shared/config/env.ts"
 }
