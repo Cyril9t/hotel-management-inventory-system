@@ -10,35 +10,19 @@ export const env = cleanEnv(process.env, {
   }),
   PORT: port({ default: 3000 }),
 
-  DATABASE_URL: str({
-    desc: "Pooled Postgres connection used by the app at runtime",
-  }),
-  DIRECT_URL: str({
-    desc: "Direct (unpooled) Postgres connection used by Prisma migrations",
-  }),
+  DATABASE_URL: str(),
+  DIRECT_URL: str(),
 
-  JWT_ACCESS_SECRET: str({
-    desc: "Signing secret for short-lived access tokens",
-  }),
-  JWT_REFRESH_SECRET: str({
-    desc: "Signing secret for refresh tokens (stored in httpOnly cookie)",
-  }),
+  JWT_ACCESS_SECRET: str(),
+  JWT_REFRESH_SECRET: str(),
   JWT_ACCESS_EXPIRES_IN: str({ default: "15m" }),
   JWT_REFRESH_EXPIRES_IN: str({ default: "7d" }),
 
-  REDIS_URL: str({
-    default: "redis://localhost:6379",
-    desc: "Used by BullMQ queues",
-  }),
+  REDIS_URL: str({ default: "redis://localhost:6379" }),
 
-  CLIENT_ORIGIN: url({
-    default: "http://localhost:5173",
-    desc: "CORS origin for the web app",
-  }),
+  CLIENT_ORIGIN: url({ default: "http://localhost:5173" }),
 
-  RESEND_API_KEY: str({
-    desc: "For password-recovery/temp-credential transactional emails",
-  }),
+  RESEND_API_KEY: str(),
 
   BCRYPT_SALT_ROUNDS: num({ default: 12 }),
 });
