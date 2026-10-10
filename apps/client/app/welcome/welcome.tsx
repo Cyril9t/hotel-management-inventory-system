@@ -1,11 +1,15 @@
+import LoginPage from "~/components/Auth/Login";
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
+import Login from "~/Page/Auth/Login";
 
 export function Welcome() {
   return (
-    <h1>Hello world build something big</h1>
+    <Login />
   );
 }
+
+
 
 const resources = [
   {

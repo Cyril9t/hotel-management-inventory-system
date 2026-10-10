@@ -2,14 +2,153 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 }
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
+/* Light mode */
+:root {
+  color-scheme: light;
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+  --background: #f7f6f3;
+  --foreground: #172536;
+
+  --card: #ffffff;
+  --card-foreground: #172536;
+
+  --popover: #ffffff;
+  --popover-foreground: #172536;
+
+  --primary: #d99a28;
+  --primary-foreground: #172536;
+
+  --secondary: #eeeae2;
+  --secondary-foreground: #172536;
+
+  --muted: #eeece7;
+  --muted-foreground: #737985;
+
+  --accent: #f5ead2;
+  --accent-foreground: #805711;
+
+  --destructive: #dc4545;
+  --destructive-foreground: #ffffff;
+
+  --border: #e3dfd6;
+  --input: #e3dfd6;
+  --ring: #d99a28;
+
+  --radius: 0.625rem;
+
+  /* Brandy Hotel brand colors */
+  --brand-navy: #172536;
+  --brand-navy-light: #24384d;
+  --brand-gold: #d99a28;
+  --brand-gold-light: #f2c66d;
+  --brand-success: #23865b;
+  --brand-warning: #d97706;
+  --brand-danger: #dc4545;
+}
+
+/* Dark mode */
+.dark {
+  color-scheme: dark;
+
+  --background: #111923;
+  --foreground: #f4f1e9;
+
+  --card: #192432;
+  --card-foreground: #f4f1e9;
+
+  --popover: #202d3b;
+  --popover-foreground: #f4f1e9;
+
+  --primary: #e5ad43;
+  --primary-foreground: #172536;
+
+  --secondary: #263342;
+  --secondary-foreground: #f4f1e9;
+
+  --muted: #222e3c;
+  --muted-foreground: #a4adba;
+
+  --accent: #3b3425;
+  --accent-foreground: #f2c66d;
+
+  --destructive: #ef6464;
+  --destructive-foreground: #ffffff;
+
+  --border: #303c49;
+  --input: #354250;
+  --ring: #e5ad43;
+
+  /* Brandy Hotel brand colors */
+  --brand-navy: #111923;
+  --brand-navy-light: #192b3e;
+  --brand-gold: #e5ad43;
+  --brand-gold-light: #f2c66d;
+  --brand-success: #4ade80;
+  --brand-warning: #fbbf24;
+  --brand-danger: #ef6464;
+}
+
+/* Tailwind v4 semantic color utilities */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-light: var(--brand-navy-light);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-light: var(--brand-gold-light);
+  --color-brand-success: var(--brand-success);
+  --color-brand-warning: var(--brand-warning);
+  --color-brand-danger: var(--brand-danger);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Global styles */
+* {
+  border-color: var(--border);
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  @apply bg-background text-foreground;
+  min-height: 100vh;
+  margin: 0;
 }
