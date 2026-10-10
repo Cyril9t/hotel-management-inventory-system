@@ -1,6 +1,9 @@
+import crypto from "node:crypto";
+import path from "node:path";
 import pino from "pino";
 import pinoHttp from "pino-http";
 import { env } from "../config/env";
+import type { HttpError } from "http-errors";
 
 const targets: pino.TransportTargetOptions[] = [
   env.isDev
@@ -24,7 +27,7 @@ const targets: pino.TransportTargetOptions[] = [
   {
     target: "pino/file",
     options: {
-      destination: "./logs/app.log",
+      destination: path.join(process.cwd(), "logs/app.log"),
       mkdir: true,
     },
   },
@@ -45,8 +48,12 @@ export const logger = pino(
         "req.headers.cookie",
         "password",
         "*.password",
+        "passwordHash",
+        "*.passwordHash",
         "token",
         "*.token",
+        "refreshToken",
+        "*.refreshToken",
       ],
       censor: "[REDACTED]",
     },
@@ -57,20 +64,32 @@ export const logger = pino(
 
 export const httpLogger = pinoHttp({
   logger,
-  // Custom log messages instead of "request completed" / "request errored"
   customSuccessMessage: (req) => `${req.method} ${req.url}`,
   customErrorMessage: (req) => `${req.method} ${req.url}`,
 
-  // Trim req and res output to only essential attributes
   serializers: {
     req: (req) => ({
       id: req.id,
       method: req.method,
       url: req.url,
     }),
-    res: (res) => ({
-      statusCode: res.statusCode,
-    }),
+    res: (res) => {
+      const err = res.locals?.err as
+        | HttpError<number>
+        | undefined;
+
+      if (!err) {
+        return { statusCode: res.statusCode };
+      }
+
+      return {
+        statusCode: res.statusCode,
+        code: err.code ?? "INTERNAL_ERROR",
+        message: err.message,
+        ...(err.details ? { details: err.details } : {}),
+        ...(res.statusCode >= 500 ? { stack: err.stack } : {}),
+      };
+    },
   },
   customLogLevel: (_req, res, err) => {
     if (res.statusCode >= 500 || err) return "error";

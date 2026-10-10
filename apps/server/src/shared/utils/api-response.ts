@@ -1,20 +1,20 @@
 import type { ErrorDetails } from "../errors/http-errors";
 
-export interface ApiSuccess<T> {
+export type ApiSuccess<T> = {
   success: true;
   data: T;
-}
+};
 
-export interface ApiFailure {
+export type ApiFailure = {
   success: false;
   error: ApiError;
-}
+};
 
-export interface ApiError {
+export type ApiError = {
   code: string;
   message: string;
   details?: ErrorDetails;
-}
+};
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
 

@@ -1,5 +1,4 @@
 import type { Request, Response, NextFunction } from "express";
-import createError from "http-errors";
 import { NotFoundError } from "../errors/http-errors";
 
 export const notFoundHandler = (
@@ -9,7 +8,7 @@ export const notFoundHandler = (
 ) => {
   const message = `Endpoint ${req.method} ${req.originalUrl} not found`;
   next(
-    NotFoundError(message, {
+    new NotFoundError(message, {
       path: req.originalUrl,
       method: req.method,
     }),

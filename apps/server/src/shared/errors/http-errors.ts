@@ -1,28 +1,42 @@
 import createError from "http-errors";
 
-export type ErrorDetails =
-  Array<{ field: string; messages: string[] }> | Record<string, unknown>;
+export type ErrorDetails = Record<string, unknown>;
 
-export const UnauthorizedError = (message = "Unauthorized") =>
-  createError(401, message, { code: "UNAUTHORIZED" });
+export class UnauthorizedError extends createError.Unauthorized {
+  code = "UNAUTHORIZED";
+  constructor(message = "Unauthorized") {
+    super(message);
+  }
+}
 
-export const NotFoundError = (
-  message = "Resource not found",
-  details?: ErrorDetails,
-) =>
-  createError(404, message, {
-    code: "NOT_FOUND",
-    ...(details ? { details } : {}),
-  });
+export class NotFoundError extends createError.NotFound {
+  code = "NOT_FOUND";
+  details?: ErrorDetails;
+  constructor(message = "Resource not found", details?: ErrorDetails) {
+    super(message);
+    if (details) this.details = details;
+  }
+}
 
-export const BadRequestError = (message = "Bad Request") =>
-  createError(400, message, { code: "BAD_REQUEST" });
+export class BadRequestError extends createError.BadRequest {
+  code = "BAD_REQUEST";
+  constructor(message = "Bad Request") {
+    super(message);
+  }
+}
 
-export const ValidationError = (
-  message = "Validation failed",
-  details?: ErrorDetails,
-) =>
-  createError(400, message, {
-    code: "VALIDATION_ERROR",
-    ...(details ? { details } : {}),
-  });
+export class ValidationError extends createError.BadRequest {
+  code = "VALIDATION_ERROR";
+  details?: ErrorDetails;
+  constructor(message = "Validation failed", details?: ErrorDetails) {
+    super(message);
+    if (details) this.details = details;
+  }
+}
+
+export class CorsError extends createError.BadRequest {
+  code = "CORS_DENIED";
+  constructor(message = "Origin not allowed by CORS") {
+    super(message);
+  }
+}
