@@ -1,0 +1,33 @@
+info:
+  name: valid
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/test/42?page=2&limit=10
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: page
+      value: "2"
+      type: query
+    - name: limit
+      value: "10"
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "email": "robert@example.com",
+        "age": "30"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

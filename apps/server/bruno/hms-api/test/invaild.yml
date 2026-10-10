@@ -1,0 +1,33 @@
+info:
+  name: invaild
+  type: http
+  seq: 4
+
+http:
+  method: post
+  url: http://localhost:3000/api/test/abc?page=0&limit=500
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: page
+      value: "0"
+      type: query
+    - name: limit
+      value: "500"
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "email": "not-an-email",
+        "age": -5
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: false
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -7,3 +7,7 @@ allowBuilds:
   bcrypt: true
   esbuild: true
   prisma: true
+<<<<<<< HEAD
+=======
+  workerd: true
+>>>>>>> dd39256f972e8409f02e113197c1f768bda52673

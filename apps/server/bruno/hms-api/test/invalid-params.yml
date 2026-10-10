@@ -1,0 +1,25 @@
+info:
+  name: invalid-params
+  type: http
+  seq: 2
+
+http:
+  method: post
+  url: http://localhost:3000/api/test/abc
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "email": "robert@example.com"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: false
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
