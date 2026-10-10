@@ -6,23 +6,425 @@ datasource db {
   provider = "postgresql"
 }
 
+// ============================================================
+// ENUMS
+// ============================================================
+
 enum Role {
   OWNER
-  GENERAL_MANAGER
+  GM
   RECEPTIONIST
-  BAR_RESTAURANT_STAFF
+  BAR_STAFF
+  RESTAURANT_STAFF
   KITCHEN_STAFF
   STORE_MANAGER
 }
 
+// Shared across users/shifts/stock_balances (all five departments).
+// products.department and sales.sourceDepartment are app-restricted
+// to BAR/RESTAURANT only — Prisma has no enum-subset type, so that
+// restriction is enforced in application validation, not the DB.
+enum Department {
+  RECEPTION
+  BAR
+  RESTAURANT
+  KITCHEN
+  STORE
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum BookingStatus {
+  RESERVED
+  CHECKED_IN
+  CHECKOUT_DUE
+  OVERDUE
+  CHECKED_OUT
+}
+
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  CARD
+  CHARGE_TO_ROOM
+}
+
+enum PaymentState {
+  UNPAID
+  PAID
+}
+
+enum SaleStatus {
+  COMPLETED
+  VOIDED
+}
+
+enum KitchenOrderStatus {
+  INCOMING
+  PREPARING
+  READY
+  DELIVERED
+  VOIDED
+}
+
+enum StockMovementType {
+  RECEIVE
+  ISSUE
+  SALE_DEDUCTION
+  CORRECTION
+}
+
+// ============================================================
+// USERS MODULE
+// ============================================================
+
+model StaffInvite {
+  id              String       @id @default(uuid())
+  firstName       String       @map("first_name")
+  lastName        String       @map("last_name")
+  email           String
+  phone           String
+  role            Role
+  department      Department?
+  tokenHash       String       @unique @map("token_hash")
+  status          InviteStatus @default(PENDING)
+  expiresAt       DateTime     @map("expires_at")
+  createdByUserId String       @map("created_by_user_id")
+  createdBy       User         @relation("InviteCreatedBy", fields: [createdByUserId], references: [id])
+  userId          String?      @unique @map("user_id")
+  user            User?        @relation("InviteAcceptedInto", fields: [userId], references: [id])
+  acceptedAt      DateTime?    @map("accepted_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  @@index([email, status])
+  @@map("staff_invites")
+}
+
 model User {
-  id                String   @id @default(cuid())
-  fullName          String
-  email             String   @unique
-  passwordHash      String
-  role              Role
-  isActive          Boolean  @default(true)
-  mustResetPassword Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String       @id @default(uuid())
+  firstName        String       @map("first_name")
+  lastName         String       @map("last_name")
+  email            String       @unique
+  phone            String
+  passwordHash     String       @map("password_hash")
+  role             Role
+  department       Department?
+  isActive         Boolean      @default(true) @map("is_active")
+  invite           StaffInvite? @relation("InviteAcceptedInto")
+  invitesCreated   StaffInvite[] @relation("InviteCreatedBy")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  deactivatedAt    DateTime?    @map("deactivated_at")
+
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
+
+  shifts               Shift[]
+  bookingsCreated      Booking[]
+  salesCreated         Sale[]            @relation("SaleCreatedBy")
+  salesVoided          Sale[]            @relation("SaleVoidedBy")
+  salesApproved        Sale[]            @relation("SaleApprovedBy")
+  salesSettled         Sale[]            @relation("SaleSettledBy")
+  kitchenOrdersCreated KitchenOrder[]
+  productsCreated      Product[]
+  stockMovements       StockMovement[]
+  auditLogs            AuditLog[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("password_reset_tokens")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+// ROOMS MODULE
+// ============================================================
+
+model RoomCategory {
+  id            String  @id @default(uuid())
+  name          String
+  pricePerNight Decimal @db.Decimal(10, 2) @map("price_per_night")
+
+  rooms Room[]
+
+  @@map("room_categories")
+}
+
+model Room {
+  id         String       @id @default(uuid())
+  number     String       @unique
+  categoryId String       @map("category_id")
+  category   RoomCategory @relation(fields: [categoryId], references: [id])
+  isActive   Boolean      @default(true) @map("is_active")
+
+  bookings Booking[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id                     String        @id @default(uuid())
+  roomId                 String        @map("room_id")
+  room                   Room          @relation(fields: [roomId], references: [id])
+  guestFirstName         String        @map("guest_first_name")
+  guestLastName          String        @map("guest_last_name")
+  guestPhone             String        @map("guest_phone")
+  guestGender            String        @map("guest_gender")
+  nights                 Int
+  pricePerNightAtBooking Decimal       @db.Decimal(10, 2) @map("price_per_night_at_booking")
+  totalPrice             Decimal       @db.Decimal(10, 2) @map("total_price")
+  paymentMethod          PaymentMethod @map("payment_method")
+  checkInAt              DateTime?     @map("check_in_at")
+  expectedCheckoutAt     DateTime      @map("expected_checkout_at")
+  actualCheckoutAt       DateTime?     @map("actual_checkout_at")
+  status                 BookingStatus @default(RESERVED)
+  createdByUserId        String        @map("created_by_user_id")
+  createdBy              User          @relation(fields: [createdByUserId], references: [id])
+  shiftId                String?       @map("shift_id")
+  shift                  Shift?        @relation(fields: [shiftId], references: [id])
+  createdAt              DateTime      @default(now()) @map("created_at")
+
+  sales Sale[]
+
+  @@index([roomId, createdAt])
+  @@index([guestFirstName, guestLastName])
+  @@map("bookings")
+}
+
+// ============================================================
+// SHIFTS MODULE
+// ============================================================
+
+model Shift {
+  id           String      @id @default(uuid())
+  userId       String      @map("user_id")
+  user         User        @relation(fields: [userId], references: [id])
+  department   Department
+  openedAt     DateTime    @default(now()) @map("opened_at")
+  closedAt     DateTime?   @map("closed_at")
+  openingCash  Decimal     @db.Decimal(10, 2) @map("opening_cash")
+  expectedCash Decimal?    @db.Decimal(10, 2) @map("expected_cash")
+  actualCash   Decimal?    @db.Decimal(10, 2) @map("actual_cash")
+  variance     Decimal?    @db.Decimal(10, 2)
+  status       ShiftStatus @default(OPEN)
+
+  receptionSnapshot ReceptionShiftSnapshot?
+  bookings          Booking[]
+  sales             Sale[]
+
+  // Enforced at the application layer (Prisma has no native partial
+  // unique index declaration here): only one shift per user may have
+  // status = OPEN at a time. Add a raw migration:
+  //   CREATE UNIQUE INDEX one_open_shift_per_user
+  //   ON shifts (user_id) WHERE status = 'OPEN';
+  @@index([userId, status])
+  @@map("shifts")
+}
+
+model ReceptionShiftSnapshot {
+  id                String   @id @default(uuid())
+  shiftId           String   @unique @map("shift_id")
+  shift             Shift    @relation(fields: [shiftId], references: [id])
+  roomSnapshotOpen  Json     @map("room_snapshot_open")
+  roomSnapshotClose Json?    @map("room_snapshot_close")
+
+  @@map("reception_shift_snapshots")
+}
+
+// ============================================================
+// ORDERS MODULE
+// ============================================================
+
+model Sale {
+  id                    String        @id @default(uuid())
+  sourceDepartment      Department    @map("source_department") // app-restricted to BAR/RESTAURANT
+  totalAmount           Decimal       @db.Decimal(10, 2) @map("total_amount")
+  paymentMethod         PaymentMethod @map("payment_method")
+  paymentState          PaymentState  @default(UNPAID) @map("payment_state")
+  chargeToRoomBookingId String?       @map("charge_to_room_booking_id")
+  chargeToRoomBooking   Booking?      @relation(fields: [chargeToRoomBookingId], references: [id])
+  status                SaleStatus    @default(COMPLETED)
+  voidReason            String?       @map("void_reason")
+  voidedByUserId        String?       @map("voided_by_user_id")
+  voidedBy              User?         @relation("SaleVoidedBy", fields: [voidedByUserId], references: [id])
+  approvedByUserId      String?       @map("approved_by_user_id")
+  approvedBy            User?         @relation("SaleApprovedBy", fields: [approvedByUserId], references: [id])
+  voidedAt              DateTime?     @map("voided_at")
+  settledAt             DateTime?     @map("settled_at")
+  settledByUserId       String?       @map("settled_by_user_id")
+  settledBy             User?         @relation("SaleSettledBy", fields: [settledByUserId], references: [id])
+  shiftId               String        @map("shift_id")
+  shift                 Shift         @relation(fields: [shiftId], references: [id])
+  createdByUserId       String        @map("created_by_user_id")
+  createdBy              User          @relation("SaleCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt              DateTime      @default(now()) @map("created_at")
+
+  items          SaleItem[]
+  kitchenOrder   KitchenOrder?
+  stockMovements StockMovement[]
+
+  @@index([sourceDepartment, createdAt])
+  @@index([chargeToRoomBookingId, paymentState])
+  @@map("sales")
+}
+
+model SaleItem {
+  id              String  @id @default(uuid())
+  saleId          String  @map("sale_id")
+  sale            Sale    @relation(fields: [saleId], references: [id])
+  productId       String  @map("product_id")
+  product         Product @relation(fields: [productId], references: [id])
+  quantity        Int
+  unitPriceAtSale Decimal @db.Decimal(10, 2) @map("unit_price_at_sale")
+  lineTotal       Decimal @db.Decimal(10, 2) @map("line_total")
+
+  @@map("sale_items")
+}
+
+model KitchenOrder {
+  id              String             @id @default(uuid())
+  saleId          String             @unique @map("sale_id")
+  sale            Sale               @relation(fields: [saleId], references: [id])
+  destination     String
+  status          KitchenOrderStatus @default(INCOMING)
+  createdByUserId String             @map("created_by_user_id")
+  createdBy       User               @relation(fields: [createdByUserId], references: [id])
+  createdAt       DateTime           @default(now()) @map("created_at")
+
+  items          KitchenOrderItem[]
+  stockMovements StockMovement[]
+
+  @@index([status, createdAt])
+  @@map("kitchen_orders")
+}
+
+model KitchenOrderItem {
+  id               String       @id @default(uuid())
+  kitchenOrderId   String       @map("kitchen_order_id")
+  kitchenOrder     KitchenOrder @relation(fields: [kitchenOrderId], references: [id])
+  productId        String       @map("product_id")
+  product          Product      @relation(fields: [productId], references: [id])
+  quantity         Int
+  unitPriceAtOrder Decimal      @db.Decimal(10, 2) @map("unit_price_at_order")
+
+  @@map("kitchen_order_items")
+}
+
+// ============================================================
+// STOCK MODULE
+// ============================================================
+
+model Product {
+  id                String     @id @default(uuid())
+  name              String
+  department        Department // app-restricted to BAR/RESTAURANT
+  unitPrice         Decimal    @db.Decimal(10, 2) @map("unit_price")
+  lowStockThreshold Int        @default(10) @map("low_stock_threshold")
+  isActive          Boolean    @default(true) @map("is_active")
+  createdByUserId   String     @map("created_by_user_id")
+  createdBy         User       @relation(fields: [createdByUserId], references: [id])
+  createdAt         DateTime   @default(now()) @map("created_at")
+
+  saleItems         SaleItem[]
+  kitchenOrderItems KitchenOrderItem[]
+  stockBalances     StockBalance[]
+  stockMovements    StockMovement[]
+
+  @@map("products")
+}
+
+model StockBalance {
+  id         String     @id @default(uuid())
+  productId  String     @map("product_id")
+  product    Product    @relation(fields: [productId], references: [id])
+  department Department // BAR / RESTAURANT / KITCHEN / STORE
+  quantity   Int        @default(0)
+
+  @@unique([productId, department])
+  @@map("stock_balances")
+}
+
+model StockMovement {
+  id               String            @id @default(uuid())
+  productId        String            @map("product_id")
+  product          Product           @relation(fields: [productId], references: [id])
+  movementType     StockMovementType @map("movement_type")
+  fromDepartment   Department?       @map("from_department")
+  toDepartment     Department?       @map("to_department")
+  quantity         Int
+  actorUserId      String            @map("actor_user_id")
+  actor            User              @relation(fields: [actorUserId], references: [id])
+  saleId           String?           @map("sale_id")
+  sale             Sale?             @relation(fields: [saleId], references: [id])
+  kitchenOrderId   String?           @map("kitchen_order_id")
+  kitchenOrder     KitchenOrder?     @relation(fields: [kitchenOrderId], references: [id])
+  correctionReason String?           @map("correction_reason")
+  createdAt        DateTime          @default(now()) @map("created_at")
+
+  @@index([productId, createdAt])
+  @@map("stock_movements")
+}
+
+// ============================================================
+// REPORTS MODULE
+// ============================================================
+
+model DailyReportSnapshot {
+  id          String     @id @default(uuid())
+  reportDate  DateTime   @db.Date @map("report_date")
+  department  Department
+  data        Json
+  generatedAt DateTime   @default(now()) @map("generated_at")
+
+  @@unique([reportDate, department])
+  @@map("daily_report_snapshots")
+}
+
+// ============================================================
+// AUDIT MODULE
+// ============================================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String   @map("actor_user_id")
+  actor       User     @relation(fields: [actorUserId], references: [id])
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  beforeValue Json?    @map("before_value")
+  afterValue  Json?    @map("after_value")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([actorUserId, createdAt])
+  @@map("audit_logs")
 }
