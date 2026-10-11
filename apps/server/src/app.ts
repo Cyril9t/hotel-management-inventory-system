@@ -24,15 +24,23 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(httpLogger);
 
-app.get("/health", (_req, res) => res.json(success({ status: "ok" })));
+app.get("/health", (_req, res) =>
+  res.json(
+    success({
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    }),
+  ),
+);
 
 app.get("/", (_req, res) =>
   res.json(success({ message: "hotel management server running" })),
 );
 
-app.use("api/v1/test", testRouter);
-app.use("api/v1/auth", authRoutes);
-app.use("api/v1/users", usersRoutes);
+app.use("/api/v1/test", testRouter);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", usersRoutes);
 
 if (env.isDev) {
   const openApiDocument = generateOpenApiDocument();

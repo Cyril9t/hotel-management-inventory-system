@@ -26,6 +26,7 @@ export const env = cleanEnv(process.env, {
   REDIS_URL: str(),
 
   CLIENT_ORIGIN: url({ default: "http://localhost:5173" }),
+  BASED_URL: url({ default: "http://localhost:3000" }),
 
   RESEND_API_KEY: str(),
 

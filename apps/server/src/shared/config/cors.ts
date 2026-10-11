@@ -2,9 +2,10 @@ import { type CorsOptions } from "cors";
 import { env } from "./env";
 import { CorsError } from "../errors/http-errors";
 
-const allowedOrigins = env.CLIENT_ORIGIN.split(",").map((origin) =>
-  origin.trim(),
-);
+// const allowedOrigins = env.CLIENT_ORIGIN.split(",").map((origin) =>
+//   origin.trim(),
+// );
+const allowedOrigins = [env.CLIENT_ORIGIN, env.BASED_URL];
 
 export const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
