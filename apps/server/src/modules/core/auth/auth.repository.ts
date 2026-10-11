@@ -1,42 +1,43 @@
-import { database } from "../../shared/database/prisma";
+import { database } from "../../../shared/database/prisma";
 
 export const authRepository = {
-  // Refresh tokens
-  async createRefreshToken(userId: string, jti: string, expiresAt: Date) {
-    return database.refreshToken.create({ data: { userId, jti, expiresAt } });
+  async createRefreshToken(data: {
+    userId: string;
+    jti: string;
+    expiresAt: Date;
+  }) {
+    return database.refreshToken.create({ data });
   },
 
   async findRefreshTokenByJti(jti: string) {
     return database.refreshToken.findUnique({ where: { jti } });
   },
 
-  async revokeRefreshToken(jti: string) {
+  async revokeRefreshToken(id: string) {
     return database.refreshToken.update({
+      where: { id },
+      data: { revokedAt: new Date() },
+    });
+  },
+
+  async revokeRefreshTokenByJti(jti: string) {
+    return database.refreshToken.updateMany({
       where: { jti },
       data: { revokedAt: new Date() },
     });
   },
 
-  // Used on password reset, to force re-login everywhere.
-  async revokeAllRefreshTokensForUser(userId: string) {
-    return database.refreshToken.updateMany({
-      where: { userId, revokedAt: null },
-      data: { revokedAt: new Date() },
-    });
-  },
-
-  // Password reset tokens
-  async createPasswordResetToken(
-    userId: string,
-    tokenHash: string,
-    expiresAt: Date,
-  ) {
+  async createPasswordResetToken(userId: string, tokenHash: string) {
     return database.passwordResetToken.create({
-      data: { userId, tokenHash, expiresAt },
+      data: {
+        userId,
+        tokenHash,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      },
     });
   },
 
-  async findPasswordResetTokenByHash(tokenHash: string) {
+  async findPasswordResetToken(tokenHash: string) {
     return database.passwordResetToken.findUnique({ where: { tokenHash } });
   },
 

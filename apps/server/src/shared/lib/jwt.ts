@@ -3,16 +3,16 @@ import { randomUUID, createHash } from "crypto";
 import ms from "ms";
 import { env } from "../config/env";
 
-export interface AccessTokenPayload {
+export type AccessTokenPayload = {
   userId: string;
   role: string;
-  department?: string | null;
-}
+  department: string | null | undefined;
+};
 
-export interface RefreshTokenPayload {
+export type RefreshTokenPayload = {
   userId: string;
   jti: string;
-}
+};
 
 export const jwt = {
   signAccessToken(payload: AccessTokenPayload): string {

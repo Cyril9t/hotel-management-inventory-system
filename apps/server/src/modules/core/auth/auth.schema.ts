@@ -14,6 +14,14 @@ export const resetPasswordSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+export const loginResponseSchema = z
+  .object({
+    accessToken: z.string(),
+  })
+  .meta({ id: "LoginResponse" });
+
 export type LoginBody = z.infer<typeof loginSchema>;
 export type ForgotPasswordBody = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordBody = z.infer<typeof resetPasswordSchema>;
+
+export type LoginResponseBody = z.infer<typeof loginResponseSchema>;

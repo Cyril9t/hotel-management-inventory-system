@@ -8,7 +8,10 @@ import { notFoundHandler } from "./shared/middleware/notfound-handler";
 import { corsOptions } from "./shared/config/cors";
 import { success } from "./shared/utils/api-response";
 import testRouter from "./modules/_test/test.routes";
-// import identityRouter from "./modules/identity/routes";
+import { authRoutes } from "#modules/core/auth/auth.routes";
+import { usersRoutes } from "#modules/core/users/users.routes";
+
+// const API_PREFIX = "/api/v1";
 
 const app = express();
 
@@ -24,9 +27,9 @@ app.get("/", (_req, res) =>
   res.json(success({ message: "hotel management server running" })),
 );
 
-app.use("/api", testRouter);
-
-// app.use("/api/auth", identityRouter);
+app.use("api/v1/test", testRouter);
+app.use("api/v1/auth", authRoutes);
+app.use("api/v1/users", usersRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
