@@ -50,5 +50,5 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
   },
-  "include": ["src/**/*", "*.config.ts"],
+  "include": ["src/**/*", "src/**/*.d.ts", "*.config.ts"],
 }

@@ -7,7 +7,7 @@ import { errorHandler } from "./shared/middleware/error-handler";
 import { notFoundHandler } from "./shared/middleware/notfound-handler";
 import { corsOptions } from "./shared/config/cors";
 import { success } from "./shared/utils/api-response";
-import testRouter from "./modules/_scratch/test.routes";
+import testRouter from "./modules/_test/test.routes";
 // import identityRouter from "./modules/identity/routes";
 
 const app = express();
