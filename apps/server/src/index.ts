@@ -4,7 +4,6 @@ import { logger } from "./shared/logger";
 import { database } from "./shared/database/prisma";
 import { scheduleAutoCheckoutJob } from "./shared/jobs/auto-checkout/auto-checkout.queue";
 import { scheduleDailyReportJob } from "./shared/jobs/daily-report/daily-report.queue";
-import { testQueue } from "./shared/jobs/test-queue";
 
 const port = env.PORT;
 
