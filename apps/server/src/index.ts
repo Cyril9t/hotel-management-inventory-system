@@ -2,6 +2,9 @@ import app from "./app";
 import { env } from "./shared/config/env";
 import { logger } from "./shared/logger";
 import { database } from "./shared/database/prisma";
+import { scheduleAutoCheckoutJob } from "./shared/jobs/auto-checkout/auto-checkout.queue";
+import { scheduleDailyReportJob } from "./shared/jobs/daily-report/daily-report.queue";
+import { testQueue } from "./shared/jobs/test-queue";
 
 const port = env.PORT;
 
@@ -9,6 +12,10 @@ try {
   await database.$queryRaw`SELECT 1`;
   // await database.execute("select 1");
   logger.info("database connected");
+
+  await scheduleAutoCheckoutJob();
+  await scheduleDailyReportJob();
+  logger.info("jobs scheduled");
 } catch (err) {
   logger.fatal({ err }, "database connection failed");
   process.exit(1);

@@ -34,7 +34,10 @@ export const usersController = {
     req: Request<unknown, unknown, CreateInviteBody>,
     res: Response,
   ) {
-    res.status(201).json(success(await usersService.createInvite(req.body)));
+    const createdByUserId = req.user!.userId;
+    res
+      .status(201)
+      .json(success(await usersService.createInvite(req.body, createdByUserId)));
   },
 
   async verifyInvite(req: Request, res: Response) {

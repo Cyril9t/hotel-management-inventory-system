@@ -2,10 +2,12 @@ import jsonwebtoken from "jsonwebtoken";
 import { randomUUID, createHash } from "crypto";
 import ms from "ms";
 import { env } from "../config/env";
+import type { Role } from "@prisma/client";
 
 export type AccessTokenPayload = {
   userId: string;
-  role: string;
+  isActive: boolean;
+  role: Role;
   department: string | null | undefined;
 };
 

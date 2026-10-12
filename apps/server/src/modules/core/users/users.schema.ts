@@ -5,7 +5,7 @@ export const createInviteSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.email("Please provide a valid email address"),
-  phone: z.string().optional(),
+  phone: z.string("Phone number is required"),
   role: z.enum(Role, "Role is required"),
   department: z.enum(Department, "Department is required"),
 });

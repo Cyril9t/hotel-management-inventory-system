@@ -1,6 +1,5 @@
 import type { RequestHandler } from "express";
 import { jwt } from "../lib/jwt";
-import { usersRepository } from "../../modules/core/users/users.repository";
 import { UnauthorizedError } from "../errors/http-errors";
 
 export const authenticate: RequestHandler = async (req, _res, next) => {
@@ -12,12 +11,12 @@ export const authenticate: RequestHandler = async (req, _res, next) => {
   }
 
   const payload = jwt.verifyAccessToken(token);
-  const user = await usersRepository.findById(payload.userId);
+  // const user = await usersRepository.findById(payload.userId);
 
-  if (!user || !user.isActive) {
+  if (!payload || !payload.isActive) {
     throw new UnauthorizedError();
   }
 
-  req.user = user;
+  req.user = payload;
   next();
 };

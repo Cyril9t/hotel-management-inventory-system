@@ -2,7 +2,9 @@ import { UnauthorizedError, BadRequestError } from "#shared/errors/http-errors";
 import { authRepository } from "./auth.repository";
 import { usersRepository } from "../users/users.repository";
 import { password } from "#shared/lib/password";
+import { enqueuePasswordResetEmail } from "#shared/jobs/email/email.queue";
 import { jwt } from "#shared/lib/jwt";
+import type { Role } from "@prisma/client";
 
 export const authService = {
   async login(email: string, plainPassword: string) {
@@ -10,7 +12,12 @@ export const authService = {
     if (!user || !(await password.compare(plainPassword, user.passwordHash))) {
       throw new UnauthorizedError("Invalid email or password");
     }
-    return authService.issueTokenPair(user.id, user.role, user.department);
+    return authService.issueTokenPair(
+      user.id,
+      user.role,
+      user.isActive,
+      user.department,
+    );
   },
 
   async refresh(refreshToken?: string) {
@@ -25,7 +32,12 @@ export const authService = {
     const user = await usersRepository.findById(payload.userId);
     if (!user) throw new UnauthorizedError("Invalid refresh token");
 
-    return authService.issueTokenPair(user.id, user.role, user.department);
+    return authService.issueTokenPair(
+      user.id,
+      user.role,
+      user.isActive,
+      user.department,
+    );
   },
 
   async logout(refreshToken: string) {
@@ -42,7 +54,7 @@ export const authService = {
       user.id,
       jwt.hashToken(rawToken),
     );
-    // TODO: queue password-reset email job with rawToken
+    await enqueuePasswordResetEmail({ to: user.email, rawToken });
   },
 
   async resetPassword(rawToken: string, newPassword: string) {
@@ -60,10 +72,16 @@ export const authService = {
 
   async issueTokenPair(
     userId: string,
-    role: string,
+    role: Role,
+    isActive: boolean,
     department?: string | null,
   ) {
-    const accessToken = jwt.signAccessToken({ userId, role, department });
+    const accessToken = jwt.signAccessToken({
+      userId,
+      isActive,
+      role,
+      department,
+    });
     const { token: refreshToken, jti } = jwt.signRefreshToken({ userId });
     const expiresAt = jwt.getRefreshTokenExpiry();
     await authRepository.createRefreshToken({ userId, jti, expiresAt });

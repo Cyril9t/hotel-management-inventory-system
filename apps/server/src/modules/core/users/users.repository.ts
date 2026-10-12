@@ -38,11 +38,16 @@ export const usersRepository = {
   },
 
   async list(filters: {
-    role: Role | undefined;
-    department: Department | undefined;
+    role?: Role | undefined;
+    department?: Department | undefined;
   }): Promise<PublicUser[]> {
+    const where: Prisma.UserWhereInput = {};
+
+    if (filters.role !== undefined) where.role = filters.role;
+    if (filters.department !== undefined) where.department = filters.department;
+
     return database.user.findMany({
-      where: filters,
+      where,
       select: PUBLIC_USER_SELECT,
     });
   },
@@ -52,7 +57,7 @@ export const usersRepository = {
   },
 
   // staff invites
-  async createInvite(data: Prisma.StaffInviteCreateInput) {
+  async createInvite(data: Prisma.StaffInviteCreateManyInput) {
     return database.staffInvite.create({ data });
   },
 

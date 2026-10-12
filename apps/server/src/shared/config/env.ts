@@ -24,11 +24,15 @@ export const env = cleanEnv(process.env, {
   JWT_REFRESH_EXPIRES_IN: str({ default: "7d" }),
 
   REDIS_URL: str(),
+  REDIS_HOST: str({ devDefault: "127.0.0.1" }),
+  REDIS_PORT: port({ default: 6379 }),
+  REDIS_PASSWORD: str({ devDefault: undefined }),
 
-  CLIENT_ORIGIN: url({ default: "http://localhost:5173" }),
-  BASED_URL: url({ default: "http://localhost:3000" }),
+  CLIENT_ORIGIN: url({ devDefault: "http://localhost:5173" }),
+  BASED_URL: url({ devDefault: "http://localhost:3000" }),
 
   RESEND_API_KEY: str(),
+  RESEND_FROM_EMAIL: str(),
 
   BCRYPT_SALT_ROUNDS: num({ default: 12 }),
 });

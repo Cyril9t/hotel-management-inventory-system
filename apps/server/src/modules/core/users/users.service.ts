@@ -2,6 +2,7 @@ import { NotFoundError, BadRequestError } from "#shared/errors/http-errors";
 import { usersRepository } from "./users.repository";
 import { password } from "#shared/lib/password";
 import { jwt } from "#shared/lib/jwt";
+import { enqueueInviteEmail } from "#shared/jobs/email/email.queue";
 import type { CreateInviteBody, ListUsersQuery } from "./users.schema";
 
 export const usersService = {
@@ -23,14 +24,19 @@ export const usersService = {
     return usersRepository.reactivate(id);
   },
 
-  async createInvite(data: CreateInviteBody) {
+  async createInvite(data: CreateInviteBody, createdByUserId: string) {
     const rawToken = crypto.randomUUID();
     const invite = await usersRepository.createInvite({
       ...data,
       tokenHash: jwt.hashToken(rawToken),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      createdByUserId,
     });
-    // TODO: queue invite email job with rawToken
+    await enqueueInviteEmail({
+      to: invite.email,
+      firstName: invite.firstName,
+      rawToken,
+    });
     return invite;
   },
 
