@@ -62,10 +62,10 @@ importers:
     devDependencies:
       '@react-router/dev':
         specifier: ^8.4.0
-        version: 8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3))(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3)(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+        version: 8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3))(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3)(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
       '@tailwindcss/vite':
         specifier: ^4.2.2
-        version: 4.3.3(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+        version: 4.3.3(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
       '@types/node':
         specifier: ^22
         version: 22.20.5
@@ -83,7 +83,7 @@ importers:
         version: 5.9.3
       vite:
         specifier: ^8.0.3
-        version: 8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)
+        version: 8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
 
   apps/server:
     dependencies:
@@ -95,7 +95,7 @@ importers:
         version: 7.10.0
       '@prisma/client':
         specifier: ^7.9.1
-        version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(magicast@0.5.5)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)
+        version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2))(typescript@7.0.2)
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -177,7 +177,7 @@ importers:
         version: 13.2.0
       prisma:
         specifier: ^7.9.1
-        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(magicast@0.5.5)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2)
       tsx:
         specifier: ^4.23.13
         version: 4.23.15
@@ -1665,7 +1665,6 @@ packages:
   baseline-browser-mapping@2.11.18:
     resolution: {integrity: sha512-1iEmLEYSiE1SeBoAfPo/Mnx3PzfzHUkDK61ASkCpuk3YXugYLH5DYK1SzqV55F8FMI6s0F+/tCP7Polz1QRjxw==}
     engines: {node: '>=6.0.0'}
-    hasBin: true
 
   basic-auth@2.0.1:
     resolution: {integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==}
@@ -1701,7 +1700,6 @@ packages:
   browserslist@4.28.8:
     resolution: {integrity: sha512-V2NpofLblG64mfOtSgDhOJESZEGogzDMBv/q+W6oc4LXWP/q75eOXoOaaOu1EOadB9U4Bwx/e0yzbvwKH8zalA==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
 
   buffer-equal-constant-time@1.0.1:
     resolution: {integrity: sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==}
@@ -2346,12 +2344,13 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
 
-  get-east-asian-width@1.7.0:
-    resolution: {integrity: sha512-XjH1AECxf0giL2V1aU8vKyRR2ppRUb5c0EvT7zuJTokQ74bNo52zOtghqdWIqrhUD79fo3x0WfKZdOqxF6LG1Q==}
-    engines: {node: '>=18'}
   get-caller-file@2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
+
+  get-east-asian-width@1.7.0:
+    resolution: {integrity: sha512-XjH1AECxf0giL2V1aU8vKyRR2ppRUb5c0EvT7zuJTokQ74bNo52zOtghqdWIqrhUD79fo3x0WfKZdOqxF6LG1Q==}
+    engines: {node: '>=18'}
 
   get-intrinsic@1.3.0:
     resolution: {integrity: sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==}
@@ -2878,9 +2877,6 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
-  magicast@0.5.5:
-    resolution: {integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==}
-
   matcher@3.0.0:
     resolution: {integrity: sha512-OkeDaAZ/bQCxeFAozM55PKcKU0yJMPGifLwV4Qgjitu+5MoAfSQN4lsLJeXZ1b8w0x+/Emda6MZgXS1jvsapng==}
     engines: {node: '>=10'}
@@ -3345,10 +3341,6 @@ packages:
 
   react@19.2.8:
     resolution: {integrity: sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw==}
-    engines: {node: '>=0.10.0'}
-
-  react@19.3.0:
-    resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
     engines: {node: '>=0.10.0'}
 
   readable-stream@4.7.0:
@@ -3839,7 +3831,6 @@ packages:
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
-    hasBin: true
 
   which@4.0.0:
     resolution: {integrity: sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg==}
@@ -3863,11 +3854,6 @@ packages:
 
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
-
-  yaml@2.9.1:
-    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
-    engines: {node: '>= 14.6'}
-    hasBin: true
 
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
@@ -4550,16 +4536,16 @@ snapshots:
 
   '@prisma/client-runtime-utils@7.10.0': {}
 
-  '@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(magicast@0.5.5)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)(typescript@7.0.2))(typescript@7.0.2)':
+  '@prisma/client@7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2))(typescript@7.0.2)':
     dependencies:
       '@prisma/client-runtime-utils': 7.10.0
     optionalDependencies:
-      prisma: 7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(magicast@0.5.5)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
+      prisma: 7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2)
       typescript: 7.0.2
 
-  '@prisma/config@7.10.0(magicast@0.5.5)':
+  '@prisma/config@7.10.0':
     dependencies:
-      c12: 3.3.4(magicast@0.5.5)
+      c12: 3.3.4
       deepmerge-ts: 7.1.5
       effect: 3.20.0
       empathic: 2.0.0
@@ -4626,82 +4612,82 @@ snapshots:
       env-paths: 3.0.0
       proper-lockfile: 4.1.2
 
-  '@prisma/studio-core@0.33.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)':
+  '@prisma/studio-core@0.33.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@radix-ui/react-toggle': 1.1.10(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)
+      '@radix-ui/react-toggle': 1.1.10(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/react': 19.2.18
       '@visx/curve': 4.0.1-alpha.0
       '@visx/event': 4.0.1-alpha.0
-      '@visx/grid': 4.0.1-alpha.0(react@19.3.0)
-      '@visx/group': 4.0.1-alpha.0(react@19.3.0)
-      '@visx/responsive': 4.0.1-alpha.0(react@19.3.0)
+      '@visx/grid': 4.0.1-alpha.0(react@19.2.8)
+      '@visx/group': 4.0.1-alpha.0(react@19.2.8)
+      '@visx/responsive': 4.0.1-alpha.0(react@19.2.8)
       '@visx/scale': 4.0.1-alpha.0
-      '@visx/shape': 4.0.1-alpha.0(react@19.3.0)
+      '@visx/shape': 4.0.1-alpha.0(react@19.2.8)
       d3-array: 3.2.4
       d3-shape: 3.2.0
       elkjs: 0.11.1
-      react: 19.3.0
-      react-dom: 19.2.8(react@19.3.0)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
     transitivePeerDependencies:
       - '@types/react-dom'
 
   '@radix-ui/primitive@1.1.3': {}
 
-  '@radix-ui/react-compose-refs@1.1.2(@types/react@19.2.18)(react@19.3.0)':
+  '@radix-ui/react-compose-refs@1.1.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      react: 19.3.0
+      react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)':
+  '@radix-ui/react-primitive@2.1.3(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@radix-ui/react-slot': 1.2.3(@types/react@19.2.18)(react@19.3.0)
-      react: 19.3.0
-      react-dom: 19.2.8(react@19.3.0)
+      '@radix-ui/react-slot': 1.2.3(@types/react@19.2.18)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.3.0(@types/react@19.2.18)
 
-  '@radix-ui/react-slot@1.2.3(@types/react@19.2.18)(react@19.3.0)':
+  '@radix-ui/react-slot@1.2.3(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.18)(react@19.3.0)
-      react: 19.3.0
+      '@radix-ui/react-compose-refs': 1.1.2(@types/react@19.2.18)(react@19.2.8)
+      react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-toggle@1.1.10(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)':
+  '@radix-ui/react-toggle@1.1.10(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.3
-      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)
-      '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.2.18)(react@19.3.0)
-      react: 19.3.0
-      react-dom: 19.2.8(react@19.3.0)
+      '@radix-ui/react-primitive': 2.1.3(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-use-controllable-state': 1.2.2(@types/react@19.2.18)(react@19.2.8)
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
       '@types/react-dom': 19.3.0(@types/react@19.2.18)
 
-  '@radix-ui/react-use-controllable-state@1.2.2(@types/react@19.2.18)(react@19.3.0)':
+  '@radix-ui/react-use-controllable-state@1.2.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      '@radix-ui/react-use-effect-event': 0.0.2(@types/react@19.2.18)(react@19.3.0)
-      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.18)(react@19.3.0)
-      react: 19.3.0
+      '@radix-ui/react-use-effect-event': 0.0.2(@types/react@19.2.18)(react@19.2.8)
+      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.18)(react@19.2.8)
+      react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-use-effect-event@0.0.2(@types/react@19.2.18)(react@19.3.0)':
+  '@radix-ui/react-use-effect-event@0.0.2(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.18)(react@19.3.0)
-      react: 19.3.0
+      '@radix-ui/react-use-layout-effect': 1.1.1(@types/react@19.2.18)(react@19.2.8)
+      react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.2.18)(react@19.3.0)':
+  '@radix-ui/react-use-layout-effect@1.1.1(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
-      react: 19.3.0
+      react: 19.2.8
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@react-router/dev@8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3))(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3)(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))':
+  '@react-router/dev@8.4.0(@react-router/serve@8.4.0(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3))(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3)(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))':
     dependencies:
       '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/generator': 7.29.8
@@ -4727,7 +4713,7 @@ snapshots:
       semver: 7.8.5
       tinyglobby: 0.2.17
       valibot: 1.5.0(typescript@5.9.3)
-      vite: 8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)
+      vite: 8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
     optionalDependencies:
       '@react-router/serve': 8.4.0(react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(supports-color@7.2.0)(typescript@5.9.3)
       typescript: 5.9.3
@@ -4914,12 +4900,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.3.3
       '@tailwindcss/oxide-win32-x64-msvc': 4.3.3
 
-  '@tailwindcss/vite@4.3.3(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))':
+  '@tailwindcss/vite@4.3.3(vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))':
     dependencies:
       '@tailwindcss/node': 4.3.3
       '@tailwindcss/oxide': 4.3.3
       tailwindcss: 4.3.3
-      vite: 8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1)
+      vite: 8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
 
   '@ts-morph/common@0.27.0':
     dependencies:
@@ -4947,16 +4933,16 @@ snapshots:
 
   '@types/bcrypt@6.0.0':
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/cookie-parser@1.4.10(@types/express@5.0.6)':
     dependencies:
@@ -4964,7 +4950,7 @@ snapshots:
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/d3-array@3.0.3': {}
 
@@ -5002,7 +4988,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.3':
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -5026,7 +5012,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/lodash@4.17.25': {}
 
@@ -5046,7 +5032,7 @@ snapshots:
 
   '@types/pg@8.23.1':
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
       pg-protocol: 1.16.1
       pg-types: 2.2.0
 
@@ -5068,12 +5054,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 26.4.1
+      '@types/node': 26.6.4
 
   '@types/validate-npm-package-name@4.0.2': {}
 
@@ -5146,47 +5132,47 @@ snapshots:
       '@types/react': 19.2.18
       '@visx/point': 4.0.1-alpha.0
 
-  '@visx/grid@4.0.1-alpha.0(react@19.3.0)':
+  '@visx/grid@4.0.1-alpha.0(react@19.2.8)':
     dependencies:
       '@types/react': 19.2.18
       '@visx/curve': 4.0.1-alpha.0
-      '@visx/group': 4.0.1-alpha.0(react@19.3.0)
+      '@visx/group': 4.0.1-alpha.0(react@19.2.8)
       '@visx/point': 4.0.1-alpha.0
       '@visx/scale': 4.0.1-alpha.0
-      '@visx/shape': 4.0.1-alpha.0(react@19.3.0)
+      '@visx/shape': 4.0.1-alpha.0(react@19.2.8)
       classnames: 2.5.1
-      react: 19.3.0
+      react: 19.2.8
 
-  '@visx/group@4.0.1-alpha.0(react@19.3.0)':
+  '@visx/group@4.0.1-alpha.0(react@19.2.8)':
     dependencies:
       '@types/react': 19.2.18
       classnames: 2.5.1
-      react: 19.3.0
+      react: 19.2.8
 
   '@visx/point@4.0.1-alpha.0': {}
 
-  '@visx/responsive@4.0.1-alpha.0(react@19.3.0)':
+  '@visx/responsive@4.0.1-alpha.0(react@19.2.8)':
     dependencies:
       '@types/lodash': 4.17.25
       '@types/react': 19.2.18
       lodash: 4.18.1
-      react: 19.3.0
+      react: 19.2.8
 
   '@visx/scale@4.0.1-alpha.0':
     dependencies:
       '@visx/vendor': 4.0.0-alpha.0
 
-  '@visx/shape@4.0.1-alpha.0(react@19.3.0)':
+  '@visx/shape@4.0.1-alpha.0(react@19.2.8)':
     dependencies:
       '@types/lodash': 4.17.25
       '@types/react': 19.2.18
       '@visx/curve': 4.0.1-alpha.0
-      '@visx/group': 4.0.1-alpha.0(react@19.3.0)
+      '@visx/group': 4.0.1-alpha.0(react@19.2.8)
       '@visx/scale': 4.0.1-alpha.0
       '@visx/vendor': 4.0.0-alpha.0
       classnames: 2.5.1
       lodash: 4.18.1
-      react: 19.3.0
+      react: 19.2.8
 
   '@visx/vendor@4.0.0-alpha.0':
     dependencies:
@@ -5361,7 +5347,7 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  c12@3.3.4(magicast@0.5.5):
+  c12@3.3.4:
     dependencies:
       chokidar: 5.0.0
       confbox: 0.2.4
@@ -5375,8 +5361,6 @@ snapshots:
       perfect-debounce: 2.1.0
       pkg-types: 2.3.3
       rc9: 3.1.0
-    optionalDependencies:
-      magicast: 0.5.5
 
   call-bind-apply-helpers@1.0.2:
     dependencies:
@@ -6073,8 +6057,9 @@ snapshots:
 
   gensync@1.0.0-beta.2: {}
 
-  get-east-asian-width@1.7.0: {}
   get-caller-file@2.0.5: {}
+
+  get-east-asian-width@1.7.0: {}
 
   get-intrinsic@1.3.0:
     dependencies:
@@ -6477,13 +6462,6 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  magicast@0.5.5:
-    dependencies:
-      '@babel/parser': 7.29.8
-      '@babel/types': 7.29.8
-      source-map-js: 1.2.2
-    optional: true
-
   matcher@3.0.0:
     dependencies:
       escape-string-regexp: 4.0.0
@@ -6860,12 +6838,11 @@ snapshots:
       parse-ms: 4.0.0
 
   prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@7.0.2):
-  prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(magicast@0.5.5)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)(typescript@7.0.2):
     dependencies:
-      '@prisma/config': 7.10.0(magicast@0.5.5)
+      '@prisma/config': 7.10.0
       '@prisma/dev': 0.24.17(typescript@7.0.2)
       '@prisma/engines': 7.10.0
-      '@prisma/studio-core': 0.33.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.3.0))(react@19.3.0)
+      '@prisma/studio-core': 0.33.0(@types/react-dom@19.3.0(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       mysql2: 3.15.3
       postgres: 3.4.7
     optionalDependencies:
@@ -6936,11 +6913,6 @@ snapshots:
       react: 19.2.8
       scheduler: 0.27.0
 
-  react-dom@19.2.8(react@19.3.0):
-    dependencies:
-      react: 19.3.0
-      scheduler: 0.27.0
-
   react-refresh@0.18.0: {}
 
   react-router@8.4.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
@@ -6952,8 +6924,6 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
 
   react@19.2.8: {}
-
-  react@19.3.0: {}
 
   readable-stream@4.7.0:
     dependencies:
@@ -7460,7 +7430,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1):
+  vite@8.3.3(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -7473,7 +7443,6 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.7.0
       tsx: 4.23.15
-      yaml: 2.9.1
 
   which@2.0.2:
     dependencies:
@@ -7495,9 +7464,6 @@ snapshots:
   xtend@4.0.2: {}
 
   yallist@3.1.1: {}
-
-  yaml@2.9.1:
-    optional: true
 
   yocto-queue@0.1.0: {}
 
