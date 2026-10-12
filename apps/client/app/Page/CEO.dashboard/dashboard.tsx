@@ -1,4 +1,4 @@
-import Overview from "~/components/CEO.dashboard/Overview";
+import Overview from "~/components/CEO.dashboard/Overview/Overview";
 
 function Owner() {
     return (<Overview />);
