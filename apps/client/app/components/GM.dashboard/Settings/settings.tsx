@@ -1,8 +1,10 @@
+import { StaffsTable } from "~/components/CEO.dashboard/Users/StaffsTable";
+
 function DashboardSettings() {
 
     return (
         <div>
-            Dashboard Settings
+            <StaffsTable />
         </div>
     );
 }
