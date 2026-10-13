@@ -16,7 +16,7 @@ export function LoginForm() {
 
         setTimeout(() => {
             setIsLoading(false)
-            navigate("/dashboard");
+            navigate("/CEO.dashboard");
         }, 1500);
 
     };

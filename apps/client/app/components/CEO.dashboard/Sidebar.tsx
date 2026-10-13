@@ -21,36 +21,39 @@ import {
 } from "lucide-react";
 
 import Logo from "../shared/Logo";
+import { useState } from "react";
 
 const DashboardLinks = [
     {
         title: "Overview",
-        link: "/CEO-home",
+        link: "/CEO.dashboard",
         icon: LayoutDashboard,
     },
     {
         title: "Activities",
-        link: "/dashboard/:id",
+        link: "/CEO.dashboard/activities",
         icon: Activity,
     },
     {
         title: "Users",
-        link: "/all-staffs",
+        link: "/CEO.dashboard/staffs",
         icon: Users,
     },
     {
         title: "Departments",
-        link: "/all-departments",
+        link: "/CEO.dashboard/departments",
         icon: Building2,
     },
     {
         title: "Settings",
-        link: "/settings",
+        link: "/CEO.dashboard/settings",
         icon: Settings,
     },
 ];
 
 function DashboardSidebar() {
+    const [active, setActive] = useState("Overview");
+
     return (
         <Sidebar className="bg-brand-navy text-background">
             <SidebarHeader className="px-4 py-5">
@@ -75,30 +78,26 @@ function DashboardSidebar() {
                         </div>
                     </SidebarGroupLabel>
 
-                    <SidebarMenu className="gap-1 mt-4 pl-4">
+
+                    <SidebarMenu className="mt-4 gap-1 pl-4">
                         {DashboardLinks.map(({ title, link, icon: Icon }) => (
                             <SidebarMenuItem key={link}>
-                                <SidebarMenuButton
+                                <NavLink
+                                    to={link}
+                                    end={link === "/CEO.dashboard"}
 
-                                    tooltip={title}
-                                    className="h-11 text-[15px] font-medium text-background/80 hover:bg-brand-navy-light hover:text-background data-[active=true]:bg-brand-navy-light data-[active=true]:text-background"
                                 >
-                                    <NavLink
-                                        to={`${link}/${title}`}
-                                        end={link === "/CEO-home"}
-                                        className={({ isActive }) =>
-                                            isActive ? "bg-brand-gold text-background" : ""
-                                        }
-                                    >
-                                        <div className="flex gap-1.5 ">
-                                            <div className="place-content-center">
-
-                                                <Icon className="size-5 shrink-0" />
-                                            </div>
-                                            <div>{title}</div>
-                                        </div>
-                                    </NavLink>
-                                </SidebarMenuButton>
+                                    {({ isActive }) => (
+                                        <SidebarMenuButton
+                                            tooltip={title}
+                                            isActive={isActive}
+                                            className={`h-11 text-[15px] font-medium ${isActive ? "bg-brand-gold" : ""}`}
+                                        >
+                                            <Icon className="size-5 shrink-0" />
+                                            <span>{title}</span>
+                                        </SidebarMenuButton>
+                                    )}
+                                </NavLink>
                             </SidebarMenuItem>
                         ))}
                     </SidebarMenu>
@@ -108,9 +107,10 @@ function DashboardSidebar() {
             <SidebarFooter className="border-t border-white/10 p-3">
                 <SidebarMenu>
                     <SidebarMenuItem>
+
                         <SidebarMenuButton
                             onClick={() => {
-                                // Add your logout logic here
+
                             }}
                             className="h-11 text-background/80 hover:bg-brand-navy-light hover:text-background"
                         >

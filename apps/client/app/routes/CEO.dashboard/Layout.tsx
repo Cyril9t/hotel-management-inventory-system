@@ -4,14 +4,15 @@ import {
     SidebarTrigger,
 } from "../../components/ui/sidebar";
 
-import DashboardSidebar from "./Sidebar";
-import { Header } from "./header";
+import DashboardSidebar from "../../components/CEO.dashboard/Sidebar";
+import { Header } from "../../components/CEO.dashboard/header";
+import { Outlet } from "react-router";
 
 type DashboardProps = {
     children: ReactNode;
 };
 
-function Dashboard({ children }: DashboardProps) {
+function Dashboard() {
     return (
         <SidebarProvider>
             <DashboardSidebar />
@@ -19,7 +20,7 @@ function Dashboard({ children }: DashboardProps) {
                 <div className="flex "><div className="grow"><SidebarTrigger /></div>
                     <div className=""><Header /></div>
                 </div>
-                {children}
+                <Outlet />
             </main>
         </SidebarProvider>
     );

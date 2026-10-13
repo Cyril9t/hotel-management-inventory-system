@@ -26,11 +26,11 @@ export function MetricCards() {
     ]
 
     return (
-        <div className="space-y-6 mt-5">
+        <div className="space-y-6">
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold font-serif text-foreground tracking-tight">Owner Dashboard</h1>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Owner Dashboard</h1>
                     <p className="text-xs text-muted-foreground mt-0.5">Real-time consolidated yield, turnover metrics, and asset occupancy performance.</p>
                 </div>
 

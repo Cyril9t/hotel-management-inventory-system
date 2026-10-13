@@ -1,14 +1,14 @@
-import Dashboard from "../Layout";
+import Dashboard from "../../../routes/CEO.dashboard/Layout";
 import { MetricCards } from "./MetricCard";
 import { RevenueChart } from "./RevenueChart";
 
 function Overview() {
     return (
-        <Dashboard >
-
+        <div>
             <MetricCards />
             <RevenueChart />
-        </Dashboard>
+        </div>
+
     );
 }
 

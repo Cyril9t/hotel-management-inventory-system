@@ -1,4 +1,4 @@
-import HotelActivities from "~/components/CEO.dashboard/Activities";
+import HotelActivities from "~/components/CEO.dashboard/Activities/Activities";
 
 function AllActivities() {
     return (
