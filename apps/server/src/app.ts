@@ -8,7 +8,7 @@ import { errorHandler } from "#shared/middleware/error-handler";
 import { notFoundHandler } from "#shared/middleware/notfound-handler";
 import { corsOptions } from "#shared/config/cors";
 import { success } from "#shared/utils/api-response";
-import testRouter from "#modules/_test/test.routes";
+import { healthRoutes } from "#modules/_health/health.routes";
 import { authRoutes } from "#modules/core/auth/auth.routes";
 import { usersRoutes } from "#modules/core/users/users.routes";
 import { generateOpenApiDocument } from "#shared/openapi/generate";
@@ -24,21 +24,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(httpLogger);
 
-app.get("/health", (_req, res) =>
-  res.json(
-    success({
-      status: "OK",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    }),
-  ),
-);
+app.use("/", healthRoutes);
 
-app.get("/", (_req, res) =>
-  res.json(success({ message: "hotel management server running" })),
-);
-
-app.use("/api/v1/test", testRouter);
+app.use("/api/v1", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", usersRoutes);
 
