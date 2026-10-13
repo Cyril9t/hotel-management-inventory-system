@@ -1,0 +1,30 @@
+info:
+  name: Create Invite
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: http://localhost:3000/api/users/invites
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@example.com",
+        "phone": "1234567890",
+        "role": "GENERAL_MANAGER",
+        "department": "IT"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
