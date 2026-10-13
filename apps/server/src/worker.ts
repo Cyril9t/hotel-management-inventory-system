@@ -32,15 +32,18 @@ for (const worker of [autoCheckoutWorker, dailyReportWorker, emailWorker]) {
     logger.info({ jobId: job.id, queue: job.queueName }, "job completed"),
   );
   worker.on("failed", (job, err) =>
-    logger.error({ jobId: job?.id, queue: job?.queueName, err }, "job failed"),
+    logger.error(
+      { jobId: job?.id, queue: job?.queueName, error: err },
+      "job failed",
+    ),
   );
   worker.on("error", (err) =>
-    logger.error({ queue: worker.name, err }, "worker error"),
+    logger.error({ queue: worker.name, error: err }, "worker error"),
   );
 }
 
 catchUpDailyReport().catch((err) =>
-  logger.error({ err }, "daily report catch-up failed"),
+  logger.error({ error: err }, "daily report catch-up failed"),
 );
 
 process.on("SIGTERM", async () => {

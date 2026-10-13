@@ -15,7 +15,7 @@ function attachErrorHandler(connection: Redis) {
     if (err.code === "ECONNRESET" || err.code === "ECONNREFUSED") {
       return;
     }
-    logger.error({ err }, "Redis error");
+    logger.error({ error: err }, "redis error");
   });
 }
 

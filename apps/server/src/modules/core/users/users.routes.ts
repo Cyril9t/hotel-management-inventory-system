@@ -128,12 +128,16 @@ registry.registerPath({
     body: { content: { "application/json": { schema: createInviteSchema } } },
   },
   responses: {
-    200: {
+    201: {
       description: "Invite created successfully",
       content: { "application/json": { schema: apiSuccessSchema } },
     },
     400: {
       description: "Invalid request data",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+    403: {
+      description: "Forbidden: Actor role is not permitted to invite this role",
       content: { "application/json": { schema: apiFailureSchema } },
     },
   },

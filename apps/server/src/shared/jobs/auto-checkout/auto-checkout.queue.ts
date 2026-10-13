@@ -13,7 +13,3 @@ export async function scheduleAutoCheckoutJob() {
     { name: "sweep" },
   );
 }
-
-autoCheckoutQueue.on("error", (err) =>
-  logger.error({ queue: autoCheckoutQueue.name, err }, "queue error"),
-);

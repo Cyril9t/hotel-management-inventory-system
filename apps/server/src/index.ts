@@ -16,7 +16,7 @@ try {
   await scheduleDailyReportJob();
   logger.info("jobs scheduled");
 } catch (err) {
-  logger.fatal({ err }, "database connection failed");
+  logger.fatal({ error: err }, "database connection failed");
   process.exit(1);
 }
 
@@ -28,7 +28,7 @@ const shutdown = async (signal: string) => {
   logger.info({ signal }, "shutting down");
   server.close(async (err) => {
     if (err) {
-      logger.error({ err }, "server close error");
+      logger.error({ error: err }, "server close error");
       process.exit(1);
     }
     await database.$disconnect();
