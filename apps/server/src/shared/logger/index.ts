@@ -74,9 +74,7 @@ export const httpLogger = pinoHttp({
       url: req.url,
     }),
     res: (res) => {
-      const err = res.locals?.err as
-        | HttpError<number>
-        | undefined;
+      const err = res.locals?.err as HttpError<number> | undefined;
 
       if (!err) {
         return { statusCode: res.statusCode };
