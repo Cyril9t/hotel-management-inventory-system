@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/users/invites/{{inviteToken}}/verify
+  url: "{{baseUrl}}/api/users/invites/{{inviteToken}}/verify"
   headers:
     - name: Content-Type
       value: application/json

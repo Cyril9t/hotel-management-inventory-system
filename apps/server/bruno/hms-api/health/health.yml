@@ -1,24 +1,18 @@
 info:
-  name: invalid-query
+  name: System Health
   type: http
-  seq: 3
+  seq: 2
 
 http:
-  method: post
-  url: http://localhost:3000/api/test/42
+  method: GET
+  url: "{{baseUrl}}/health"
   headers:
     - name: Content-Type
       value: application/json
-  body:
-    type: json
-    data: |-
-      {
-        "email": "robert@example.com"
-      }
   auth: inherit
 
 settings:
-  encodeUrl: false
+  encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5

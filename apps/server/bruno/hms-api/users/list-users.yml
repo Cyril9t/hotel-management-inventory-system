@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/users
+  url: "{{baseUrl}}/api/users"
   headers:
     - name: Content-Type
       value: application/json

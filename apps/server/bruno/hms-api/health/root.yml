@@ -1,24 +1,18 @@
 info:
-  name: invalid-body
+  name: Root Health
   type: http
   seq: 1
 
 http:
-  method: post
-  url: http://localhost:3000/api/test/42
+  method: GET
+  url: "{{baseUrl}}/"
   headers:
     - name: Content-Type
       value: application/json
-  body:
-    type: json
-    data: |-
-      {
-        "email": "not-an-email"
-      }
   auth: inherit
 
 settings:
-  encodeUrl: false
+  encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
