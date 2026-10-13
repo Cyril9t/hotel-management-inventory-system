@@ -1,8 +1,9 @@
-function Departments() {
-    return (<>
+import HotelDepartments from "~/components/CEO.dashboard/Department/Department";
 
-        All Departments will display here
-    </>);
+function Departments() {
+    return (
+        <HotelDepartments />
+    );
 }
 
 export default Departments;

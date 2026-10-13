@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
 } from "../../components/ui/sidebar";
 
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import {
     LayoutDashboard,
     Activity,
@@ -52,7 +52,7 @@ const DashboardLinks = [
 ];
 
 function DashboardSidebar() {
-    const [active, setActive] = useState("Overview");
+    const navigate = useNavigate()
 
     return (
         <Sidebar className="bg-brand-navy text-background">
@@ -110,7 +110,7 @@ function DashboardSidebar() {
 
                         <SidebarMenuButton
                             onClick={() => {
-
+                                navigate("/", { replace: true })
                             }}
                             className="h-11 text-background/80 hover:bg-brand-navy-light hover:text-background"
                         >

@@ -1,4 +1,4 @@
-import { BedDouble, CalendarIcon, ChevronDown, DollarSign, Download, ShoppingBag, TrendingUp, Users } from "lucide-react";
+import { BedDouble, CalendarIcon, ChevronDown, DollarSign, Download, Hotel, House, ShoppingBag, TrendingUp, Users } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "~/components/ui/card";
@@ -68,7 +68,28 @@ export function MetricCards() {
 
 
             <div className="flex gap-3">
+                <Card className="w-full">
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Rooms</span>
+                            <div className="p-2 rounded-lg bg-accent text-accent-foreground">
+                                <House className="w-4 h-4 text-primary" />
+                            </div>
+                        </div>
 
+
+                    </CardHeader>
+
+                    <CardContent>
+                        <CardDescription >
+                            <div className="">
+                                <h3 className="text-2xl font-bold text-foreground">
+                                    60
+                                </h3>
+                            </div>
+                        </CardDescription>
+                    </CardContent>
+                </Card>
                 {CARDS.map((card) => {
                     return (
                         <Card className="w-full">

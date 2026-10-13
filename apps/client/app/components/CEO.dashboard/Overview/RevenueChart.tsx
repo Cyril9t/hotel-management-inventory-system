@@ -25,7 +25,7 @@ const data = [
     { month: 'Dec', revenue: 100 },
 ];
 
-/* Custom Tooltip styled with shadcn / luxury theme classes */
+
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
