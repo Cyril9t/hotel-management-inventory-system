@@ -5,7 +5,7 @@ import { RevenueChart } from "./RevenueChart";
 function Overview() {
     return (
         <div>
-            <MetricCards />
+            <MetricCards user="Owner" />
             <RevenueChart />
         </div>
 

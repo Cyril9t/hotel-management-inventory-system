@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "~/components/ui/card";
 
-export function MetricCards() {
+export function MetricCards({ user = "" }) {
 
     const [activeTab, setActiveTab] = useState('Today');
     const tabs = ['Today', 'Week', 'Month', 'Year'];
@@ -30,13 +30,13 @@ export function MetricCards() {
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Owner Dashboard</h1>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">{user} Dashboard</h1>
                     <p className="text-xs text-muted-foreground mt-0.5">Real-time consolidated yield, turnover metrics, and asset occupancy performance.</p>
                 </div>
 
                 <div className="flex items-center gap-3">
 
-                    <div className="flex items-center bg-secondary p-1 rounded-[var(--radius)] border border-border">
+                    <div className="flex items-center bg-secondary p-1 rounded-xl border border-border">
                         {tabs.map((tab) => (
                             <button
                                 key={tab}
@@ -54,7 +54,11 @@ export function MetricCards() {
 
                     <Button variant={"outline"} className="flex items-center gap-2 h-10">
                         <CalendarIcon className="w-3.5 h-3.5 text-primary" />
-                        <span>Apr 26, 2025</span>
+                        <span>{new Date().toLocaleDateString("en-US", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        })}</span>
                         <ChevronDown className="w-3 h-3 text-muted-foreground" />
                     </Button>
 

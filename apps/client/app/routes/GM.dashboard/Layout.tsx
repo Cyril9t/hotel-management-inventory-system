@@ -12,7 +12,7 @@ function Dashboard() {
     return (
         <SidebarProvider>
             <GMDashboardSidebar />
-            <main className="flex-1 p-6">
+            <main className="flex-1 p-4">
                 <div className="flex "><div className="grow"><SidebarTrigger /></div>
                     <div className=""><Header /></div>
                 </div>
