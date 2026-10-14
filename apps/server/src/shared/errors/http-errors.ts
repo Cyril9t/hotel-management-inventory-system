@@ -9,6 +9,13 @@ export class UnauthorizedError extends createError.Unauthorized {
   }
 }
 
+export class ForbiddenError extends createError.Forbidden {
+  code = "FORBIDDEN";
+  constructor(message = "Forbidden") {
+    super(message);
+  }
+}
+
 export class NotFoundError extends createError.NotFound {
   code = "NOT_FOUND";
   details?: ErrorDetails;

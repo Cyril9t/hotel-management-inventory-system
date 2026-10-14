@@ -12,7 +12,7 @@ datasource db {
 
 enum Role {
   OWNER
-  GM
+  GENERAL_MANAGER
   RECEPTIONIST
   BAR_STAFF
   RESTAURANT_STAFF
@@ -158,7 +158,7 @@ model RefreshToken {
   id        String    @id @default(uuid())
   userId    String    @map("user_id")
   user      User      @relation(fields: [userId], references: [id])
-  tokenHash String    @unique @map("token_hash")
+  jti       String    @unique
   expiresAt DateTime  @map("expires_at")
   revokedAt DateTime? @map("revoked_at")
 
