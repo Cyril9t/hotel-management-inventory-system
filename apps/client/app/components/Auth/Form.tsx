@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader } from "../ui/card";
 
 export function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
@@ -16,13 +17,50 @@ export function LoginForm() {
 
         setTimeout(() => {
             setIsLoading(false)
-            navigate("/GM.dashboard");
+
         }, 1500);
 
     };
 
+    const dash = [
+        {
+            title: "GM",
+            link: "/GM.dashboard",
+        },
+        {
+            title: "CEO",
+            link: "/CEO.dashboard",
+        },
+        {
+            title: "RECEP",
+            link: "/reception",
+        }
+    ]
+
     return (
         <div className="w-full max-w-md mx-auto">
+
+            <Card >
+                <CardHeader className="bg-destructive-foreground">
+                    <h1 className="text-destructive">This is for easy navigation until Authentication is integrated</h1>
+                </CardHeader>
+
+                <CardContent>
+                    {dash.map((d) => {
+                        return (
+                            <NavLink
+                                to={d.link}
+
+                            >
+                                <Button>
+                                    {d.title}
+                                </Button>
+                            </NavLink>
+                        )
+
+                    })}
+                </CardContent>
+            </Card>
 
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome Back</h2>

@@ -28,7 +28,7 @@ export const DashboardHeader = () => {
     ] as const;
 
     return (
-        <header className="bg-card border-b border-border shadow-sm">
+        <header className="border-b">
 
             <div className="w-full mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
