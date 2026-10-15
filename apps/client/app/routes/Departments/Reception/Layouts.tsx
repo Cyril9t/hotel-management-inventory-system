@@ -6,7 +6,7 @@ function DepartmentsDashboard() {
 
         <div>
             <DashboardHeader />
-            <main>
+            <main className="p-6">
                 <Outlet />
             </main>
         </div>);
