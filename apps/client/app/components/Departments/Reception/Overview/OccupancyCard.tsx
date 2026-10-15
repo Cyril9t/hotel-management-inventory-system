@@ -73,21 +73,21 @@ export const OccupancyCard = () => {
             <div className="flex w-full gap-3 pt-4 border-t border-border ">
                 <Card className=" w-full">
                     <CardHeader>
-                        <h1 className="text-[12px] font-bold uppercase tracking-widest">Available</h1>
+                        <h1 className="text-[12px] font-bold uppercase tracking-widest">Available Rooms</h1>
                     </CardHeader>
                     <CardContent>
 
-                        <p className="text-lg font-bold font-serif text-brand-success mt-0.5">14</p>
+                        <p className="text-3xl font-bold font-serif text-brand-success mt-0.5">14</p>
                     </CardContent>
                 </Card>
                 <Card className="w-full">
                     <CardHeader>
 
-                        <h1 className="text-[12px] font-bold uppercase tracking-widest">Occupied</h1>
+                        <h1 className="text-[12px] font-bold uppercase tracking-widest">Occupied Rooms</h1>
                     </CardHeader>
                     <CardContent>
 
-                        <p className="text-lg font-bold font-serif text-destructive mt-0.5">36</p>
+                        <p className="text-3xl font-bold font-serif text-destructive mt-0.5">36</p>
                     </CardContent>
                 </Card>
 
@@ -98,7 +98,7 @@ export const OccupancyCard = () => {
                     </CardHeader>
                     <CardContent>
 
-                        <p className="text-lg font-bold font-serif text-brand-gold mt-0.5">5</p>
+                        <p className="text-3xl font-bold font-serif text-brand-gold mt-0.5">5</p>
                     </CardContent>
                 </Card>
             </div>

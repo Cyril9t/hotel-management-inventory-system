@@ -9,19 +9,19 @@ const cards = [
     {
         title: "Today's Check-ins",
         icon: <LogIn className="w-4 h-4 text-brand-success" />,
-        count: 8,
+        count: 31,
         label: "guest"
     },
     {
         title: "Today's Check-outs",
         icon: <LogOut className="w-4 h-4 text-destructive" />,
-        count: 6,
+        count: 0,
         label: "guest"
     },
     {
         title: "Room Service Orders",
         icon: <UtensilsCrossed className="w-4 h-4 text-primary" />,
-        count: 4,
+        count: 14,
         label: "pending"
     }
 ]
