@@ -1,8 +1,10 @@
+import AvailableRoomsPage from "./AvailableRooms";
+
 
 
 function HotelRooms() {
     return (
-        <h1>Hotel Rooms</h1>
+        <AvailableRoomsPage />
     );
 }
 

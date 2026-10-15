@@ -41,7 +41,7 @@ export const DashboardHeader = () => {
                                 RECEPTION
                             </span>
 
-                            <span className="text-2xl font-bold text-foreground">David Bello</span>
+                            <span className="text-xl font-bold text-brand-navy-light">David Bello</span>
                         </div>
                         <p className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-1 justify-end">
                             <span className="w-3 h-3 rounded-full bg-brand-success animate-pulse" />
