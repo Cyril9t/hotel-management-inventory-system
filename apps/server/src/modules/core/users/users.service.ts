@@ -1,10 +1,19 @@
 import { Role } from "@prisma/client";
-import { NotFoundError, BadRequestError, ForbiddenError } from "#shared/errors/http-errors";
+import {
+  NotFoundError,
+  BadRequestError,
+  ForbiddenError,
+} from "#shared/errors/http-errors";
 import { usersRepository } from "./users.repository";
 import { password } from "#shared/lib/password";
-import { jwt } from "#shared/lib/jwt";
 import { enqueueInviteEmail } from "#shared/jobs/email/email.queue";
+import crypto from "node:crypto";
 import type { CreateInviteBody, ListUsersQuery } from "./users.schema";
+import {
+  SYSTEM_BOOTSTRAP_ID,
+  SYSTEM_BOOTSTRAP_PASSWORD,
+} from "#shared/constants/system-user.js";
+import { token } from "#shared/lib/token.js";
 
 // Who each role is allowed to invite
 const INVITABLE_ROLES: Record<string, Role[]> = {
@@ -31,7 +40,11 @@ export const usersService = {
     return usersRepository.reactivate(id);
   },
 
-  async createInvite(data: CreateInviteBody, createdByUserId: string, actorRole: Role) {
+  async createInvite(
+    data: CreateInviteBody,
+    createdByUserId: string,
+    actorRole: Role,
+  ) {
     const allowedRoles = INVITABLE_ROLES[actorRole] ?? [];
     if (!allowedRoles.includes(data.role)) {
       throw new ForbiddenError(
@@ -39,10 +52,11 @@ export const usersService = {
       );
     }
 
-    const rawToken = crypto.randomUUID();
+    // const rawToken = crypto.randomUUID();
+    const rawToken = token.generateToken();
     const invite = await usersRepository.createInvite({
       ...data,
-      tokenHash: jwt.hashToken(rawToken),
+      tokenHash: token.hashToken(rawToken),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       createdByUserId,
     });
@@ -54,11 +68,89 @@ export const usersService = {
     return invite;
   },
 
+  async resendInvite(id: string, actorRole: Role) {
+    const invite = await usersRepository.findInviteById(id);
+    if (!invite) throw new NotFoundError("Invite not found");
+    if (invite.status !== "PENDING") {
+      throw new BadRequestError("Only pending invites can be resent");
+    }
+
+    // Same authority check as creating — if you couldn't invite this role, you can't resend it either
+    const allowedRoles = INVITABLE_ROLES[actorRole] ?? [];
+    if (!allowedRoles.includes(invite.role)) {
+      throw new ForbiddenError(
+        `${actorRole} is not permitted to resend an invite for role ${invite.role}`,
+      );
+    }
+
+    // const rawToken = crypto.randomUUID();
+    const rawToken = token.generateToken();
+    await usersRepository.reissueInviteToken(
+      invite.id,
+      token.hashToken(rawToken),
+    );
+    await enqueueInviteEmail({
+      to: invite.email,
+      firstName: invite.firstName,
+      rawToken,
+    });
+    return invite;
+  },
+
+  async createOwnerInvite(
+    data: Pick<CreateInviteBody, "firstName" | "lastName" | "email" | "phone">,
+  ) {
+    const existingOwner = await usersRepository.findActiveOwner();
+    if (existingOwner) throw new BadRequestError("An owner already exists");
+
+    const pendingInvite = await usersRepository.findPendingInviteByRole(
+      Role.OWNER,
+    );
+    if (pendingInvite) {
+      const reissuedToken = token.generateToken();
+      await usersRepository.reissueInviteToken(
+        pendingInvite.id,
+        token.hashToken(reissuedToken),
+      );
+      await enqueueInviteEmail({
+        to: pendingInvite.email,
+        firstName: pendingInvite.firstName,
+        rawToken: reissuedToken,
+      });
+      return pendingInvite;
+    }
+
+    await usersRepository.ensureSystemUser(
+      SYSTEM_BOOTSTRAP_ID,
+      await password.hash(SYSTEM_BOOTSTRAP_PASSWORD),
+    );
+
+    // const rawToken = crypto.randomUUID();
+    const rawToken = token.generateToken();
+    const invite = await usersRepository.createInvite({
+      ...data,
+      role: Role.OWNER,
+      tokenHash: token.hashToken(rawToken),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      createdByUserId: SYSTEM_BOOTSTRAP_ID,
+    });
+    await enqueueInviteEmail({
+      to: invite.email,
+      firstName: invite.firstName,
+      rawToken,
+    });
+    return invite;
+  },
+
   async verifyInvite(rawToken: string) {
     const invite = await usersRepository.findInviteByTokenHash(
-      jwt.hashToken(rawToken),
+      token.hashToken(rawToken),
     );
-    if (!invite || invite.acceptedAt || invite.expiresAt < new Date()) {
+    if (
+      !invite ||
+      invite.status !== "PENDING" ||
+      invite.expiresAt < new Date()
+    ) {
       throw new BadRequestError("Invalid or expired invite");
     }
     return invite;
@@ -78,7 +170,7 @@ export const usersService = {
       passwordHash,
     });
 
-    await usersRepository.markInviteAccepted(invite.id);
+    await usersRepository.markInviteAccepted(invite.id, user.id);
     return user;
   },
 };

@@ -37,6 +37,12 @@ export const usersRepository = {
     });
   },
 
+  async findActiveOwner(): Promise<User | null> {
+    return database.user.findFirst({
+      where: { role: "OWNER", isActive: true },
+    });
+  },
+
   async list(filters: {
     role?: Role | undefined;
     department?: Department | undefined;
@@ -53,11 +59,15 @@ export const usersRepository = {
   },
 
   async updatePassword(id: string, passwordHash: string) {
-    return database.user.update({ where: { id }, data: { passwordHash } });
+    return database.user.update({
+      where: { id },
+      data: { passwordHash },
+      select: PUBLIC_USER_SELECT,
+    });
   },
 
   // staff invites
-  async createInvite(data: Prisma.StaffInviteCreateManyInput) {
+  async createInvite(data: Prisma.StaffInviteUncheckedCreateInput) {
     return database.staffInvite.create({ data });
   },
 
@@ -65,15 +75,42 @@ export const usersRepository = {
     return database.staffInvite.findUnique({ where: { tokenHash } });
   },
 
-  async markInviteAccepted(id: string) {
+  async findPendingInviteByRole(role: Role) {
+    return database.staffInvite.findFirst({
+      where: { role, status: "PENDING" },
+    });
+  },
+
+  async markInviteAccepted(id: string, userId: string) {
     return database.staffInvite.update({
       where: { id },
-      data: { acceptedAt: new Date() },
+      data: { status: "ACCEPTED", acceptedAt: new Date(), userId },
     });
   },
 
   async createFromInvite(data: Prisma.UserCreateInput) {
     return database.user.create({ data, select: PUBLIC_USER_SELECT });
+  },
+
+  async revokeInvite(id: string) {
+    return database.staffInvite.update({
+      where: { id },
+      data: { status: "REVOKED" },
+    });
+  },
+
+  async findInviteById(id: string) {
+    return database.staffInvite.findUnique({ where: { id } });
+  },
+
+  async reissueInviteToken(id: string, tokenHash: string) {
+    return database.staffInvite.update({
+      where: { id },
+      data: {
+        tokenHash,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
   },
 
   // Soft delete only — isActive/deactivatedAt, never a hard delete.
@@ -90,6 +127,27 @@ export const usersRepository = {
       where: { id },
       data: { isActive: true, deactivatedAt: null },
       select: PUBLIC_USER_SELECT,
+    });
+  },
+
+  async ensureSystemUser(
+    systemUserId: string,
+    passwordHash: string,
+  ): Promise<void> {
+    await database.user.upsert({
+      where: { id: systemUserId },
+      update: {},
+      create: {
+        id: systemUserId,
+        firstName: "System",
+        lastName: "Bootstrap",
+        email: "system@internal.local",
+        phone: "0000000000",
+        passwordHash,
+        role: "OWNER",
+        isActive: false,
+        deactivatedAt: new Date(),
+      },
     });
   },
 };

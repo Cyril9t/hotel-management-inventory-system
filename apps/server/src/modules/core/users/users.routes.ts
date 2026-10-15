@@ -11,6 +11,7 @@ import {
   inviteTokenParamsSchema,
   userIdParamsSchema,
   listUsersQuerySchema,
+  inviteIdParamsSchema,
 } from "./users.schema";
 
 export const usersRoutes = Router();
@@ -20,6 +21,7 @@ registry.registerPath({
   method: "get",
   path: "/users/invites/:token/verify",
   tags: ["Users"],
+  summary: "Verify invite token",
   request: {
     params: inviteTokenParamsSchema,
   },
@@ -46,6 +48,7 @@ registry.registerPath({
   method: "post",
   path: "/users/invites/accept",
   tags: ["Users"],
+  summary: "Accept invite and create account",
   request: {
     body: { content: { "application/json": { schema: acceptInviteSchema } } },
   },
@@ -74,6 +77,8 @@ registry.registerPath({
   method: "get",
   path: "/users",
   tags: ["Users"],
+  summary: "Get staff",
+  security: [{ bearerAuth: [] }],
   request: {
     query: listUsersQuerySchema,
   },
@@ -97,6 +102,8 @@ registry.registerPath({
   method: "get",
   path: "/users/:id",
   tags: ["Users"],
+  summary: "Get a staff member",
+  security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
   },
@@ -124,6 +131,9 @@ registry.registerPath({
   method: "post",
   path: "/users/invites",
   tags: ["Users"],
+  summary: "Invite new staff",
+  security: [{ bearerAuth: [] }],
+
   request: {
     body: { content: { "application/json": { schema: createInviteSchema } } },
   },
@@ -155,6 +165,8 @@ registry.registerPath({
   method: "patch",
   path: "/users/:id/deactivate",
   tags: ["Users"],
+  summary: "Deactivate a staff member (soft delete)",
+  security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
   },
@@ -182,6 +194,8 @@ registry.registerPath({
   method: "patch",
   path: "/users/:id/reactivate",
   tags: ["Users"],
+  summary: "Reactivate a deactivated staff member",
+  security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
   },
@@ -202,4 +216,34 @@ usersRoutes.patch(
   authorize(["GENERAL_MANAGER", "OWNER"]),
   validate({ params: userIdParamsSchema }),
   usersController.reactivate,
+);
+
+// POST /users/invites/:id/resend
+registry.registerPath({
+  method: "post",
+  path: "/users/invites/:id/resend",
+  tags: ["Users"],
+  summary: "Resend staff invitation email",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: inviteIdParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "Invitation email resent successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    404: {
+      description: "Invite not found",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
+usersRoutes.post(
+  "/invites/:id/resend",
+  authenticate,
+  authorize(["OWNER", "GENERAL_MANAGER"]),
+  validate({ params: inviteIdParamsSchema }),
+  usersController.resendInvite,
 );

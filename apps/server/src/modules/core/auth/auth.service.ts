@@ -5,6 +5,7 @@ import { password } from "#shared/lib/password";
 import { enqueuePasswordResetEmail } from "#shared/jobs/email/email.queue";
 import { jwt } from "#shared/lib/jwt";
 import type { Role } from "@prisma/client";
+import { token } from "#shared/lib/token.js";
 
 export const authService = {
   async login(email: string, plainPassword: string) {
@@ -49,17 +50,17 @@ export const authService = {
     const user = await usersRepository.findByEmail(email);
     if (!user) return; // don't leak whether the email exists
 
-    const rawToken = crypto.randomUUID();
+    const rawToken = token.generateToken()
     await authRepository.createPasswordResetToken(
       user.id,
-      jwt.hashToken(rawToken),
+      token.hashToken(rawToken),
     );
     await enqueuePasswordResetEmail({ to: user.email, rawToken });
   },
 
   async resetPassword(rawToken: string, newPassword: string) {
     const resetToken = await authRepository.findPasswordResetToken(
-      jwt.hashToken(rawToken),
+      token.hashToken(rawToken),
     );
     if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
       throw new BadRequestError("Invalid or expired reset token");

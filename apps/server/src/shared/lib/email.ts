@@ -68,7 +68,7 @@ function buildShell({
               </tr>
             </table>
             <p style="color: ${brand.muted}; font-size: 13px; line-height: 1.6; margin: 0 0 8px;">
-              This link expires on <strong style="color: ${brand.text};">${expiresAt.toUTCString()}</strong>.
+              This link expires on <strong style="color: ${brand.text};">${new Date(expiresAt).toUTCString()}</strong>.
             </p>
             <p style="color: ${brand.subtle}; font-size: 12px; line-height: 1.5; margin: 0;">
               If you weren't expecting this email you can safely ignore it.

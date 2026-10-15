@@ -11,11 +11,21 @@ export const redisConnection = new Redis(env.REDIS_URL, {
 });
 
 function attachErrorHandler(connection: Redis) {
-  connection.on("error", (err: { code?: string }) => {
-    if (err.code === "ECONNRESET" || err.code === "ECONNREFUSED") {
-      return;
-    }
-    logger.error({ error: err }, "redis error");
+  connection.on("error", (err: any) => {
+    // Wrap the error explicitly to ensure log aggregators parse all TCP metadata
+    logger.error(
+      {
+        err: {
+          message: `redis error: ${err.message}`,
+          stack: err.stack, // Preserves TCP.onStreamRead stack
+          code: err.code || "UNKNOWN", // Preserves 'ECONNRESET', 'ECONNREFUSED', etc.
+          errno: err.errno, // Preserves -4077
+          syscall: err.syscall, // Preserves 'read' or 'connect'
+          library: "ioredis",
+        },
+      },
+      "redis connection error",
+    );
   });
 }
 

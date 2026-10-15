@@ -1,6 +1,5 @@
 import { Queue } from "bullmq";
 import { redisConnection } from "#shared/config/redis";
-import { logger } from "#shared/logger";
 
 export const autoCheckoutQueue = new Queue("auto-checkout", {
   connection: redisConnection,

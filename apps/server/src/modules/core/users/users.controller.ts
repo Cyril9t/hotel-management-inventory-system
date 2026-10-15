@@ -7,6 +7,7 @@ import type {
   InviteTokenParams,
   UserIdParams,
   ListUsersQuery,
+  InviteIdParams,
 } from "./users.schema";
 
 export const usersController = {
@@ -65,5 +66,11 @@ export const usersController = {
       req.body.password,
     );
     res.status(201).json(success(user));
+  },
+
+  async resendInvite(req: Request, res: Response) {
+    const { id } = res.locals.params as InviteIdParams;
+    const invite = await usersService.resendInvite(id, req.user!.role);
+    res.json(success(invite));
   },
 };

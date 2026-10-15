@@ -28,8 +28,13 @@ export const listUsersQuerySchema = z.object({
   department: z.enum(Department).optional(),
 });
 
+export const inviteIdParamsSchema = z.object({
+  id: z.uuid("Invalid invite id"),
+});
+
 export type CreateInviteBody = z.infer<typeof createInviteSchema>;
 export type AcceptInviteBody = z.infer<typeof acceptInviteSchema>;
 export type InviteTokenParams = z.infer<typeof inviteTokenParamsSchema>;
 export type UserIdParams = z.infer<typeof userIdParamsSchema>;
 export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
+export type InviteIdParams = z.infer<typeof inviteIdParamsSchema>;

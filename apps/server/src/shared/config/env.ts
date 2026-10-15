@@ -35,4 +35,9 @@ export const env = cleanEnv(process.env, {
   RESEND_FROM_EMAIL: str(),
 
   BCRYPT_SALT_ROUNDS: num({ default: 12 }),
+
+  OWNER_EMAIL: str(),
+  OWNER_FIRST_NAME: str(),
+  OWNER_LAST_NAME: str(),
+  OWNER_PHONE: str(),
 });
