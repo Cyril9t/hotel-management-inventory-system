@@ -51,7 +51,10 @@ export default function AvailableRoomsPage() {
             <BookRoomModal
                 isOpen={bookRooms}
                 room={selectedRoom as unknown as Parameters<typeof BookRoomModal>[0]["room"]}
-                onClose={() => setBookRooms(false)}
+                onClose={() => {
+                    console.log(selectedRoom)
+                    setBookRooms(false)
+                }}
             />
             <div className="mb-4">
                 <h1 className="text-2xl font-bold text-foreground tracking-wide">Available Rooms</h1>

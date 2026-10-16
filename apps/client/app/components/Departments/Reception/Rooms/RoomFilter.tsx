@@ -85,14 +85,14 @@ export const RoomFiltersBar: React.FC<RoomFiltersBarProps> = ({
                     </select>
 
 
-                    <Button
+                    {/* <Button
 
                         onClick={onNewBooking}
                         className="h-9 bg-brand-navy text-background "
                     >
                         <Plus className="w-4 h-4" />
                         <span>New Booking</span>
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
 

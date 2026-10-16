@@ -10,19 +10,24 @@ import {
     Receipt,
     CheckCircle2,
     Lock,
-    BedDouble
+    BedDouble,
+    FileDigit,
+    Users
 } from 'lucide-react';
+import { formatNaira } from '../data';
+import { Button } from '~/components/ui/button';
+import { Card, CardContent, CardHeader } from '~/components/ui/card';
 
 // ==========================================
 // TYPESCRIPT INTERFACES
 // ==========================================
 export interface SelectedRoom {
     id: string;
-    roomNumber: string;
-    roomType: string;
+    number: string;
+    type: string;
     pricePerNight: number;
-    maxOccupancy: number;
-    bedConfig: string;
+    maxGuests: number;
+    bedCount: string;
     floor?: string;
     wing?: string;
 }
@@ -56,6 +61,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
     onBookingComplete,
     modalWidthClass = "max-w-3xl",
 }) => {
+
     if (!isOpen || !room) return null;
 
     const todayStr = new Date().toISOString().split('T')[0];
@@ -124,51 +130,88 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             <BedDouble className="w-5 h-5 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold font-serif text-foreground tracking-tight">
-                                Book Room {room.roomNumber}
+                            <h2 className="text-xl font-bold text-foreground tracking-tight">
+                                Book Room {room.number}
                             </h2>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                                {room.roomType} • ₦ {room.pricePerNight.toLocaleString()} / night
+                            <p className="text text-muted-foreground mt-">
+                                {room.type} • <span className='text-foreground text-[20px] font-serif'>{formatNaira(room.pricePerNight)} </span>/ night
                             </p>
                         </div>
                     </div>
-                    <button
+                    <Button
+                        variant={"outline"}
                         onClick={onClose}
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                        className=""
                         type="button"
                     >
                         <X className="w-5 h-5" />
-                    </button>
+                    </Button>
                 </div>
 
 
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
 
+                    <div className='flex gap-4 w-full bg-brand-navy rounded-[10px] p-1'>
+                        <Card className='bg-brand-navy border-none w-full'>
+                            <CardHeader>
+                                <h1 className='text-background font-bold text uppercase tracking-wide '>Room Number</h1>
+                            </CardHeader>
 
-                    <div className="bg-secondary/50 border border-border/80 rounded-[var(--radius)] p-4 flex flex-wrap items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div>
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Room No.</span>
-                                <p className="text-lg font-bold font-serif text-foreground">{room.roomNumber}</p>
-                            </div>
-                            <div className="h-8 w-px bg-border" />
-                            <div>
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Category</span>
-                                <p className="text-xs font-semibold text-foreground">{room.roomType}</p>
-                            </div>
-                            <div className="h-8 w-px bg-border" />
-                            <div>
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Capacity</span>
-                                <p className="text-xs font-semibold text-foreground">{room.bedConfig} • Max {room.maxOccupancy} Guests</p>
-                            </div>
-                        </div>
+                            <CardContent>
+                                <p className="font-serif text-[20px] font-bold tracking-tight text-brand-gold-light">
+                                    {room.number}
+                                </p>
+                            </CardContent>
+                        </Card>
 
-                        <div className="text-right">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rate</span>
-                            <p className="text-sm font-bold text-primary">₦ {room.pricePerNight.toLocaleString()} <span className="text-[10px] text-muted-foreground font-normal">/ night</span></p>
-                        </div>
+                        <Card className='bg-brand-navy border-none w-full'>
+                            <CardHeader>
+                                <h1 className='text-background font-bold text uppercase tracking-wide '>
+                                    Room Category
+                                </h1>
+                            </CardHeader>
+
+                            <CardContent>
+                                <p className="font-serif text-[16px] font-bold tracking-tight text-brand-gold-light">
+                                    {room.type}
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className='bg-brand-navy border-none w-full'>
+                            <CardHeader>
+                                <h1 className='text-background font-bold text uppercase tracking-wide'>Accommodation</h1>
+                            </CardHeader>
+
+                            <CardContent>
+                                <div className='flex gap-4 text-background'>
+                                    <div className='flex gap-0.5 '>
+                                        <BedDouble size={18} className='text-brand-gold-light' />
+                                        <span className='text-[12px]'>{room.bedCount} Bed</span>
+                                    </div>
+                                    <div className='flex'>
+                                        <Users size={18} className='text-brand-gold-light' />
+                                        <span className='text-[12px] '>{room.maxGuests} Guest</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className='bg-brand-navy border-none w-full'>
+                            <CardHeader>
+                                <h1 className='text-background font-bold text uppercase tracking-wide'>Nightly Rate</h1>
+                            </CardHeader>
+
+                            <CardContent>
+                                <p className="font-serif text-xl font-bold text-brand-gold-light">
+                                    ₦{room.pricePerNight.toLocaleString()}
+                                    <span className="ml-1 font-sans text-xs font-normal tejxt-background">
+                                        / night
+                                    </span>
+                                </p>
+                            </CardContent>
+                        </Card>
                     </div>
-
 
                     <div className="space-y-4">
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
