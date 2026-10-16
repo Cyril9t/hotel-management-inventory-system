@@ -14,8 +14,21 @@ const brand = {
   subtle: "#8A8DA3",
 };
 
-function buildSignupUrl(rawToken: string) {
-  return `${env.CLIENT_ORIGIN}/accept-invite?token=${encodeURIComponent(rawToken)}`;
+function buildSignupUrl(data: {
+  rawToken: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+}) {
+  const params = new URLSearchParams({
+    token: data.rawToken,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    email: data.email,
+    role: data.role,
+  });
+  return `${env.CLIENT_ORIGIN}/accept-invite?${params.toString()}`;
 }
 
 function buildResetUrl(rawToken: string) {
@@ -133,6 +146,8 @@ export const email = {
   async sendInvite(data: {
     to: string;
     firstName: string;
+    lastName: string;
+    role: string;
     rawToken: string;
     expiresAt: Date;
   }) {
@@ -142,9 +157,15 @@ export const email = {
       html: buildShell({
         heading: "You've been invited",
         greeting: "You're invited",
-        bodyHtml: `<p>Hi ${data.firstName}, you've been invited to join the team. Accept your invite to set your password and get started.</p>`,
+        bodyHtml: `<p>Hi ${data.firstName}, you've been invited to join the team as <strong>${data.role}</strong>. Accept your invite to set your password and get started.</p>`,
         ctaLabel: "Accept invitation",
-        ctaUrl: buildSignupUrl(data.rawToken),
+        ctaUrl: buildSignupUrl({
+          rawToken: data.rawToken,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.to,
+          role: data.role,
+        }),
         expiresAt: data.expiresAt,
       }),
       rawToken: data.rawToken,

@@ -1,0 +1,23 @@
+info:
+  name: Resend Invite
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/users/invites/{{inviteId}}/resend"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: id
+      value: "{{inviteId}}"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

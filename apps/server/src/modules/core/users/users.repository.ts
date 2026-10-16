@@ -1,5 +1,6 @@
 import { database } from "#shared/database/prisma";
 import type { User, Prisma, Role, Department } from "@prisma/client";
+import type { ListInvitesQuery, ListUsersQuery } from "./users.schema";
 
 // Excludes passwordHash — safe to attach to req.user or return in responses.
 export const PUBLIC_USER_SELECT = {
@@ -43,10 +44,7 @@ export const usersRepository = {
     });
   },
 
-  async list(filters: {
-    role?: Role | undefined;
-    department?: Department | undefined;
-  }): Promise<PublicUser[]> {
+  async list(filters: ListUsersQuery): Promise<PublicUser[]> {
     const where: Prisma.UserWhereInput = {};
 
     if (filters.role !== undefined) where.role = filters.role;
@@ -127,6 +125,19 @@ export const usersRepository = {
       where: { id },
       data: { isActive: true, deactivatedAt: null },
       select: PUBLIC_USER_SELECT,
+    });
+  },
+
+  async listInvites(filters: ListInvitesQuery) {
+    const where: Prisma.StaffInviteWhereInput = {};
+
+    if (filters.role !== undefined) where.role = filters.role;
+    if (filters.department !== undefined) where.department = filters.department;
+    if (filters.status !== undefined) where.status = filters.status;
+
+    return database.staffInvite.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
     });
   },
 

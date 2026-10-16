@@ -5,7 +5,7 @@ info:
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/api/users/{{userId}}/deactivate"
+  url: "{{baseUrl}}/api/v1/users/{{userId}}/deactivate"
   headers:
     - name: Content-Type
       value: application/json

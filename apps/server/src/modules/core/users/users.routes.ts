@@ -12,6 +12,7 @@ import {
   userIdParamsSchema,
   listUsersQuerySchema,
   inviteIdParamsSchema,
+  listInvitesQuerySchema,
 } from "./users.schema";
 
 export const usersRoutes = Router();
@@ -19,7 +20,7 @@ export const usersRoutes = Router();
 // GET /users/invites/:token/verify
 registry.registerPath({
   method: "get",
-  path: "/users/invites/:token/verify",
+  path: "/users/invites/{token}/verify",
   tags: ["Users"],
   summary: "Verify invite token",
   request: {
@@ -97,10 +98,35 @@ usersRoutes.get(
   usersController.list,
 );
 
+// GET /users/invites
+registry.registerPath({
+  method: "get",
+  path: "/users/invites",
+  tags: ["Users"],
+  summary: "Get staff invites",
+  security: [{ bearerAuth: [] }],
+  request: {
+    query: listInvitesQuerySchema,
+  },
+  responses: {
+    200: {
+      description: "List of invites retrieved",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+  },
+});
+
+usersRoutes.get(
+  "/invites",
+  authorize(["GENERAL_MANAGER", "OWNER"]),
+  validate({ query: listInvitesQuerySchema }),
+  usersController.listInvites,
+);
+
 // GET /users/:id
 registry.registerPath({
   method: "get",
-  path: "/users/:id",
+  path: "/users/{id}",
   tags: ["Users"],
   summary: "Get a staff member",
   security: [{ bearerAuth: [] }],
@@ -163,7 +189,7 @@ usersRoutes.post(
 // PATCH /users/:id/deactivate
 registry.registerPath({
   method: "patch",
-  path: "/users/:id/deactivate",
+  path: "/users/{id}/deactivate",
   tags: ["Users"],
   summary: "Deactivate a staff member (soft delete)",
   security: [{ bearerAuth: [] }],
@@ -192,7 +218,7 @@ usersRoutes.patch(
 // PATCH /users/:id/reactivate
 registry.registerPath({
   method: "patch",
-  path: "/users/:id/reactivate",
+  path: "/users/{id}/reactivate",
   tags: ["Users"],
   summary: "Reactivate a deactivated staff member",
   security: [{ bearerAuth: [] }],
@@ -221,7 +247,7 @@ usersRoutes.patch(
 // POST /users/invites/:id/resend
 registry.registerPath({
   method: "post",
-  path: "/users/invites/:id/resend",
+  path: "/users/invites/{id}/resend",
   tags: ["Users"],
   summary: "Resend staff invitation email",
   security: [{ bearerAuth: [] }],

@@ -8,27 +8,44 @@ import type {
   UserIdParams,
   ListUsersQuery,
   InviteIdParams,
+  ListInvitesQuery,
 } from "./users.schema";
 
 export const usersController = {
   async list(req: Request, res: Response) {
     const filters = (res.locals.query ?? {}) as ListUsersQuery;
-    res.json(success(await usersService.list(filters)));
+    res.json(
+      success({
+        users: await usersService.list(filters),
+      }),
+    );
   },
 
   async getById(req: Request, res: Response) {
     const { id } = res.locals.params as UserIdParams;
-    res.json(success(await usersService.getById(id)));
+    res.json(
+      success({
+        user: await usersService.getById(id),
+      }),
+    );
   },
 
   async deactivate(req: Request, res: Response) {
     const { id } = res.locals.params as UserIdParams;
-    res.json(success(await usersService.deactivate(id)));
+    res.json(
+      success({
+        user: await usersService.deactivate(id),
+      }),
+    );
   },
 
   async reactivate(req: Request, res: Response) {
     const { id } = res.locals.params as UserIdParams;
-    res.json(success(await usersService.reactivate(id)));
+    res.json(
+      success({
+        user: await usersService.reactivate(id),
+      }),
+    );
   },
 
   async createInvite(
@@ -36,13 +53,15 @@ export const usersController = {
     res: Response,
   ) {
     const actor = req.user!;
-    res
-      .status(201)
-      .json(
-        success(
-          await usersService.createInvite(req.body, actor.userId, actor.role),
+    res.status(201).json(
+      success({
+        user: await usersService.createInvite(
+          req.body,
+          actor.userId,
+          actor.role,
         ),
-      );
+      }),
+    );
   },
 
   async verifyInvite(req: Request, res: Response) {
@@ -50,9 +69,11 @@ export const usersController = {
     const invite = await usersService.verifyInvite(token);
     res.json(
       success({
-        email: invite.email,
-        role: invite.role,
-        department: invite.department,
+        invite: {
+          email: invite.email,
+          role: invite.role,
+          department: invite.department,
+        },
       }),
     );
   },
@@ -65,12 +86,21 @@ export const usersController = {
       req.body.token,
       req.body.password,
     );
-    res.status(201).json(success(user));
+    res.status(201).json(success({ user }));
   },
 
   async resendInvite(req: Request, res: Response) {
     const { id } = res.locals.params as InviteIdParams;
     const invite = await usersService.resendInvite(id, req.user!.role);
-    res.json(success(invite));
+    res.json(success({ invite }));
+  },
+
+  async listInvites(req: Request, res: Response) {
+    const filters = res.locals.query as ListInvitesQuery;
+    res.json(
+      success({
+        invites: await usersService.listInvites(filters),
+      }),
+    );
   },
 };

@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role, Department } from "@prisma/client";
 import {
   NotFoundError,
   BadRequestError,
@@ -7,8 +7,11 @@ import {
 import { usersRepository } from "./users.repository";
 import { password } from "#shared/lib/password";
 import { enqueueInviteEmail } from "#shared/jobs/email/email.queue";
-import crypto from "node:crypto";
-import type { CreateInviteBody, ListUsersQuery } from "./users.schema";
+import type {
+  CreateInviteBody,
+  ListInvitesQuery,
+  ListUsersQuery,
+} from "./users.schema";
 import {
   SYSTEM_BOOTSTRAP_ID,
   SYSTEM_BOOTSTRAP_PASSWORD,
@@ -19,6 +22,16 @@ import { token } from "#shared/lib/token.js";
 const INVITABLE_ROLES: Record<string, Role[]> = {
   [Role.OWNER]: [Role.GENERAL_MANAGER],
   [Role.GENERAL_MANAGER]: Object.values(Role).filter((r) => r !== Role.OWNER),
+};
+
+const ROLE_DEPARTMENT_MAP: Record<Role, Department | null> = {
+  [Role.OWNER]: null,
+  [Role.GENERAL_MANAGER]: null,
+  [Role.RECEPTIONIST]: Department.RECEPTION,
+  [Role.BAR_STAFF]: Department.BAR,
+  [Role.RESTAURANT_STAFF]: Department.RESTAURANT,
+  [Role.KITCHEN_STAFF]: Department.KITCHEN,
+  [Role.STORE_MANAGER]: Department.STORE,
 };
 
 export const usersService = {
@@ -52,10 +65,13 @@ export const usersService = {
       );
     }
 
+    const department = ROLE_DEPARTMENT_MAP[data.role];
+
     // const rawToken = crypto.randomUUID();
     const rawToken = token.generateToken();
     const invite = await usersRepository.createInvite({
       ...data,
+      department,
       tokenHash: token.hashToken(rawToken),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       createdByUserId,
@@ -63,7 +79,10 @@ export const usersService = {
     await enqueueInviteEmail({
       to: invite.email,
       firstName: invite.firstName,
+      lastName: invite.lastName,
+      role: invite.role,
       rawToken,
+      expiresAt: invite.expiresAt,
     });
     return invite;
   },
@@ -92,7 +111,10 @@ export const usersService = {
     await enqueueInviteEmail({
       to: invite.email,
       firstName: invite.firstName,
+      lastName: invite.lastName,
+      role: invite.role,
       rawToken,
+      expiresAt: invite.expiresAt,
     });
     return invite;
   },
@@ -115,7 +137,10 @@ export const usersService = {
       await enqueueInviteEmail({
         to: pendingInvite.email,
         firstName: pendingInvite.firstName,
+        lastName: pendingInvite.lastName,
+        role: pendingInvite.role,
         rawToken: reissuedToken,
+        expiresAt: pendingInvite.expiresAt,
       });
       return pendingInvite;
     }
@@ -137,7 +162,10 @@ export const usersService = {
     await enqueueInviteEmail({
       to: invite.email,
       firstName: invite.firstName,
+      lastName: invite.lastName,
+      role: invite.role,
       rawToken,
+      expiresAt: invite.expiresAt,
     });
     return invite;
   },
@@ -172,5 +200,9 @@ export const usersService = {
 
     await usersRepository.markInviteAccepted(invite.id, user.id);
     return user;
+  },
+
+  async listInvites(filters: ListInvitesQuery = {}) {
+    return usersRepository.listInvites(filters);
   },
 };

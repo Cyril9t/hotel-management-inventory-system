@@ -13,7 +13,10 @@ const RETRY_OPTIONS = {
 export async function enqueueInviteEmail(data: {
   to: string;
   firstName: string;
+  lastName: string;
+  role: string;
   rawToken: string;
+  expiresAt: Date;
 }) {
   await emailQueue.add("invite", data, RETRY_OPTIONS);
 }
@@ -21,6 +24,7 @@ export async function enqueueInviteEmail(data: {
 export async function enqueuePasswordResetEmail(data: {
   to: string;
   rawToken: string;
+  expiresAt: Date;
 }) {
   await emailQueue.add("password-reset", data, RETRY_OPTIONS);
 }

@@ -50,12 +50,16 @@ export const authService = {
     const user = await usersRepository.findByEmail(email);
     if (!user) return; // don't leak whether the email exists
 
-    const rawToken = token.generateToken()
-    await authRepository.createPasswordResetToken(
+    const rawToken = token.generateToken();
+    const resetToken = await authRepository.createPasswordResetToken(
       user.id,
       token.hashToken(rawToken),
     );
-    await enqueuePasswordResetEmail({ to: user.email, rawToken });
+    await enqueuePasswordResetEmail({
+      to: user.email,
+      rawToken,
+      expiresAt: resetToken.expiresAt,
+    });
   },
 
   async resetPassword(rawToken: string, newPassword: string) {

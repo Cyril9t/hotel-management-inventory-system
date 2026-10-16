@@ -15,7 +15,7 @@ function attachErrorHandler(connection: Redis) {
     // Wrap the error explicitly to ensure log aggregators parse all TCP metadata
     logger.error(
       {
-        err: {
+        error: {
           message: `redis error: ${err.message}`,
           stack: err.stack, // Preserves TCP.onStreamRead stack
           code: err.code || "UNKNOWN", // Preserves 'ECONNRESET', 'ECONNREFUSED', etc.

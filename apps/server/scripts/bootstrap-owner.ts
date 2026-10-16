@@ -10,7 +10,7 @@ async function bootstrapOwner() {
   const phone = env.OWNER_PHONE;
 
   await usersService.createOwnerInvite({ email, firstName, lastName, phone });
-  console.log(`Owner invite sent to ${email}`);
+  logger.info(`Owner invite sent to ${email}`);
 }
 
 bootstrapOwner()
