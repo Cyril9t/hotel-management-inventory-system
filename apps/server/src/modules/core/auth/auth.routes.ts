@@ -16,6 +16,7 @@ registry.registerPath({
   method: "post",
   path: "/auth/login",
   tags: ["Auth"],
+  summary: "Authenticate user and get tokens",
   request: {
     body: { content: { "application/json": { schema: loginSchema } } },
   },
@@ -46,6 +47,7 @@ registry.registerPath({
   method: "post",
   path: "/auth/refresh",
   tags: ["Auth"],
+  summary: "Refresh access token using refresh token cookie",
   responses: {
     200: {
       description: "Access token refreshed successfully",
@@ -69,6 +71,7 @@ registry.registerPath({
   method: "post",
   path: "/auth/logout",
   tags: ["Auth"],
+  summary: "Logout user and clear refresh token",
   responses: {
     200: {
       description: "Logged out successfully",
@@ -94,6 +97,7 @@ registry.registerPath({
   method: "post",
   path: "/auth/forgot-password",
   tags: ["Auth"],
+  summary: "Request password reset email",
   request: {
     body: { content: { "application/json": { schema: forgotPasswordSchema } } },
   },
@@ -120,6 +124,7 @@ registry.registerPath({
   method: "post",
   path: "/auth/reset-password",
   tags: ["Auth"],
+  summary: "Reset password using token",
   request: {
     body: { content: { "application/json": { schema: resetPasswordSchema } } },
   },

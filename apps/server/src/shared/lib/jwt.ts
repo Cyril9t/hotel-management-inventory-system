@@ -56,9 +56,9 @@ export const jwt = {
     ) as RefreshTokenPayload;
   },
 
-  hashToken(token: string): string {
-    return createHash("sha256").update(token).digest("hex");
-  },
+  // hashToken(token: string): string {
+  //   return createHash("sha256").update(token).digest("hex");
+  // },
 
   getRefreshTokenExpiry(): Date {
     const durationMs = ms(env.JWT_REFRESH_EXPIRES_IN as ms.StringValue);

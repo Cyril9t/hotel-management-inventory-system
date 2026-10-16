@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{baseUrl}}/api/users/invites/accept"
+  url: "{{baseUrl}}/api/v1/users/invites/accept"
   headers:
     - name: Content-Type
       value: application/json

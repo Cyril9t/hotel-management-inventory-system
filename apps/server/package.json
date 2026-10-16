@@ -13,6 +13,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "start:worker": "node dist/worker.js",
+    "bootstrap:owner": "tsx scripts/bootstrap-owner.ts",
     "db:generate": "prisma generate",
     "db:push": "prisma push",
     "db:migrate": "prisma migrate dev",

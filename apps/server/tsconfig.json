@@ -54,5 +54,5 @@
       "#modules/*": ["./src/modules/*"],
     },
   },
-  "include": ["src/**/*", "src/**/*.d.ts", "*.config.ts"],
+  "include": ["src/**/*", "src/**/*.d.ts", "*.config.ts", "scripts/*"],
 }
