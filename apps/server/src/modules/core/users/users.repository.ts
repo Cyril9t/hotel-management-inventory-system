@@ -1,6 +1,10 @@
 import { database } from "#shared/database/prisma";
-import type { User, Prisma, Role, Department } from "@prisma/client";
+import type { User, Prisma, Role } from "@prisma/client";
 import type { ListInvitesQuery, ListUsersQuery } from "./users.schema";
+import {
+  SYSTEM_BOOTSTRAP_ID,
+  SYSTEM_BOOTSTRAP_PASSWORD,
+} from "#shared/constants/system-user";
 
 // Excludes passwordHash — safe to attach to req.user or return in responses.
 export const PUBLIC_USER_SELECT = {
@@ -45,7 +49,9 @@ export const usersRepository = {
   },
 
   async list(filters: ListUsersQuery): Promise<PublicUser[]> {
-    const where: Prisma.UserWhereInput = {};
+    const where: Prisma.UserWhereInput = {
+      id: { not: SYSTEM_BOOTSTRAP_ID },
+    };
 
     if (filters.role !== undefined) where.role = filters.role;
     if (filters.department !== undefined) where.department = filters.department;
@@ -141,24 +147,22 @@ export const usersRepository = {
     });
   },
 
-  async ensureSystemUser(
-    systemUserId: string,
-    passwordHash: string,
-  ): Promise<void> {
+  async ensureSystemUser() {
     await database.user.upsert({
-      where: { id: systemUserId },
+      where: { id: SYSTEM_BOOTSTRAP_ID },
       update: {},
       create: {
-        id: systemUserId,
+        id: SYSTEM_BOOTSTRAP_ID,
         firstName: "System",
         lastName: "Bootstrap",
         email: "system@internal.local",
         phone: "0000000000",
-        passwordHash,
+        passwordHash: SYSTEM_BOOTSTRAP_PASSWORD,
         role: "OWNER",
         isActive: false,
         deactivatedAt: new Date(),
       },
     });
+    return SYSTEM_BOOTSTRAP_ID;
   },
 };

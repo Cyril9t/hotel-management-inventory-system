@@ -12,11 +12,7 @@ import type {
   ListInvitesQuery,
   ListUsersQuery,
 } from "./users.schema";
-import {
-  SYSTEM_BOOTSTRAP_ID,
-  SYSTEM_BOOTSTRAP_PASSWORD,
-} from "#shared/constants/system-user.js";
-import { token } from "#shared/lib/token.js";
+import { token } from "#shared/lib/token";
 
 // Who each role is allowed to invite
 const INVITABLE_ROLES: Record<string, Role[]> = {
@@ -145,10 +141,7 @@ export const usersService = {
       return pendingInvite;
     }
 
-    await usersRepository.ensureSystemUser(
-      SYSTEM_BOOTSTRAP_ID,
-      await password.hash(SYSTEM_BOOTSTRAP_PASSWORD),
-    );
+    const systemUserId = await usersRepository.ensureSystemUser();
 
     // const rawToken = crypto.randomUUID();
     const rawToken = token.generateToken();
@@ -157,7 +150,7 @@ export const usersService = {
       role: Role.OWNER,
       tokenHash: token.hashToken(rawToken),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      createdByUserId: SYSTEM_BOOTSTRAP_ID,
+      createdByUserId: systemUserId,
     });
     await enqueueInviteEmail({
       to: invite.email,
