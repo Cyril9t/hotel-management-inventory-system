@@ -11,16 +11,14 @@ import {
     CheckCircle2,
     Lock,
     BedDouble,
-    FileDigit,
-    Users
+    Users,
+    Banknote,
+    ArrowLeftRight
 } from 'lucide-react';
 import { formatNaira } from '../data';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 
-// ==========================================
-// TYPESCRIPT INTERFACES
-// ==========================================
 export interface SelectedRoom {
     id: string;
     number: string;
@@ -32,7 +30,7 @@ export interface SelectedRoom {
     wing?: string;
 }
 
-export type PaymentMethod = 'paystack' | 'bank_transfer' | 'folio_charge';
+export type PaymentMethod = 'cash' | 'card' | 'transfer' | 'paystack' | 'bank_transfer' | 'folio_charge' | '';
 
 export interface BookingFormData {
     guestName: string;
@@ -77,7 +75,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
         checkOutDate: tomorrowStr,
         adultsCount: 1,
         childrenCount: 0,
-        paymentMethod: 'paystack',
+        paymentMethod: '',
         specialRequests: '',
     });
 
@@ -214,14 +212,14 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                     </div>
 
                     <div className="space-y-4">
-                        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                            <User className="w-4 h-4 text-primary" />
+                        <h3 className="text-[16px] font-bold text-foreground flex items-center gap-2">
+                            <User className="w-6 h-6 text-primary" />
                             Guest Information
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Guest Full Name</label>
+                                <label className="text-sm font-semibold text-foreground">Guest Full Name</label>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground pointer-events-none">
                                         <User className="w-4 h-4" />
@@ -232,7 +230,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                         placeholder="Enter guest name"
                                         value={formData.guestName}
                                         onChange={(e) => handleInputChange('guestName', e.target.value)}
-                                        className="w-full pl-9 pr-3.5 py-2 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                        className="w-full text-sm h-10 pl-9 pr-3.5 py-2 rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                     />
                                 </div>
                             </div>
@@ -249,7 +247,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                         placeholder="guest@email.com"
                                         value={formData.guestEmail}
                                         onChange={(e) => handleInputChange('guestEmail', e.target.value)}
-                                        className="w-full pl-9 pr-3.5 py-2 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                        className="w-full text-sm h-10 placeholder:text-sm pl-9 pr-3.5 py-2 rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                     />
                                 </div>
                             </div>
@@ -266,7 +264,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                         placeholder="+234 800 000 0000"
                                         value={formData.guestPhone}
                                         onChange={(e) => handleInputChange('guestPhone', e.target.value)}
-                                        className="w-full pl-9 pr-3.5 py-2 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                        className="w-full pl-9 pr-3.5 py-2 text-sm h-10 placeholder:text-sm rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                     />
                                 </div>
                             </div>
@@ -274,42 +272,42 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                     </div>
 
 
-                    <div className="space-y-4 pt-2 border-t border-border">
-                        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-primary" />
+                    <div className="space-y-4 pt-6 border-t border-border mt-6">
+                        <h3 className="text-[16px] font-bold text-foreground flex items-center gap-2">
+                            <Calendar className="w-6 h-6 text-primary" />
                             Stay Schedule & Occupants
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Check-in Date</label>
+                                <label className="text-sm font-semibold text-foreground">Check-in Date</label>
                                 <input
                                     type="date"
                                     required
                                     value={formData.checkInDate}
                                     onChange={(e) => handleInputChange('checkInDate', e.target.value)}
-                                    className="w-full px-3 py-2 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                    className="w-full px-3 py-2 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                 />
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Check-out Date</label>
+                                <label className="text-sm font-semibold text-foreground">Check-out Date</label>
                                 <input
                                     type="date"
                                     required
                                     min={formData.checkInDate}
                                     value={formData.checkOutDate}
                                     onChange={(e) => handleInputChange('checkOutDate', e.target.value)}
-                                    className="w-full px-3 py-2 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                    className="w-full px-3 py-2 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                 />
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Adults</label>
+                                <label className="text-sm font-semibold text-foreground">Adults</label>
                                 <select
                                     value={formData.adultsCount}
                                     onChange={(e) => handleInputChange('adultsCount', Number(e.target.value))}
-                                    className="w-full h-9 px-3 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                    className="w-full h-9 px-3 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                 >
                                     <option value={1}>1 Adult</option>
                                     <option value={2}>2 Adults</option>
@@ -319,11 +317,11 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Children</label>
+                                <label className="text-sm font-semibold text-foreground">Children</label>
                                 <select
                                     value={formData.childrenCount}
                                     onChange={(e) => handleInputChange('childrenCount', Number(e.target.value))}
-                                    className="w-full h-9 px-3 text-xs rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                    className="w-full h-9 px-3 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                 >
                                     <option value={0}>0 Children</option>
                                     <option value={1}>1 Child</option>
@@ -334,6 +332,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                     </div>
 
 
+
                     <div className="space-y-4 pt-2 border-t border-border">
                         <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                             <CreditCard className="w-4 h-4 text-primary" />
@@ -342,8 +341,9 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 
+                            {/* 1. Cash */}
                             <label
-                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'paystack'
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'cash'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -351,22 +351,45 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 <input
                                     type="radio"
                                     name="paymentMethod"
-                                    checked={formData.paymentMethod === 'paystack'}
-                                    onChange={() => handleInputChange('paymentMethod', 'paystack')}
+                                    checked={formData.paymentMethod === 'cash'}
+                                    onChange={() => handleInputChange('paymentMethod', 'cash')}
+                                    className="mt-0.5 text-primary focus:ring-ring accent-primary"
+                                />
+                                <div>
+                                    <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                                        <Banknote className="w-3.5 h-3.5 text-primary" />
+                                        <span>Cash Payment</span>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">Physical cash payment at desk</p>
+                                </div>
+                            </label>
+
+                            {/* 2. Card */}
+                            <label
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'card'
+                                    ? 'bg-accent/40 border-primary shadow-sm'
+                                    : 'bg-card border-input hover:bg-secondary'
+                                    }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    checked={formData.paymentMethod === 'card'}
+                                    onChange={() => handleInputChange('paymentMethod', 'card')}
                                     className="mt-0.5 text-primary focus:ring-ring accent-primary"
                                 />
                                 <div>
                                     <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
                                         <CreditCard className="w-3.5 h-3.5 text-primary" />
-                                        <span>Paystack Gateway</span>
+                                        <span>Card / POS</span>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mt-0.5">Card, USSD, Bank Transfer online</p>
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">Terminal POS or Paystack Online</p>
                                 </div>
                             </label>
 
-
+                            {/* 3. Transfer */}
                             <label
-                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'bank_transfer'
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'transfer'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -374,44 +397,21 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 <input
                                     type="radio"
                                     name="paymentMethod"
-                                    checked={formData.paymentMethod === 'bank_transfer'}
-                                    onChange={() => handleInputChange('paymentMethod', 'bank_transfer')}
+                                    checked={formData.paymentMethod === 'transfer'}
+                                    onChange={() => handleInputChange('paymentMethod', 'transfer')}
                                     className="mt-0.5 text-primary focus:ring-ring accent-primary"
                                 />
                                 <div>
                                     <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
-                                        <Building2 className="w-3.5 h-3.5 text-primary" />
-                                        <span>Direct Transfer</span>
+                                        <ArrowLeftRight className="w-3.5 h-3.5 text-primary" />
+                                        <span>Bank Transfer</span>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mt-0.5">POS or Direct hotel bank transfer</p>
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">Direct hotel bank account transfer</p>
                                 </div>
                             </label>
 
-
-                            <label
-                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'folio_charge'
-                                    ? 'bg-accent/40 border-primary shadow-sm'
-                                    : 'bg-card border-input hover:bg-secondary'
-                                    }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="paymentMethod"
-                                    checked={formData.paymentMethod === 'folio_charge'}
-                                    onChange={() => handleInputChange('paymentMethod', 'folio_charge')}
-                                    className="mt-0.5 text-primary focus:ring-ring accent-primary"
-                                />
-                                <div>
-                                    <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
-                                        <Receipt className="w-3.5 h-3.5 text-primary" />
-                                        <span>Post to Folio</span>
-                                    </div>
-                                    <p className="text-[11px] text-muted-foreground mt-0.5">Pay later upon checkout</p>
-                                </div>
-                            </label>
                         </div>
                     </div>
-
 
                     <div className="bg-secondary/40 border border-border rounded-[var(--radius)] p-4 space-y-2 text-xs">
                         <div className="flex justify-between text-muted-foreground">
