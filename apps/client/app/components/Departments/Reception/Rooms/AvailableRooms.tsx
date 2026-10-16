@@ -5,6 +5,7 @@ import { RoomCard } from "./RoomsCard";
 import { RoomDetailsDrawer } from "./RoomsDetails";
 import type { Room } from "./type";
 import { INITIAL_ROOMS } from "./data";
+import BookRoomModal from "./BookRoom/BookGuest";
 
 export default function AvailableRoomsPage() {
     const [rooms] = useState<Room[]>(INITIAL_ROOMS);
@@ -14,6 +15,8 @@ export default function AvailableRoomsPage() {
     const [selectedStatus, setSelectedStatus] = useState('All');
 
     const [selectedType, setSelectedType] = useState('All');
+
+    const [bookRooms, setBookRooms] = useState(false);
 
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(INITIAL_ROOMS[1]);
 
@@ -45,6 +48,11 @@ export default function AvailableRoomsPage() {
     return (
         <div >
 
+            <BookRoomModal
+                isOpen={bookRooms}
+                room={selectedRoom as unknown as Parameters<typeof BookRoomModal>[0]["room"]}
+                onClose={() => setBookRooms(false)}
+            />
             <div className="mb-4">
                 <h1 className="text-2xl font-bold text-foreground tracking-wide">Available Rooms</h1>
 
@@ -69,7 +77,10 @@ export default function AvailableRoomsPage() {
                 occupiedCount={counts.occupied}
                 checkoutDueCount={counts.checkoutDue}
                 overdueCount={counts.overdue}
-                onNewBooking={() => alert('Opening New Booking Modal...')}
+                onNewBooking={() => {
+
+                    setBookRooms(true)
+                }}
             />
 
 
@@ -101,7 +112,7 @@ export default function AvailableRoomsPage() {
                         room={selectedRoom}
                         onCheckOut={(r) => alert(`Checking out room ${r.number}`)}
                         onOrderService={(r) => alert(`Ordering room service for room ${r.number}`)}
-                        onBookNow={(r) => alert(`Booking room ${r.number}`)}
+                        onBookNow={(r) => setBookRooms(true)}
                     />
                 </div>
             </div>
