@@ -83,17 +83,22 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
 
     const calculateNights = (): number => {
+
         const start = new Date(formData.checkInDate);
+
         const end = new Date(formData.checkOutDate);
+
         const diffTime = end.getTime() - start.getTime();
+
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
         return diffDays > 0 ? diffDays : 1;
     };
 
     const nights = calculateNights();
     const roomTotal = room.pricePerNight * nights;
-    const serviceFee = roomTotal * 0.05;
-    const grandTotal = roomTotal + serviceFee;
+
+    const grandTotal = roomTotal
 
     const handleInputChange = (field: keyof BookingFormData, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -341,7 +346,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
 
-                            {/* 1. Cash */}
+
                             <label
                                 className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'cash'
                                     ? 'bg-accent/40 border-primary shadow-sm'
@@ -364,7 +369,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 </div>
                             </label>
 
-                            {/* 2. Card */}
+
                             <label
                                 className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'card'
                                     ? 'bg-accent/40 border-primary shadow-sm'
@@ -387,7 +392,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 </div>
                             </label>
 
-                            {/* 3. Transfer */}
+
                             <label
                                 className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'transfer'
                                     ? 'bg-accent/40 border-primary shadow-sm'
@@ -415,16 +420,13 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
                     <div className="bg-secondary/40 border border-border rounded-[var(--radius)] p-4 space-y-2 text-xs">
                         <div className="flex justify-between text-muted-foreground">
-                            <span>Room Rate ({nights} night{nights > 1 ? 's' : ''})</span>
-                            <span className="font-semibold text-foreground">₦ {roomTotal.toLocaleString()}</span>
+                            <span className='text-sm'>Room Rate ({nights} night{nights > 1 ? 's' : ''})</span>
+                            <span className="text-sm font-semibold text-foreground">₦ {roomTotal.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-muted-foreground">
-                            <span>Taxes & Service Fee (5%)</span>
-                            <span className="font-semibold text-foreground">₦ {serviceFee.toLocaleString()}</span>
-                        </div>
+
                         <div className="border-t border-border pt-2 flex justify-between font-bold text-sm text-foreground">
-                            <span>Total Payable Amount</span>
-                            <span className="text-primary font-serif">₦ {grandTotal.toLocaleString()}</span>
+                            <span className='text-sm'>Total Payable Amount</span>
+                            <span className="text-xl text-primary font-serif">₦ {grandTotal.toLocaleString()}</span>
                         </div>
                     </div>
 
@@ -436,17 +438,19 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <button
+                            <Button
+                                variant={"outline"}
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-xs font-semibold rounded-[var(--radius)] border border-input bg-card text-foreground hover:bg-secondary transition-colors"
+                                className="h-10"
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="submit"
+
                                 disabled={isProcessing}
-                                className="px-5 py-2.5 text-xs font-semibold rounded-[var(--radius)] bg-primary text-primary-foreground shadow-md hover:opacity-95 transition-all flex items-center gap-2"
+                                className="h-10"
                             >
                                 {isProcessing ? (
                                     <>
@@ -463,7 +467,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                         </span>
                                     </>
                                 )}
-                            </button>
+                            </Button>
                         </div>
                     </div>
 

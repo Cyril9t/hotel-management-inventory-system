@@ -1,8 +1,12 @@
 import Overview from "~/components/GM.dashboard/Overview/Overview";
+import { RoomsMetric } from "~/Context/Context";
 
 function Dashboard() {
     return (
-        <Overview />
+        <RoomsMetric>
+
+            <Overview />
+        </RoomsMetric>
     );
 }
 
