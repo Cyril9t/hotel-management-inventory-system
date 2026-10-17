@@ -65,7 +65,8 @@ export const logger = pino(
 export const httpLogger = pinoHttp({
   logger,
   customSuccessMessage: (req) => `${req.method} ${req.url}`,
-  customErrorMessage: (req) => `${req.method} ${req.url}`,
+  customErrorMessage: (req, res, err) =>
+    `${req.method} ${req.url} - ${err?.message || "Internal Server Error"}`,
 
   serializers: {
     req: (req) => ({
@@ -73,27 +74,24 @@ export const httpLogger = pinoHttp({
       method: req.method,
       url: req.url,
     }),
-    res: (res) => {
-      const err = res.locals?.err as HttpError<number> | undefined;
-
-      if (!err) {
-        return { statusCode: res.statusCode };
-      }
-
-      return {
-        statusCode: res.statusCode,
-        code: err.code ?? "INTERNAL_ERROR",
-        message: err.message,
-        ...(err.details ? { details: err.details } : {}),
-        ...(res.statusCode >= 500 ? { stack: err.stack } : {}),
-      };
-    },
+    res: (res) => ({
+      statusCode: res.statusCode,
+    }),
+    err: (err) => ({
+      type: err.name || "Error",
+      message: err.message,
+      code: (err as any).code ?? "INTERNAL_ERROR",
+      ...((err as any).details ? { details: (err as any).details } : {}),
+      ...(err.stack ? { stack: err.stack } : {}),
+    }),
   },
+
   customLogLevel: (_req, res, err) => {
     if (res.statusCode >= 500 || err) return "error";
     if (res.statusCode >= 400) return "warn";
     return "info";
   },
+
   genReqId: (req) =>
     (req.headers["x-request-id"] as string) || crypto.randomUUID(),
 });

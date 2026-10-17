@@ -1,0 +1,29 @@
+info:
+  name: Update Category Price
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/rooms/categories/{{categoryId}}/price"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: categoryId
+      value: "{{categoryId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "price": 150.00
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

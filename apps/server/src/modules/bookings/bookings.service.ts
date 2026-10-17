@@ -1,11 +1,8 @@
-import {
-  BadRequestError,
-  NotFoundError,
-  UnauthorizedError,
-} from "#shared/errors/http-errors";
+import { BadRequestError, NotFoundError } from "#shared/errors/http-errors";
 import { bookingsRepository } from "./bookings.repository";
 import { roomsRepository } from "../rooms/rooms.repository";
-import type { CreateBookingBody } from "./bookings.schema";
+import { auditService } from "../audit/audit.service";
+import type { CreateBookingBody, ListBookingsQuery } from "./bookings.schema";
 
 export const bookingsService = {
   async create(data: CreateBookingBody, createdByUserId: string) {
@@ -42,6 +39,10 @@ export const bookingsService = {
     return booking;
   },
 
+  async listBookings(filters: ListBookingsQuery = {}) {
+    return bookingsRepository.list(filters);
+  },
+
   async checkIn(id: string) {
     const booking = await bookingsService.getById(id);
     if (booking.status !== "RESERVED") {
@@ -55,8 +56,21 @@ export const bookingsService = {
     if (!["CHECKED_IN", "CHECKOUT_DUE", "OVERDUE"].includes(booking.status)) {
       throw new BadRequestError("Booking is not in a checkout-eligible state");
     }
+
     const result = await bookingsRepository.checkout(id, settledByUserId);
-    // TODO: audit log — "manual booking checkout" is a critical event
+
+    await auditService.log({
+      actorUserId: settledByUserId,
+      action: "manual_booking_checkout",
+      entityType: "Booking",
+      entityId: id,
+      beforeValue: { status: booking.status },
+      afterValue: {
+        status: "CHECKED_OUT",
+        actualCheckoutAt: result.actualCheckoutAt,
+      },
+    });
+
     return result;
   },
 

@@ -1,0 +1,29 @@
+info:
+  name: Update Category Name
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/rooms/categories/{{categoryId}}/name"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: categoryId
+      value: "{{categoryId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Updated Category Name"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

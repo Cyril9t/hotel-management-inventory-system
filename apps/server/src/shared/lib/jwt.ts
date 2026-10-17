@@ -1,5 +1,5 @@
 import jsonwebtoken from "jsonwebtoken";
-import { randomUUID, createHash } from "crypto";
+import { randomUUID } from "crypto";
 import ms from "ms";
 import { env } from "../config/env";
 import type { Role } from "@prisma/client";

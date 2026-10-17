@@ -1,0 +1,26 @@
+info:
+  name: List Bookings
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/bookings"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: roomId
+      value: "{{roomId}}"
+      type: query
+    - name: status
+      value: "RESERVED"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

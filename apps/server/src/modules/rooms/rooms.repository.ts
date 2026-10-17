@@ -61,10 +61,33 @@ export const roomsRepository = {
     return database.roomCategory.findUnique({ where: { id } });
   },
 
+  async findCategoryByName(name: string) {
+    return database.roomCategory.findFirst({ where: { name } });
+  },
+
   async updateCategoryPrice(id: string, price: number) {
     return database.roomCategory.update({
       where: { id },
       data: { pricePerNight: price },
+    });
+  },
+
+  async updateCategoryName(id: string, name: string) {
+    return database.roomCategory.update({ where: { id }, data: { name } });
+  },
+
+  async listCategories() {
+    return database.roomCategory.findMany({ orderBy: { name: "asc" } });
+  },
+
+  async createCategory(data: Prisma.RoomCategoryCreateInput) {
+    return database.roomCategory.create({ data });
+  },
+
+  async createMany(rooms: { number: string; categoryId: string }[]) {
+    return database.room.createMany({
+      data: rooms,
+      skipDuplicates: true,
     });
   },
 };

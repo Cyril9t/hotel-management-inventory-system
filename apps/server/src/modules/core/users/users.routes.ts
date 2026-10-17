@@ -23,6 +23,7 @@ registry.registerPath({
   path: "/users/invites/{token}/verify",
   tags: ["Users"],
   summary: "Verify invite token",
+  description: "Checks if an invitation token is valid and not yet expired or accepted.",
   request: {
     params: inviteTokenParamsSchema,
   },
@@ -50,6 +51,7 @@ registry.registerPath({
   path: "/users/invites/accept",
   tags: ["Users"],
   summary: "Accept invite and create account",
+  description: "Converts a valid invitation into a full staff account after the user provides a password.",
   request: {
     body: { content: { "application/json": { schema: acceptInviteSchema } } },
   },
@@ -79,6 +81,7 @@ registry.registerPath({
   path: "/users",
   tags: ["Users"],
   summary: "Get staff",
+  description: "Retrieves a list of all staff members with optional filters for role and department.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listUsersQuerySchema,
@@ -104,6 +107,7 @@ registry.registerPath({
   path: "/users/invites",
   tags: ["Users"],
   summary: "Get staff invites",
+  description: "Lists all pending invitations sent to prospective staff members.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listInvitesQuerySchema,
@@ -129,6 +133,7 @@ registry.registerPath({
   path: "/users/{id}",
   tags: ["Users"],
   summary: "Get a staff member",
+  description: "Retrieves detailed profile information for a specific staff member by ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
@@ -158,9 +163,10 @@ registry.registerPath({
   path: "/users/invites",
   tags: ["Users"],
   summary: "Invite new staff",
+  description: "Creates a new invitation for a prospective staff member and sends them an email.",
   security: [{ bearerAuth: [] }],
-
   request: {
+
     body: { content: { "application/json": { schema: createInviteSchema } } },
   },
   responses: {
@@ -192,6 +198,7 @@ registry.registerPath({
   path: "/users/{id}/deactivate",
   tags: ["Users"],
   summary: "Deactivate a staff member (soft delete)",
+  description: "Marks a staff member as inactive, preventing them from logging in.",
   security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
@@ -221,6 +228,7 @@ registry.registerPath({
   path: "/users/{id}/reactivate",
   tags: ["Users"],
   summary: "Reactivate a deactivated staff member",
+  description: "Restores an inactive staff member to active status.",
   security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
@@ -250,6 +258,7 @@ registry.registerPath({
   path: "/users/invites/{id}/resend",
   tags: ["Users"],
   summary: "Resend staff invitation email",
+  description: "Triggers a resend of the invitation email for a specific invite ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: inviteIdParamsSchema,

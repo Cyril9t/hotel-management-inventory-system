@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PaymentMethod } from "@prisma/client";
+import { BookingStatus, PaymentMethod } from "@prisma/client";
 
 export const createBookingSchema = z.object({
   roomId: z.uuid("Invalid room id"),
@@ -17,5 +17,11 @@ export const bookingIdParamsSchema = z.object({
   id: z.uuid("Invalid booking id"),
 });
 
+export const listBookingsQuerySchema = z.object({
+  roomId: z.uuid("Room ID must be a valid UUID").optional(),
+  status: z.enum(BookingStatus, "Invalid booking status").optional(),
+});
+
 export type CreateBookingBody = z.infer<typeof createBookingSchema>;
 export type BookingIdParams = z.infer<typeof bookingIdParamsSchema>;
+export type ListBookingsQuery = z.infer<typeof listBookingsQuerySchema>;

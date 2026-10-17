@@ -1,0 +1,33 @@
+info:
+  name: Create Booking
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/bookings"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "roomId": "{{roomId}}",
+        "guestFirstName": "Jane",
+        "guestLastName": "Doe",
+        "guestPhone": "0987654321",
+        "guestGender": "Female",
+        "nights": 3,
+        "expectedCheckoutAt": "2026-10-20T10:00:00Z",
+        "paymentMethod": "CREDIT_CARD",
+        "checkInNow": false
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

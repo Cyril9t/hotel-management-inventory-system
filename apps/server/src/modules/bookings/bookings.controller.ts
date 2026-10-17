@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 import { bookingsService } from "./bookings.service";
 import { success } from "#shared/utils/api-response";
-import type { CreateBookingBody, BookingIdParams } from "./bookings.schema";
+import type {
+  CreateBookingBody,
+  BookingIdParams,
+  ListBookingsQuery,
+} from "./bookings.schema";
 
 export const bookingsController = {
   async create(
@@ -14,6 +18,12 @@ export const bookingsController = {
         booking: await bookingsService.create(req.body, createdByUserId),
       }),
     );
+  },
+
+  async list(_req: Request, res: Response) {
+    const { roomId, status } = res.locals.query as ListBookingsQuery;
+    const bookings = await bookingsService.listBookings({ roomId, status });
+    res.json(success({ bookings }));
   },
 
   async getById(req: Request, res: Response) {

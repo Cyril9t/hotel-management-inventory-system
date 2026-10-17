@@ -5,6 +5,7 @@ import {
   SYSTEM_BOOTSTRAP_ID,
   SYSTEM_BOOTSTRAP_PASSWORD,
 } from "#shared/constants/system-user";
+import { compact } from "#shared/utils/omit-undefined";
 
 // Excludes passwordHash — safe to attach to req.user or return in responses.
 export const PUBLIC_USER_SELECT = {
@@ -51,10 +52,8 @@ export const usersRepository = {
   async list(filters: ListUsersQuery): Promise<PublicUser[]> {
     const where: Prisma.UserWhereInput = {
       id: { not: SYSTEM_BOOTSTRAP_ID },
+      ...compact({ role: filters.role, department: filters.department }),
     };
-
-    if (filters.role !== undefined) where.role = filters.role;
-    if (filters.department !== undefined) where.department = filters.department;
 
     return database.user.findMany({
       where,
