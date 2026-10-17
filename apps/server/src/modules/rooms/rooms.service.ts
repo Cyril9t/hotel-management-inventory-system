@@ -105,6 +105,33 @@ export const roomsService = {
     return updated;
   },
 
+  async updateCategoryName(
+    categoryId: string,
+    name: string,
+    actorUserId: string,
+  ) {
+    const category = await roomsRepository.findCategoryById(categoryId);
+    if (!category) throw new NotFoundError("Room category not found");
+
+    const existing = await roomsRepository.findCategoryByName(name);
+    if (existing && existing.id !== categoryId) {
+      throw new BadRequestError("A category with that name already exists");
+    }
+
+    const updated = await roomsRepository.updateCategoryName(categoryId, name);
+
+    await auditService.log({
+      actorUserId,
+      action: "room_category_name_changed",
+      entityType: "RoomCategory",
+      entityId: categoryId,
+      beforeValue: { name: category.name },
+      afterValue: { name },
+    });
+
+    return updated;
+  },
+
   async createCategory(data: CreateCategoryBody) {
     const existing = await roomsRepository.findCategoryByName(data.name);
     if (existing)

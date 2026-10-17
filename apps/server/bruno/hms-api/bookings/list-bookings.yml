@@ -1,20 +1,20 @@
 info:
-  name: List Users
+  name: List Bookings
   type: http
-  seq: 3
+  seq: 2
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/v1/users"
+  url: "{{baseUrl}}/api/v1/bookings"
   headers:
     - name: Content-Type
       value: application/json
   params:
-    - name: role
-      value: "{{role}}"
+    - name: roomId
+      value: "{{roomId}}"
       type: query
-    - name: department
-      value: "{{department}}"
+    - name: status
+      value: "RESERVED"
       type: query
   auth: inherit
 

@@ -8,6 +8,9 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
+  (res as any).err = err;
+  res.locals.err = err;
+
   if (isHttpError(err)) {
     const httpErr = err as HttpError;
     const apiError: ApiError = {
@@ -15,11 +18,9 @@ export const errorHandler = (
       message: httpErr.message,
       details: httpErr.details,
     };
-    res.locals.err = httpErr;
     return res.status(httpErr.status).json(failure(apiError));
   }
 
-  res.locals.err = err;
   return res.status(500).json(
     failure({
       code: "INTERNAL_ERROR",

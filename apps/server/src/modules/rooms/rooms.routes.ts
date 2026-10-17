@@ -11,6 +11,7 @@ import {
   roomIdParamsSchema,
   categoryIdParamsSchema,
   updateCategoryPriceSchema,
+  updateCategoryNameSchema,
   createCategorySchema,
   bulkCreateRoomsSchema,
 } from "./rooms.schema";
@@ -252,6 +253,41 @@ roomsRoutes.patch(
   authorize(MANAGEMENT),
   validate({ params: categoryIdParamsSchema, body: updateCategoryPriceSchema }),
   roomsController.updateCategoryPrice,
+);
+
+// PATCH /rooms/categories/:categoryId/name
+registry.registerPath({
+  method: "patch",
+  path: "/rooms/categories/{categoryId}/name",
+  tags: ["Rooms"],
+  summary: "Update category name",
+  description: "Updates the name of a specific room category.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: categoryIdParamsSchema,
+    body: { content: { "application/json": { schema: updateCategoryNameSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Category name updated successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    400: {
+      description: "Invalid request data",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+    404: {
+      description: "Room category not found",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
+roomsRoutes.patch(
+  "/categories/:categoryId/name",
+  authorize(["GENERAL_MANAGER", "OWNER"]),
+  validate({ body: updateCategoryNameSchema, params: categoryIdParamsSchema }),
+  roomsController.updateCategoryName,
 );
 
 // POST /rooms/categories

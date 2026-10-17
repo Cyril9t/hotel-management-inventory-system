@@ -72,6 +72,10 @@ export const roomsRepository = {
     });
   },
 
+  async updateCategoryName(id: string, name: string) {
+    return database.roomCategory.update({ where: { id }, data: { name } });
+  },
+
   async listCategories() {
     return database.roomCategory.findMany({ orderBy: { name: "asc" } });
   },

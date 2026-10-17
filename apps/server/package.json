@@ -13,6 +13,8 @@
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "start:worker": "node dist/worker.js",
+    "typecheck": "prisma generate && tsc --noEmit -p tsconfig.json",
+    "typecheck:watch": "tsc --noEmit -p tsconfig.json --watch",
     "bootstrap:owner": "tsx scripts/bootstrap-owner.ts",
     "db:generate": "prisma generate",
     "db:push": "prisma push",

@@ -10,13 +10,19 @@ export const authenticate: RequestHandler = async (req, _res, next) => {
     throw new UnauthorizedError("Authentication required");
   }
 
-  const payload = jwt.verifyAccessToken(token);
-  // const user = await usersRepository.findById(payload.userId);
+  try {
+    const payload = jwt.verifyAccessToken(token);
 
-  if (!payload || !payload.isActive) {
-    throw new UnauthorizedError();
+    if (!payload || !payload.isActive) {
+      throw new UnauthorizedError("Invalid or inactive user session");
+    }
+
+    req.user = payload;
+    next();
+  } catch (err) {
+    if (err instanceof UnauthorizedError) {
+      return next(err);
+    }
+    return next(new UnauthorizedError("Invalid or expired token"));
   }
-
-  req.user = payload;
-  next();
 };

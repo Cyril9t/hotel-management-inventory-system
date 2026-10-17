@@ -19,6 +19,10 @@ export const updateCategoryPriceSchema = z.object({
   price: z.coerce.number().positive("Price must be a positive number"),
 });
 
+export const updateCategoryNameSchema = z.object({
+  name: z.string().min(1, "Category name is required"),
+});
+
 export const createCategorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
   pricePerNight: z.coerce.number().positive("Price must be a positive number"),
@@ -41,12 +45,11 @@ export const bulkCreateRoomsSchema = z
     path: ["rangeEnd"],
   });
 
-export type BulkCreateRoomsBody = z.infer<typeof bulkCreateRoomsSchema>;
-
 export type CreateRoomBody = z.infer<typeof createRoomSchema>;
 export type UpdateRoomBody = z.infer<typeof updateRoomSchema>;
 export type RoomIdParams = z.infer<typeof roomIdParamsSchema>;
 export type CategoryIdParams = z.infer<typeof categoryIdParamsSchema>;
 export type UpdateCategoryPriceBody = z.infer<typeof updateCategoryPriceSchema>;
+export type UpdateCategoryNameBody = z.infer<typeof updateCategoryNameSchema>;
 export type CreateCategoryBody = z.infer<typeof createCategorySchema>;
 export type BulkCreateRoomsBody = z.infer<typeof bulkCreateRoomsSchema>;

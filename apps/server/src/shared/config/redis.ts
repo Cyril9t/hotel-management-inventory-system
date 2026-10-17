@@ -10,17 +10,25 @@ export const redisConnection = new Redis(env.REDIS_URL, {
   },
 });
 
-function attachErrorHandler(connection: Redis) {
+function attachConnectionHandlers(connection: Redis) {
+  connection.on("connect", () => {
+    logger.info("redis connected");
+  });
+
+  // connection.on("ready", () => {
+  //   logger.info("redis: client ready and operational");
+  // });
+
+  // Required to prevent unhandled 'error' events from crashing the Node process
   connection.on("error", (err: any) => {
-    // Wrap the error explicitly to ensure log aggregators parse all TCP metadata
     logger.error(
       {
         error: {
           message: `redis error: ${err.message}`,
-          stack: err.stack, // Preserves TCP.onStreamRead stack
-          code: err.code || "UNKNOWN", // Preserves 'ECONNRESET', 'ECONNREFUSED', etc.
-          errno: err.errno, // Preserves -4077
-          syscall: err.syscall, // Preserves 'read' or 'connect'
+          stack: err.stack,
+          code: err.code || "UNKNOWN",
+          errno: err.errno,
+          syscall: err.syscall,
           library: "ioredis",
         },
       },
@@ -29,26 +37,20 @@ function attachErrorHandler(connection: Redis) {
   });
 }
 
-attachErrorHandler(redisConnection);
+attachConnectionHandlers(redisConnection);
 
-// BullMQ internally calls `.duplicate()` on this connection to create the
-// extra clients it needs (blocking reads, pub/sub subscriber). duplicate()
-// copies constructor options but NOT listeners attached afterward — so
-// without this, every connection BullMQ creates under the hood is
-// unguarded even though the original instance has an error handler.
+// BullMQ calls .duplicate() internally, which does not copy listeners.
+// Overriding duplicate ensures all underlying BullMQ clients have handlers attached.
 const originalDuplicate = redisConnection.duplicate.bind(redisConnection);
 redisConnection.duplicate = (...args) => {
   const dup = originalDuplicate(...args);
-  attachErrorHandler(dup);
+  attachConnectionHandlers(dup);
   return dup;
 };
 
-// Diagnostics — temporary. Confirms whether the shared connection itself
-// is cycling, or whether the ECONNRESETs are isolated to a duplicated
-// connection the patch above now covers. Remove once confirmed either way.
-redisConnection.on("close", () =>
-  logger.warn("redis: shared connection closed"),
-);
+// redisConnection.on("close", () =>
+//   logger.warn("redis: shared connection closed"),
+// );
 redisConnection.on("reconnecting", () =>
-  logger.warn("redis: shared connection reconnecting"),
+  logger.warn("redis reconnecting"),
 );

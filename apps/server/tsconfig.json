@@ -40,7 +40,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "baseUrl": ".",
     "lib": ["ES2022"],
     "moduleResolution": "Bundler",
     "typeRoots": ["node_modules/@types"],
@@ -50,6 +49,7 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
+      "*": ["./*"],
       "#shared/*": ["./src/shared/*"],
       "#modules/*": ["./src/modules/*"],
     },

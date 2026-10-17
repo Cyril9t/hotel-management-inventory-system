@@ -7,6 +7,7 @@ import type {
   RoomIdParams,
   CategoryIdParams,
   UpdateCategoryPriceBody,
+  UpdateCategoryNameBody,
   CreateCategoryBody,
   BulkCreateRoomsBody,
 } from "./rooms.schema";
@@ -50,7 +51,7 @@ export const roomsController = {
     const { id } = res.locals.params as RoomIdParams;
     res.json(
       success({
-        room: await roomsService.deactivate(id),
+        room: await roomsService.deactivate(id, req.user!.userId),
       }),
     );
   },
@@ -59,7 +60,7 @@ export const roomsController = {
     const { id } = res.locals.params as RoomIdParams;
     res.json(
       success({
-        room: await roomsService.reactivate(id),
+        room: await roomsService.reactivate(id, req.user!.userId),
       }),
     );
   },
@@ -74,7 +75,26 @@ export const roomsController = {
         room: await roomsService.updateCategoryPrice(
           categoryId,
           req.body.price,
+          req.user!.userId,
         ),
+      }),
+    );
+  },
+
+  async updateCategoryName(
+    req: Request<unknown, unknown, UpdateCategoryNameBody>,
+    res: Response,
+  ) {
+    const { categoryId } = res.locals.params as CategoryIdParams;
+    const { name } = req.body;
+    const updated = await roomsService.updateCategoryName(
+      categoryId,
+      name,
+      req.user!.userId,
+    );
+    res.json(
+      success({
+        category: updated,
       }),
     );
   },

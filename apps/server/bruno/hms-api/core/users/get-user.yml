@@ -19,6 +19,12 @@ runtime:
   variables:
     - name: userId
       value: da34c5f7-e4ca-4378-bda9-b3d487e1b45e
+  scripts:
+    - type: before-request
+      code: |-
+        const userId = "00000000-0000-0000-0000-000000000000"
+
+        bru.setVar("userId", userId)
 
 settings:
   encodeUrl: true

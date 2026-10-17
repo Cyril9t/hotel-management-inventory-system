@@ -1,0 +1,23 @@
+info:
+  name: Check-in Booking
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/bookings/{{bookingId}}/check-in"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: id
+      value: "{{bookingId}}"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
