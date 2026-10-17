@@ -7,12 +7,13 @@ import { httpLogger } from "#shared/logger";
 import { errorHandler } from "#shared/middleware/error-handler";
 import { notFoundHandler } from "#shared/middleware/notfound-handler";
 import { corsOptions } from "#shared/config/cors";
-import { success } from "#shared/utils/api-response";
 import { healthRoutes } from "#modules/_health/health.routes";
 import { authRoutes } from "#modules/core/auth/auth.routes";
 import { usersRoutes } from "#modules/core/users/users.routes";
 import { generateOpenApiDocument } from "#shared/openapi/generate";
 import { env } from "#shared/config/env";
+import { roomsRoutes } from "#modules/rooms/rooms.routes";
+import { bookingsRoutes } from "#modules/bookings/bookings.routes";
 
 // const API_PREFIX = "/api/v1";
 
@@ -29,6 +30,9 @@ app.use("/", healthRoutes);
 app.use("/api/v1", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", usersRoutes);
+
+app.use("/api/v1/bookings", bookingsRoutes);
+app.use("/api/v1/rooms", roomsRoutes);
 
 if (env.isDev) {
   const openApiDocument = generateOpenApiDocument();

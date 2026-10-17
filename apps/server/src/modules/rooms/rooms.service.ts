@@ -1,6 +1,5 @@
 import { NotFoundError } from "#shared/errors/http-errors";
 import { roomsRepository } from "./rooms.repository";
-import type { Prisma } from "@prisma/client";
 import type { CreateRoomBody, UpdateRoomBody } from "./rooms.schema";
 
 function deriveStatus(bookings: { status: string }[]) {
@@ -14,6 +13,10 @@ export const roomsService = {
       ...room,
       status: deriveStatus(bookings),
     }));
+  },
+
+  async listCategories() {
+    return roomsRepository.listCategories();
   },
 
   async getById(id: string) {

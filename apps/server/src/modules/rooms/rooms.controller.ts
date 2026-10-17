@@ -11,31 +11,55 @@ import type {
 
 export const roomsController = {
   async list(req: Request, res: Response) {
-    res.json(success(await roomsService.list()));
+    res.json(
+      success({
+        rooms: await roomsService.list(),
+      }),
+    );
   },
 
   async getById(req: Request, res: Response) {
     const { id } = res.locals.params as RoomIdParams;
-    res.json(success(await roomsService.getById(id)));
+    res.json(
+      success({
+        room: await roomsService.getById(id),
+      }),
+    );
   },
 
   async create(req: Request<unknown, unknown, CreateRoomBody>, res: Response) {
-    res.status(201).json(success(await roomsService.create(req.body)));
+    res.status(201).json(
+      success({
+        room: await roomsService.create(req.body),
+      }),
+    );
   },
 
   async update(req: Request<unknown, unknown, UpdateRoomBody>, res: Response) {
     const { id } = res.locals.params as RoomIdParams;
-    res.json(success(await roomsService.update(id, req.body)));
+    res.json(
+      success({
+        room: await roomsService.update(id, req.body),
+      }),
+    );
   },
 
   async deactivate(req: Request, res: Response) {
     const { id } = res.locals.params as RoomIdParams;
-    res.json(success(await roomsService.deactivate(id)));
+    res.json(
+      success({
+        room: await roomsService.deactivate(id),
+      }),
+    );
   },
 
   async reactivate(req: Request, res: Response) {
     const { id } = res.locals.params as RoomIdParams;
-    res.json(success(await roomsService.reactivate(id)));
+    res.json(
+      success({
+        room: await roomsService.reactivate(id),
+      }),
+    );
   },
 
   async updateCategoryPrice(
@@ -44,9 +68,17 @@ export const roomsController = {
   ) {
     const { categoryId } = res.locals.params as CategoryIdParams;
     res.json(
-      success(
-        await roomsService.updateCategoryPrice(categoryId, req.body.price),
-      ),
+      success({
+        room: await roomsService.updateCategoryPrice(
+          categoryId,
+          req.body.price,
+        ),
+      }),
     );
+  },
+
+  async listCategories(_req: Request, res: Response) {
+    const categories = await roomsService.listCategories();
+    res.json(success({ categories }));
   },
 };

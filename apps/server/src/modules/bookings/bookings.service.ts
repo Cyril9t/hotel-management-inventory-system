@@ -5,7 +5,7 @@ import {
 } from "#shared/errors/http-errors";
 import { bookingsRepository } from "./bookings.repository";
 import { roomsRepository } from "../rooms/rooms.repository";
-import type { CreateBookingBody } from "./bookings.schema";
+import type { CreateBookingBody, ListBookingsQuery } from "./bookings.schema";
 
 export const bookingsService = {
   async create(data: CreateBookingBody, createdByUserId: string) {
@@ -40,6 +40,10 @@ export const bookingsService = {
     const booking = await bookingsRepository.findById(id);
     if (!booking) throw new NotFoundError("Booking not found");
     return booking;
+  },
+
+  async listBookings(filters: ListBookingsQuery = {}) {
+    return bookingsRepository.list(filters);
   },
 
   async checkIn(id: string) {

@@ -67,4 +67,8 @@ export const roomsRepository = {
       data: { pricePerNight: price },
     });
   },
+
+  async listCategories() {
+    return database.roomCategory.findMany({ orderBy: { name: "asc" } });
+  },
 };
