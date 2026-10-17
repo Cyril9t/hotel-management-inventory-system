@@ -1,6 +1,7 @@
 import { database } from "#shared/database/prisma";
 import type { Prisma } from "@prisma/client";
 import type { ListBookingsQuery } from "./bookings.schema";
+import { compact } from "#shared/utils/omit-undefined";
 
 export const bookingsRepository = {
   async create(data: Prisma.BookingCreateInput) {
@@ -15,10 +16,12 @@ export const bookingsRepository = {
   },
 
   async list(filters: ListBookingsQuery) {
-    const where: Prisma.BookingWhereInput = {};
-
-    if (filters.roomId !== undefined) where.roomId = filters.roomId;
-    if (filters.status !== undefined) where.status = filters.status;
+    const where: Prisma.BookingWhereInput = {
+      ...compact({
+        roomId: filters.roomId,
+        status: filters.status,
+      }),
+    };
 
     return database.booking.findMany({
       where,

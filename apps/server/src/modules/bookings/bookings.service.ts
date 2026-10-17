@@ -1,10 +1,7 @@
-import {
-  BadRequestError,
-  NotFoundError,
-  UnauthorizedError,
-} from "#shared/errors/http-errors";
+import { BadRequestError, NotFoundError } from "#shared/errors/http-errors";
 import { bookingsRepository } from "./bookings.repository";
 import { roomsRepository } from "../rooms/rooms.repository";
+import { auditService } from "../audit/audit.service";
 import type { CreateBookingBody, ListBookingsQuery } from "./bookings.schema";
 
 export const bookingsService = {
@@ -59,8 +56,21 @@ export const bookingsService = {
     if (!["CHECKED_IN", "CHECKOUT_DUE", "OVERDUE"].includes(booking.status)) {
       throw new BadRequestError("Booking is not in a checkout-eligible state");
     }
+
     const result = await bookingsRepository.checkout(id, settledByUserId);
-    // TODO: audit log — "manual booking checkout" is a critical event
+
+    await auditService.log({
+      actorUserId: settledByUserId,
+      action: "manual_booking_checkout",
+      entityType: "Booking",
+      entityId: id,
+      beforeValue: { status: booking.status },
+      afterValue: {
+        status: "CHECKED_OUT",
+        actualCheckoutAt: result.actualCheckoutAt,
+      },
+    });
+
     return result;
   },
 

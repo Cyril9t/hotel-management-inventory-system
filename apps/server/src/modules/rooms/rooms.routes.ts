@@ -11,6 +11,8 @@ import {
   roomIdParamsSchema,
   categoryIdParamsSchema,
   updateCategoryPriceSchema,
+  createCategorySchema,
+  bulkCreateRoomsSchema,
 } from "./rooms.schema";
 import type { Role } from "@prisma/client";
 
@@ -18,8 +20,8 @@ export const roomsRoutes = Router();
 
 roomsRoutes.use(authenticate);
 
-const MANAGEMENT = ["GENERAL_MANAGER", "OWNER"] as Role[];
-const STAFF = ["RECEPTIONIST", "GENERAL_MANAGER", "OWNER"] as Role[];
+const MANAGEMENT: Role[] = ["GENERAL_MANAGER", "OWNER"];
+const STAFF: Role[] = ["RECEPTIONIST", "GENERAL_MANAGER", "OWNER"];
 
 // GET /rooms
 registry.registerPath({
@@ -27,7 +29,8 @@ registry.registerPath({
   path: "/rooms",
   tags: ["Rooms"],
   summary: "List rooms",
-  description: "Retrieves a list of all rooms with their current availability status.",
+  description:
+    "Retrieves a list of all rooms with their current availability status.",
   security: [{ bearerAuth: [] }],
   responses: {
     200: {
@@ -61,13 +64,14 @@ roomsRoutes.get(
   roomsController.listCategories,
 );
 
-// GET /rooms/{id}
+// GET /rooms/:id
 registry.registerPath({
   method: "get",
   path: "/rooms/{id}",
   tags: ["Rooms"],
   summary: "Get room details",
-  description: "Retrieves detailed information about a specific room by its ID.",
+  description:
+    "Retrieves detailed information about a specific room by its ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: roomIdParamsSchema,
@@ -125,13 +129,14 @@ roomsRoutes.post(
   roomsController.create,
 );
 
-// PATCH /rooms/{id}
+// PATCH /rooms/:id
 registry.registerPath({
   method: "patch",
   path: "/rooms/{id}",
   tags: ["Rooms"],
   summary: "Update room details",
-  description: "Updates room number or category. Validates that the room exists.",
+  description:
+    "Updates room number or category. Validates that the room exists.",
   security: [{ bearerAuth: [] }],
   request: {
     params: roomIdParamsSchema,
@@ -156,7 +161,7 @@ roomsRoutes.patch(
   roomsController.update,
 );
 
-// PATCH /rooms/{id}/deactivate
+// PATCH /rooms/:id/deactivate
 registry.registerPath({
   method: "patch",
   path: "/rooms/{id}/deactivate",
@@ -186,7 +191,7 @@ roomsRoutes.patch(
   roomsController.deactivate,
 );
 
-// PATCH /rooms/{id}/reactivate
+// PATCH /rooms/:id/reactivate
 registry.registerPath({
   method: "patch",
   path: "/rooms/{id}/reactivate",
@@ -216,7 +221,7 @@ roomsRoutes.patch(
   roomsController.reactivate,
 );
 
-// PATCH /rooms/categories/{categoryId}/price
+// PATCH /rooms/categories/:categoryId/price
 registry.registerPath({
   method: "patch",
   path: "/rooms/categories/{categoryId}/price",
@@ -226,7 +231,9 @@ registry.registerPath({
   security: [{ bearerAuth: [] }],
   request: {
     params: categoryIdParamsSchema,
-    body: { content: { "application/json": { schema: updateCategoryPriceSchema } } },
+    body: {
+      content: { "application/json": { schema: updateCategoryPriceSchema } },
+    },
   },
   responses: {
     200: {
@@ -245,4 +252,67 @@ roomsRoutes.patch(
   authorize(MANAGEMENT),
   validate({ params: categoryIdParamsSchema, body: updateCategoryPriceSchema }),
   roomsController.updateCategoryPrice,
+);
+
+// POST /rooms/categories
+registry.registerPath({
+  method: "post",
+  path: "/rooms/categories",
+  tags: ["Rooms"],
+  summary: "Create a new room category",
+  description:
+    "Adds a new room category with a specified name and price per night.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    body: { content: { "application/json": { schema: createCategorySchema } } },
+  },
+  responses: {
+    201: {
+      description: "Category created successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    400: {
+      description: "Invalid request data",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
+roomsRoutes.post(
+  "/categories",
+  authorize(MANAGEMENT),
+  validate({ body: createCategorySchema }),
+  roomsController.createCategory,
+);
+
+// POST /rooms/bulk
+registry.registerPath({
+  method: "post",
+  path: "/rooms/bulk",
+  tags: ["Rooms"],
+  summary: "Bulk create rooms",
+  description: "Creates multiple rooms in a single request for efficiency.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    body: {
+      content: { "application/json": { schema: bulkCreateRoomsSchema } },
+    },
+  },
+  responses: {
+    201: {
+      description: "Rooms created successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    400: {
+      description: "Invalid request data",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
+roomsRoutes.post(
+  "/bulk",
+  authorize(MANAGEMENT),
+  validate({ body: bulkCreateRoomsSchema }),
+  roomsController.bulkCreateRooms,
 );

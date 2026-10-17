@@ -7,6 +7,8 @@ import type {
   RoomIdParams,
   CategoryIdParams,
   UpdateCategoryPriceBody,
+  CreateCategoryBody,
+  BulkCreateRoomsBody,
 } from "./rooms.schema";
 
 export const roomsController = {
@@ -80,5 +82,23 @@ export const roomsController = {
   async listCategories(_req: Request, res: Response) {
     const categories = await roomsService.listCategories();
     res.json(success({ categories }));
+  },
+
+  async createCategory(
+    req: Request<unknown, unknown, CreateCategoryBody>,
+    res: Response,
+  ) {
+    res.status(201).json(
+      success({
+        category: await roomsService.createCategory(req.body),
+      }),
+    );
+  },
+
+  async bulkCreateRooms(
+    req: Request<unknown, unknown, BulkCreateRoomsBody>,
+    res: Response,
+  ) {
+    res.status(201).json(success(await roomsService.bulkCreateRooms(req.body)));
   },
 };

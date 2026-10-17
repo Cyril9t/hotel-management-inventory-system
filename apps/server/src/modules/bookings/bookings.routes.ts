@@ -5,14 +5,18 @@ import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
 import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
-import { createBookingSchema, bookingIdParamsSchema, listBookingsQuerySchema } from "./bookings.schema";
+import {
+  createBookingSchema,
+  bookingIdParamsSchema,
+  listBookingsQuerySchema,
+} from "./bookings.schema";
 import type { Role } from "@prisma/client";
 
 export const bookingsRoutes = Router();
 
 bookingsRoutes.use(authenticate);
 
-const STAFF = ["RECEPTIONIST", "GENERAL_MANAGER", "OWNER"] as Role[];
+const STAFF: Role[] = ["RECEPTIONIST", "GENERAL_MANAGER", "OWNER"];
 
 // POST /bookings
 registry.registerPath({
@@ -20,7 +24,8 @@ registry.registerPath({
   path: "/bookings",
   tags: ["Bookings"],
   summary: "Book a room",
-  description: "Creates a new booking for a room. Checks for existing active bookings and calculates total price based on current room category price.",
+  description:
+    "Creates a new booking for a room. Checks for existing active bookings and calculates total price based on current room category price.",
   security: [{ bearerAuth: [] }],
   request: {
     body: { content: { "application/json": { schema: createBookingSchema } } },
@@ -54,7 +59,8 @@ registry.registerPath({
   path: "/bookings",
   tags: ["Bookings"],
   summary: "List bookings",
-  description: "Retrieves a list of bookings, optionally filtered by room ID or status.",
+  description:
+    "Retrieves a list of bookings, optionally filtered by room ID or status.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listBookingsQuerySchema,
@@ -73,13 +79,14 @@ bookingsRoutes.get(
   bookingsController.list,
 );
 
-// GET /bookings/{id}
+// GET /bookings/:id
 registry.registerPath({
   method: "get",
   path: "/bookings/{id}",
   tags: ["Bookings"],
   summary: "Get booking details",
-  description: "Retrieves detailed information about a specific booking by its ID.",
+  description:
+    "Retrieves detailed information about a specific booking by its ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: bookingIdParamsSchema,
@@ -103,13 +110,14 @@ bookingsRoutes.get(
   bookingsController.getById,
 );
 
-// POST /bookings/{id}/check-in
+// POST /bookings/:id/check-in
 registry.registerPath({
   method: "post",
   path: "/bookings/{id}/check-in",
   tags: ["Bookings"],
   summary: "Check in a guest",
-  description: "Marks a reserved booking as checked-in. Only bookings with 'RESERVED' status can be checked in.",
+  description:
+    "Marks a reserved booking as checked-in. Only bookings with 'RESERVED' status can be checked in.",
   security: [{ bearerAuth: [] }],
   request: {
     params: bookingIdParamsSchema,
@@ -137,13 +145,14 @@ bookingsRoutes.post(
   bookingsController.checkIn,
 );
 
-// POST /bookings/{id}/checkout
+// POST /bookings/:id/checkout
 registry.registerPath({
   method: "post",
   path: "/bookings/{id}/checkout",
   tags: ["Bookings"],
   summary: "Check out a guest",
-  description: "Marks a booking as checked-out. Eligible statuses include CHECKED_IN, CHECKOUT_DUE, and OVERDUE.",
+  description:
+    "Marks a booking as checked-out. Eligible statuses include CHECKED_IN, CHECKOUT_DUE, and OVERDUE.",
   security: [{ bearerAuth: [] }],
   request: {
     params: bookingIdParamsSchema,

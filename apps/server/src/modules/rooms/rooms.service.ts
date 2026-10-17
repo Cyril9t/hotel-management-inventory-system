@@ -1,6 +1,13 @@
-import { NotFoundError } from "#shared/errors/http-errors";
+import { NotFoundError, BadRequestError } from "#shared/errors/http-errors";
+import { compact } from "#shared/utils/omit-undefined";
 import { roomsRepository } from "./rooms.repository";
-import type { CreateRoomBody, UpdateRoomBody } from "./rooms.schema";
+import { auditService } from "#modules/audit/audit.service";
+import type {
+  BulkCreateRoomsBody,
+  CreateCategoryBody,
+  CreateRoomBody,
+  UpdateRoomBody,
+} from "./rooms.schema";
 
 function deriveStatus(bookings: { status: string }[]) {
   return bookings[0]?.status ?? "AVAILABLE";
@@ -26,7 +33,6 @@ export const roomsService = {
     return { ...rest, status: deriveStatus(bookings) };
   },
 
-  // rooms.service.ts — create/update only, rest unchanged
   async create(data: CreateRoomBody) {
     const category = await roomsRepository.findCategoryById(data.categoryId);
     if (!category) throw new NotFoundError("Room category not found");
@@ -38,35 +44,95 @@ export const roomsService = {
 
   async update(id: string, data: UpdateRoomBody) {
     await roomsService.getById(id);
-    const { categoryId, number } = data;
-    return roomsRepository.update(id, {
-      ...(number !== undefined && { number }),
-      ...(categoryId && { category: { connect: { id: categoryId } } }),
+    return roomsRepository.update(
+      id,
+      compact({
+        number: data.number,
+        ...(data.categoryId && {
+          category: { connect: { id: data.categoryId } },
+        }),
+      }),
+    );
+  },
+
+  async deactivate(id: string, actorUserId: string) {
+    const room = await roomsService.getById(id);
+    const updated = await roomsRepository.deactivate(id);
+    await auditService.log({
+      actorUserId,
+      action: "room_deactivated",
+      entityType: "Room",
+      entityId: id,
+      beforeValue: { isActive: room.isActive },
+      afterValue: { isActive: false },
     });
+    return updated;
   },
 
-  async deactivate(id: string) {
-    await roomsService.getById(id);
-    const room = await roomsRepository.deactivate(id);
-    // TODO: audit log — "room deactivated" is a critical event
-    return room;
+  async reactivate(id: string, actorUserId: string) {
+    const room = await roomsService.getById(id);
+    const updated = await roomsRepository.reactivate(id);
+    await auditService.log({
+      actorUserId,
+      action: "room_reactivated",
+      entityType: "Room",
+      entityId: id,
+      beforeValue: { isActive: room.isActive },
+      afterValue: { isActive: true },
+    });
+    return updated;
   },
 
-  async reactivate(id: string) {
-    await roomsService.getById(id);
-    const room = await roomsRepository.reactivate(id);
-    // TODO: audit log — "room reactivated" is a critical event
-    return room;
-  },
-
-  async updateCategoryPrice(categoryId: string, price: number) {
+  async updateCategoryPrice(
+    categoryId: string,
+    price: number,
+    actorUserId: string,
+  ) {
     const category = await roomsRepository.findCategoryById(categoryId);
     if (!category) throw new NotFoundError("Room category not found");
     const updated = await roomsRepository.updateCategoryPrice(
       categoryId,
       price,
     );
-    // TODO: audit log — "room category price changed" is a critical event
+    await auditService.log({
+      actorUserId,
+      action: "room_category_price_changed",
+      entityType: "RoomCategory",
+      entityId: categoryId,
+      beforeValue: { pricePerNight: category.pricePerNight },
+      afterValue: { pricePerNight: price },
+    });
     return updated;
+  },
+
+  async createCategory(data: CreateCategoryBody) {
+    const existing = await roomsRepository.findCategoryByName(data.name);
+    if (existing)
+      throw new BadRequestError("A category with that name already exists");
+    return roomsRepository.createCategory(data);
+  },
+
+  async bulkCreateRooms(data: BulkCreateRoomsBody) {
+    const category = await roomsRepository.findCategoryById(data.categoryId);
+    if (!category) throw new NotFoundError("Room category not found");
+
+    const wing = data.wing?.toUpperCase() ?? "";
+    const floor = data.floor !== undefined ? String(data.floor) : "";
+
+    const numbers = Array.from(
+      { length: data.rangeEnd - data.rangeStart + 1 },
+      (_, i) =>
+        `${wing}${floor}${String(data.rangeStart + i).padStart(2, "0")}`,
+    );
+
+    const result = await roomsRepository.createMany(
+      numbers.map((number) => ({ number, categoryId: data.categoryId })),
+    );
+
+    return {
+      requested: numbers.length,
+      created: result.count,
+      skipped: numbers.length - result.count,
+    };
   },
 };
