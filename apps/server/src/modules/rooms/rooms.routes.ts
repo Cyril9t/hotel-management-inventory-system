@@ -14,6 +14,7 @@ import {
   updateCategoryNameSchema,
   createCategorySchema,
   bulkCreateRoomsSchema,
+  listRoomsQuerySchema,
 } from "./rooms.schema";
 
 export const roomsRoutes = Router();
