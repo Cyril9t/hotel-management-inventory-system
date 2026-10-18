@@ -1,8 +1,10 @@
+import { subject } from "@casl/ability";
 import {
   NotFoundError,
   BadRequestError,
   ForbiddenError,
 } from "#shared/errors/http-errors";
+import { compact } from "#shared/utils/omit-undefined";
 import { shiftsRepository } from "./shifts.repository";
 import { roomsService } from "#modules/rooms/rooms.service";
 import { auditService } from "#modules/audit/audit.service";
@@ -60,9 +62,7 @@ export const shiftsService = {
     if (shift.status === "CLOSED")
       throw new BadRequestError("Shift is already closed");
 
-    // Instance-level check: evaluates the { userId } condition from ability.ts
-    // against this specific shift, not just a type-level "does Shift exist" check.
-    if (permission.cannot("update", shift)) {
+    if (permission.cannot("update", subject("Shift", shift))) {
       throw new ForbiddenError("You cannot close this shift");
     }
 
@@ -100,7 +100,7 @@ export const shiftsService = {
   async getById(id: string, permission: Permissions) {
     const shift = await shiftsRepository.findById(id);
     if (!shift) throw new NotFoundError("Shift not found");
-    if (permission.cannot("read", shift)) {
+    if (permission.cannot("read", subject("Shift", shift))) {
       throw new ForbiddenError("You cannot view this shift");
     }
     return shift;
@@ -111,12 +111,10 @@ export const shiftsService = {
     actorUserId: string,
     permission: Permissions,
   ) {
-    // Staff only have a conditioned ("own shift") read rule, not blanket "read all" —
-    // so unless the actor's ability actually covers "all", force the query to their own.
     const canReadAll = permission.can("read", "all");
     const scopedFilters = canReadAll
-      ? filters
-      : { ...filters, userId: actorUserId };
+      ? compact(filters)
+      : compact({ ...filters, userId: actorUserId });
     return shiftsRepository.findMany(scopedFilters);
   },
 };

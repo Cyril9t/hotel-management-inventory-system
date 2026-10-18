@@ -27,13 +27,11 @@ export const shiftsController = {
     if (!department)
       throw new BadRequestError("User has no department assigned");
 
-    res
-      .status(201)
-      .json(
-        success({
-          shift: await shiftsService.open(userId, department, req.body),
-        }),
-      );
+    res.status(201).json(
+      success({
+        shift: await shiftsService.open(userId, department, req.body),
+      }),
+    );
   },
 
   async close(req: Request<unknown, unknown, CloseShiftBody>, res: Response) {
@@ -43,7 +41,7 @@ export const shiftsController = {
         shift: await shiftsService.close(
           id,
           req.user!.userId,
-          req.permission,
+          req.permission!,
           req.body,
         ),
       }),
@@ -53,7 +51,7 @@ export const shiftsController = {
   async getById(req: Request, res: Response) {
     const { id } = res.locals.params as ShiftIdParams;
     res.json(
-      success({ shift: await shiftsService.getById(id, req.permission) }),
+      success({ shift: await shiftsService.getById(id, req.permission!) }),
     );
   },
 
@@ -64,7 +62,7 @@ export const shiftsController = {
         shifts: await shiftsService.list(
           query,
           req.user!.userId,
-          req.permission,
+          req.permission!,
         ),
       }),
     );

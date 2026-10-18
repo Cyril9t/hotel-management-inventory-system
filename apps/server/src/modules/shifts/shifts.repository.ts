@@ -72,13 +72,19 @@ export const shiftsRepository = {
     return bookingsTotal + salesTotal;
   },
 
-  async createSnapshot(shiftId: string, roomSnapshotOpen: unknown) {
+  async createSnapshot(
+    shiftId: string,
+    roomSnapshotOpen: Prisma.InputJsonValue,
+  ) {
     return database.receptionShiftSnapshot.create({
       data: { shiftId, roomSnapshotOpen },
     });
   },
 
-  async closeSnapshot(shiftId: string, roomSnapshotClose: unknown) {
+  async closeSnapshot(
+    shiftId: string,
+    roomSnapshotClose: Prisma.InputJsonValue,
+  ) {
     return database.receptionShiftSnapshot.update({
       where: { shiftId },
       data: { roomSnapshotClose },
