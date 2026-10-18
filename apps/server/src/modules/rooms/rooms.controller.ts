@@ -10,13 +10,15 @@ import type {
   UpdateCategoryNameBody,
   CreateCategoryBody,
   BulkCreateRoomsBody,
+  ListRoomsQuery,
 } from "./rooms.schema";
 
 export const roomsController = {
   async list(req: Request, res: Response) {
+    const filters = res.locals.query as ListRoomsQuery;
     res.json(
       success({
-        rooms: await roomsService.list(),
+        rooms: await roomsService.list(filters),
       }),
     );
   },

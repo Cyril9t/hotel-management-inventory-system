@@ -23,7 +23,8 @@ registry.registerPath({
   path: "/users/invites/{token}/verify",
   tags: ["Users"],
   summary: "Verify invite token",
-  description: "Checks if an invitation token is valid and not yet expired or accepted.",
+  description:
+    "Checks if an invitation token is valid and not yet expired or accepted.",
   request: {
     params: inviteTokenParamsSchema,
   },
@@ -51,7 +52,8 @@ registry.registerPath({
   path: "/users/invites/accept",
   tags: ["Users"],
   summary: "Accept invite and create account",
-  description: "Converts a valid invitation into a full staff account after the user provides a password.",
+  description:
+    "Converts a valid invitation into a full staff account after the user provides a password.",
   request: {
     body: { content: { "application/json": { schema: acceptInviteSchema } } },
   },
@@ -81,7 +83,8 @@ registry.registerPath({
   path: "/users",
   tags: ["Users"],
   summary: "Get staff",
-  description: "Retrieves a list of all staff members with optional filters for role and department.",
+  description:
+    "Retrieves a list of all staff members with optional filters for role and department.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listUsersQuerySchema,
@@ -96,7 +99,7 @@ registry.registerPath({
 
 usersRoutes.get(
   "/",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("read", "User"),
   validate({ query: listUsersQuerySchema }),
   usersController.list,
 );
@@ -107,7 +110,8 @@ registry.registerPath({
   path: "/users/invites",
   tags: ["Users"],
   summary: "Get staff invites",
-  description: "Lists all pending invitations sent to prospective staff members.",
+  description:
+    "Lists all pending invitations sent to prospective staff members.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listInvitesQuerySchema,
@@ -122,7 +126,7 @@ registry.registerPath({
 
 usersRoutes.get(
   "/invites",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("read", "StaffInvite"),
   validate({ query: listInvitesQuerySchema }),
   usersController.listInvites,
 );
@@ -133,7 +137,8 @@ registry.registerPath({
   path: "/users/{id}",
   tags: ["Users"],
   summary: "Get a staff member",
-  description: "Retrieves detailed profile information for a specific staff member by ID.",
+  description:
+    "Retrieves detailed profile information for a specific staff member by ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
@@ -152,7 +157,7 @@ registry.registerPath({
 
 usersRoutes.get(
   "/:id",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("read", "User"),
   validate({ params: userIdParamsSchema }),
   usersController.getById,
 );
@@ -163,10 +168,10 @@ registry.registerPath({
   path: "/users/invites",
   tags: ["Users"],
   summary: "Invite new staff",
-  description: "Creates a new invitation for a prospective staff member and sends them an email.",
+  description:
+    "Creates a new invitation for a prospective staff member and sends them an email.",
   security: [{ bearerAuth: [] }],
   request: {
-
     body: { content: { "application/json": { schema: createInviteSchema } } },
   },
   responses: {
@@ -187,7 +192,7 @@ registry.registerPath({
 
 usersRoutes.post(
   "/invites",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("create", "StaffInvite"),
   validate({ body: createInviteSchema }),
   usersController.createInvite,
 );
@@ -198,7 +203,8 @@ registry.registerPath({
   path: "/users/{id}/deactivate",
   tags: ["Users"],
   summary: "Deactivate a staff member (soft delete)",
-  description: "Marks a staff member as inactive, preventing them from logging in.",
+  description:
+    "Marks a staff member as inactive, preventing them from logging in.",
   security: [{ bearerAuth: [] }],
   request: {
     params: userIdParamsSchema,
@@ -217,7 +223,7 @@ registry.registerPath({
 
 usersRoutes.patch(
   "/:id/deactivate",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("update", "User"),
   validate({ params: userIdParamsSchema }),
   usersController.deactivate,
 );
@@ -247,7 +253,7 @@ registry.registerPath({
 
 usersRoutes.patch(
   "/:id/reactivate",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("update", "User"),
   validate({ params: userIdParamsSchema }),
   usersController.reactivate,
 );
@@ -258,7 +264,8 @@ registry.registerPath({
   path: "/users/invites/{id}/resend",
   tags: ["Users"],
   summary: "Resend staff invitation email",
-  description: "Triggers a resend of the invitation email for a specific invite ID.",
+  description:
+    "Triggers a resend of the invitation email for a specific invite ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: inviteIdParamsSchema,
@@ -277,8 +284,7 @@ registry.registerPath({
 
 usersRoutes.post(
   "/invites/:id/resend",
-  authenticate,
-  authorize(["OWNER", "GENERAL_MANAGER"]),
+  authorize("update", "StaffInvite"),
   validate({ params: inviteIdParamsSchema }),
   usersController.resendInvite,
 );

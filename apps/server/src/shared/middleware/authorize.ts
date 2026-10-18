@@ -1,15 +1,17 @@
 import type { RequestHandler } from "express";
-import { Role } from "@prisma/client";
+import { getPermissions } from "../lib/ability";
+import type { Permission } from "../lib/ability";
 import { ForbiddenError, UnauthorizedError } from "../errors/http-errors";
 
-export const authorize = (allowed: Role[]): RequestHandler => {
+export const authorize = (...rule: Permission): RequestHandler => {
   return (req, _res, next) => {
-    if (!req.user) {
-      return next(new UnauthorizedError());
-    }
+    if (!req.user) throw new UnauthorizedError();
 
-    if (!allowed.includes(req.user.role)) {
-      return next(new ForbiddenError("Insufficient permissions"));
+    const permission = getPermissions(req.user);
+    req.permission = permission;
+
+    if (permission.cannot(...rule)) {
+      throw new ForbiddenError("Insufficient permissions");
     }
 
     next();

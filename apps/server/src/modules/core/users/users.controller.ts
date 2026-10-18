@@ -56,9 +56,9 @@ export const usersController = {
     res.status(201).json(
       success({
         user: await usersService.createInvite(
+          req.permission!,
           req.body,
           actor.userId,
-          actor.role,
         ),
       }),
     );
@@ -91,7 +91,7 @@ export const usersController = {
 
   async resendInvite(req: Request, res: Response) {
     const { id } = res.locals.params as InviteIdParams;
-    const invite = await usersService.resendInvite(id, req.user!.role);
+    const invite = await usersService.resendInvite(req.permission!, id);
     res.json(success({ invite }));
   },
 

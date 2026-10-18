@@ -4,7 +4,7 @@ import { usersRepository } from "../users/users.repository";
 import { password } from "#shared/lib/password";
 import { enqueuePasswordResetEmail } from "#shared/jobs/email/email.queue";
 import { jwt } from "#shared/lib/jwt";
-import type { Role } from "@prisma/client";
+import type { Role, Department } from "@prisma/client";
 import { token } from "#shared/lib/token.js";
 
 export const authService = {
@@ -79,7 +79,7 @@ export const authService = {
     userId: string,
     role: Role,
     isActive: boolean,
-    department?: string | null,
+    department?: Department | null,
   ) {
     const accessToken = jwt.signAccessToken({
       userId,

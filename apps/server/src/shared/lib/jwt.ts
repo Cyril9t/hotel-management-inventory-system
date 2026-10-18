@@ -2,13 +2,13 @@ import jsonwebtoken from "jsonwebtoken";
 import { randomUUID } from "crypto";
 import ms from "ms";
 import { env } from "../config/env";
-import type { Role } from "@prisma/client";
+import type { Department, Role } from "@prisma/client";
 
 export type AccessTokenPayload = {
   userId: string;
   isActive: boolean;
   role: Role;
-  department: string | null | undefined;
+  department: Department | null | undefined;
 };
 
 export type RefreshTokenPayload = {

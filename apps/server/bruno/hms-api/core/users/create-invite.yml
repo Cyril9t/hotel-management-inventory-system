@@ -13,12 +13,11 @@ http:
     type: json
     data: |-
       {
-        "firstName": "John",
-        "lastName": "Doe",
-        "email": "john.doe@example.com",
+        "firstName": "Robert",
+        "lastName": "Kitchen",
+        "email": "doublerobert.dev+kitchen@gmail.com",
         "phone": "1234567890",
-        "role": "GENERAL_MANAGER",
-        "department": "IT"
+        "role": "KITCHEN_STAFF"
       }
   auth: inherit
 

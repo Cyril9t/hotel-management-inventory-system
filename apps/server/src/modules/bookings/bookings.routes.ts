@@ -10,13 +10,10 @@ import {
   bookingIdParamsSchema,
   listBookingsQuerySchema,
 } from "./bookings.schema";
-import type { Role } from "@prisma/client";
 
 export const bookingsRoutes = Router();
 
 bookingsRoutes.use(authenticate);
-
-const STAFF: Role[] = ["RECEPTIONIST", "GENERAL_MANAGER", "OWNER"];
 
 // POST /bookings
 registry.registerPath({
@@ -48,7 +45,7 @@ registry.registerPath({
 
 bookingsRoutes.post(
   "/",
-  authorize(STAFF),
+  authorize("create", "Booking"),
   validate({ body: createBookingSchema }),
   bookingsController.create,
 );
@@ -75,6 +72,7 @@ registry.registerPath({
 
 bookingsRoutes.get(
   "/",
+  authorize("read", "Booking"),
   validate({ query: listBookingsQuerySchema }),
   bookingsController.list,
 );
@@ -105,7 +103,7 @@ registry.registerPath({
 
 bookingsRoutes.get(
   "/:id",
-  authorize(STAFF),
+  authorize("read", "Booking"),
   validate({ params: bookingIdParamsSchema }),
   bookingsController.getById,
 );
@@ -140,7 +138,7 @@ registry.registerPath({
 
 bookingsRoutes.post(
   "/:id/check-in",
-  authorize(STAFF),
+  authorize("update", "Booking"),
   validate({ params: bookingIdParamsSchema }),
   bookingsController.checkIn,
 );
@@ -175,7 +173,7 @@ registry.registerPath({
 
 bookingsRoutes.post(
   "/:id/checkout",
-  authorize(STAFF),
+  authorize("update", "Booking"),
   validate({ params: bookingIdParamsSchema }),
   bookingsController.checkout,
 );
