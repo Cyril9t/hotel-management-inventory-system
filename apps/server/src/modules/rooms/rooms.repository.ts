@@ -1,5 +1,7 @@
 import { database } from "#shared/database/prisma";
+import { compact } from "#shared/utils/omit-undefined.js";
 import type { BookingStatus, Prisma } from "@prisma/client";
+import type { ListRoomsQuery } from "./rooms.schema";
 
 const ACTIVE_BOOKING_STATUSES = [
   "RESERVED",
@@ -9,8 +11,12 @@ const ACTIVE_BOOKING_STATUSES = [
 ] as BookingStatus[];
 
 export const roomsRepository = {
-  async findMany() {
+  async findMany(filters: ListRoomsQuery = {}) {
     return database.room.findMany({
+      where: compact({
+        categoryId: filters.categoryId,
+        isActive: filters.isActive,
+      }),
       include: {
         category: true,
         bookings: {

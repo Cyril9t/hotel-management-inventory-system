@@ -10,13 +10,10 @@ import {
   entityParamsSchema,
   actorParamsSchema,
 } from "./audit.schema";
-import type { Role } from "@prisma/client";
 
 export const auditRoutes = Router();
 
-const AUDIT_VIEWERS: Role[] = ["GENERAL_MANAGER", "OWNER"];
-
-auditRoutes.use(authenticate, authorize(AUDIT_VIEWERS));
+auditRoutes.use(authenticate, authorize("read", "AuditLog"));
 
 // GET /audit
 registry.registerPath({

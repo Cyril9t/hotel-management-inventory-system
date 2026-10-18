@@ -6,6 +6,7 @@ import type {
   BulkCreateRoomsBody,
   CreateCategoryBody,
   CreateRoomBody,
+  ListRoomsQuery,
   UpdateRoomBody,
 } from "./rooms.schema";
 
@@ -14,12 +15,18 @@ function deriveStatus(bookings: { status: string }[]) {
 }
 
 export const roomsService = {
-  async list() {
-    const rooms = await roomsRepository.findMany();
-    return rooms.map(({ bookings, ...room }) => ({
+  async list(filters: ListRoomsQuery = {}) {
+    const rooms = await roomsRepository.findMany({
+      categoryId: filters.categoryId,
+      isActive: filters.isActive,
+    });
+    const withStatus = rooms.map(({ bookings, ...room }) => ({
       ...room,
       status: deriveStatus(bookings),
     }));
+    return filters.status
+      ? withStatus.filter((room) => room.status === filters.status)
+      : withStatus;
   },
 
   async listCategories() {

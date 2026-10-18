@@ -1,3 +1,4 @@
+import { subject } from "@casl/ability";
 import { Role, Department } from "@prisma/client";
 import {
   NotFoundError,
@@ -7,18 +8,13 @@ import {
 import { usersRepository } from "./users.repository";
 import { password } from "#shared/lib/password";
 import { enqueueInviteEmail } from "#shared/jobs/email/email.queue";
+import type { Permissions } from "#shared/lib/ability";
 import type {
   CreateInviteBody,
   ListInvitesQuery,
   ListUsersQuery,
 } from "./users.schema";
 import { token } from "#shared/lib/token";
-
-// Who each role is allowed to invite
-const INVITABLE_ROLES: Record<string, Role[]> = {
-  [Role.OWNER]: [Role.GENERAL_MANAGER],
-  [Role.GENERAL_MANAGER]: Object.values(Role).filter((r) => r !== Role.OWNER),
-};
 
 const ROLE_DEPARTMENT_MAP: Record<Role, Department | null> = {
   [Role.OWNER]: null,
@@ -50,20 +46,22 @@ export const usersService = {
   },
 
   async createInvite(
+    permission: Permissions,
     data: CreateInviteBody,
     createdByUserId: string,
-    actorRole: Role,
   ) {
-    const allowedRoles = INVITABLE_ROLES[actorRole] ?? [];
-    if (!allowedRoles.includes(data.role)) {
+    if (
+      permission.cannot(
+        "create",
+        subject("StaffInvite", { role: data.role } as any),
+      )
+    ) {
       throw new ForbiddenError(
-        `${actorRole} is not permitted to invite a user with role ${data.role}`,
+        `Not permitted to invite a user with role ${data.role}`,
       );
     }
 
     const department = ROLE_DEPARTMENT_MAP[data.role];
-
-    // const rawToken = crypto.randomUUID();
     const rawToken = token.generateToken();
     const invite = await usersRepository.createInvite({
       ...data,
@@ -83,22 +81,19 @@ export const usersService = {
     return invite;
   },
 
-  async resendInvite(id: string, actorRole: Role) {
+  async resendInvite(permission: Permissions, id: string) {
     const invite = await usersRepository.findInviteById(id);
     if (!invite) throw new NotFoundError("Invite not found");
     if (invite.status !== "PENDING") {
       throw new BadRequestError("Only pending invites can be resent");
     }
 
-    // Same authority check as creating — if you couldn't invite this role, you can't resend it either
-    const allowedRoles = INVITABLE_ROLES[actorRole] ?? [];
-    if (!allowedRoles.includes(invite.role)) {
+    if (permission.cannot("update", subject("StaffInvite", invite))) {
       throw new ForbiddenError(
-        `${actorRole} is not permitted to resend an invite for role ${invite.role}`,
+        `Not permitted to resend an invite for role ${invite.role}`,
       );
     }
 
-    // const rawToken = crypto.randomUUID();
     const rawToken = token.generateToken();
     await usersRepository.reissueInviteToken(
       invite.id,

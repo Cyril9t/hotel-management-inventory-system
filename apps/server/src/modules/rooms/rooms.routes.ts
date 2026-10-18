@@ -15,14 +15,10 @@ import {
   createCategorySchema,
   bulkCreateRoomsSchema,
 } from "./rooms.schema";
-import type { Role } from "@prisma/client";
 
 export const roomsRoutes = Router();
 
 roomsRoutes.use(authenticate);
-
-const MANAGEMENT: Role[] = ["GENERAL_MANAGER", "OWNER"];
-const STAFF: Role[] = ["RECEPTIONIST", "GENERAL_MANAGER", "OWNER"];
 
 // GET /rooms
 registry.registerPath({
@@ -41,7 +37,7 @@ registry.registerPath({
   },
 });
 
-roomsRoutes.get("/", authorize(STAFF), roomsController.list);
+roomsRoutes.get("/", authorize("read", "Room"), roomsController.list);
 
 // GET /rooms/categories
 registry.registerPath({
@@ -61,7 +57,7 @@ registry.registerPath({
 
 roomsRoutes.get(
   "/categories",
-  authorize(STAFF),
+  authorize("read", "RoomCategory"),
   roomsController.listCategories,
 );
 
@@ -91,7 +87,7 @@ registry.registerPath({
 
 roomsRoutes.get(
   "/:id",
-  authorize(STAFF),
+  authorize("read", "Room"),
   validate({ params: roomIdParamsSchema }),
   roomsController.getById,
 );
@@ -125,7 +121,7 @@ registry.registerPath({
 
 roomsRoutes.post(
   "/",
-  authorize(MANAGEMENT),
+  authorize("create", "Room"),
   validate({ body: createRoomSchema }),
   roomsController.create,
 );
@@ -157,7 +153,7 @@ registry.registerPath({
 
 roomsRoutes.patch(
   "/:id",
-  authorize(MANAGEMENT),
+  authorize("update", "Room"),
   validate({ params: roomIdParamsSchema, body: updateRoomSchema }),
   roomsController.update,
 );
@@ -187,7 +183,7 @@ registry.registerPath({
 
 roomsRoutes.patch(
   "/:id/deactivate",
-  authorize(MANAGEMENT),
+  authorize("update", "Room"),
   validate({ params: roomIdParamsSchema }),
   roomsController.deactivate,
 );
@@ -217,7 +213,7 @@ registry.registerPath({
 
 roomsRoutes.patch(
   "/:id/reactivate",
-  authorize(MANAGEMENT),
+  authorize("update", "Room"),
   validate({ params: roomIdParamsSchema }),
   roomsController.reactivate,
 );
@@ -250,7 +246,7 @@ registry.registerPath({
 
 roomsRoutes.patch(
   "/categories/:categoryId/price",
-  authorize(MANAGEMENT),
+  authorize("update", "RoomCategory"),
   validate({ params: categoryIdParamsSchema, body: updateCategoryPriceSchema }),
   roomsController.updateCategoryPrice,
 );
@@ -265,7 +261,9 @@ registry.registerPath({
   security: [{ bearerAuth: [] }],
   request: {
     params: categoryIdParamsSchema,
-    body: { content: { "application/json": { schema: updateCategoryNameSchema } } },
+    body: {
+      content: { "application/json": { schema: updateCategoryNameSchema } },
+    },
   },
   responses: {
     200: {
@@ -285,7 +283,7 @@ registry.registerPath({
 
 roomsRoutes.patch(
   "/categories/:categoryId/name",
-  authorize(["GENERAL_MANAGER", "OWNER"]),
+  authorize("update", "RoomCategory"),
   validate({ body: updateCategoryNameSchema, params: categoryIdParamsSchema }),
   roomsController.updateCategoryName,
 );
@@ -316,7 +314,7 @@ registry.registerPath({
 
 roomsRoutes.post(
   "/categories",
-  authorize(MANAGEMENT),
+  authorize("create", "RoomCategory"),
   validate({ body: createCategorySchema }),
   roomsController.createCategory,
 );
@@ -348,7 +346,7 @@ registry.registerPath({
 
 roomsRoutes.post(
   "/bulk",
-  authorize(MANAGEMENT),
+  authorize("create", "Room"),
   validate({ body: bulkCreateRoomsSchema }),
   roomsController.bulkCreateRooms,
 );
