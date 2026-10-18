@@ -14,6 +14,7 @@ import { generateOpenApiDocument } from "#shared/openapi/generate";
 import { env } from "#shared/config/env";
 import { roomsRoutes } from "#modules/rooms/rooms.routes";
 import { bookingsRoutes } from "#modules/bookings/bookings.routes";
+import { shiftsRoutes } from "#modules/shifts/shifts.routes";
 
 // const API_PREFIX = "/api/v1";
 
@@ -26,13 +27,15 @@ app.use(cookieParser());
 app.use(httpLogger);
 
 app.use("/", healthRoutes);
-
 app.use("/api/v1", healthRoutes);
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", usersRoutes);
 
 app.use("/api/v1/bookings", bookingsRoutes);
 app.use("/api/v1/rooms", roomsRoutes);
+
+app.use("/api/v1/shifts", shiftsRoutes);
 
 if (env.isDev) {
   const openApiDocument = generateOpenApiDocument();
