@@ -37,7 +37,12 @@ registry.registerPath({
   },
 });
 
-roomsRoutes.get("/", authorize("read", "Room"), roomsController.list);
+roomsRoutes.get(
+  "/",
+  authorize("read", "Room"),
+  validate({ query: listRoomsQuerySchema }),
+  roomsController.list,
+);
 
 // GET /rooms/categories
 registry.registerPath({

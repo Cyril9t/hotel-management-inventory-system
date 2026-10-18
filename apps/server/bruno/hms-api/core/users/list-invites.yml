@@ -21,6 +21,11 @@ http:
       type: query
   auth: inherit
 
+runtime:
+  variables:
+    - name: role
+      value: owner
+
 settings:
   encodeUrl: true
   timeout: 0
