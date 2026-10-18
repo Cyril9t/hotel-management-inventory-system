@@ -1,11 +1,17 @@
 import { BadRequestError, NotFoundError } from "#shared/errors/http-errors";
 import { bookingsRepository } from "./bookings.repository";
 import { roomsRepository } from "../rooms/rooms.repository";
+import { shiftsRepository } from "../shifts/shifts.repository";
 import { auditService } from "../audit/audit.service";
 import type { CreateBookingBody, ListBookingsQuery } from "./bookings.schema";
 
 export const bookingsService = {
   async create(data: CreateBookingBody, createdByUserId: string) {
+    const shift = await shiftsRepository.findOpenByUserId(createdByUserId);
+    if (!shift) {
+      throw new BadRequestError("Open a shift before creating a booking");
+    }
+
     const existing = await bookingsRepository.findActiveByRoomId(data.roomId);
     if (existing)
       throw new BadRequestError("Room already has an active booking");
@@ -30,6 +36,7 @@ export const bookingsService = {
       status: data.checkInNow ? "CHECKED_IN" : "RESERVED",
       checkInAt: data.checkInNow ? new Date() : null,
       createdBy: { connect: { id: createdByUserId } },
+      shift: { connect: { id: shift.id } },
     });
   },
 
