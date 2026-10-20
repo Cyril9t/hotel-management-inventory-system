@@ -1,6 +1,7 @@
 import { ArrowRight, Home } from "lucide-react";
 
 export const ExceptionalStaysBanner: React.FC = () => {
+
     return (
         <div className="bg-gradient-to-r from-brand-gold/10 via-card to-card border border-brand-gold/30 rounded-[var(--radius)] p-6 shadow-sm flex items-center justify-between">
             <div className="flex items-center gap-4">

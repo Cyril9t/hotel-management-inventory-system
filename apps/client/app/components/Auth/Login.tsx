@@ -3,9 +3,9 @@ import { LoginForm } from "./Form";
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen w-full flex bg-[var(--background)]">
+        <div className="h-screen w-full flex bg--background">
 
-            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[var(--brand-navy)] flex-col justify-between p-12">
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-brand-navy flex-col justify-between p-12">
 
                 <div className="absolute inset-0 z-0">
                     <img
@@ -16,9 +16,8 @@ export default function LoginPage() {
 
                 </div>
 
-
                 <div className="relative z-10 flex justify-end">
-                    <span className="text-[10px] tracking-[0.3em] uppercase text-[var(--brand-gold-light)] bg-[var(--brand-navy-light)]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[var(--brand-gold)]/20">
+                    <span className="text-[10px] tracking-[0.3em] uppercase text-brand-gold-light bg-[var(--brand-navy-light)]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[var(--brand-gold)]/20">
                         Secure Portal v3.4
                     </span>
                 </div>
