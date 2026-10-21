@@ -36,7 +36,7 @@ export const DashboardHeader = () => {
                     <div className="text-right hidden sm:block">
                         <div className="flex items-center justify-end gap-4">
 
-                            <span className="px-2 py-0.5 rounded text-[14px] font-bold bg-brand-gold/15 text-primary uppercase tracking-wider">
+                            <span className="px-2 py-0.5 rounded text-[14px] font-bold bg-brand-navy-light/90 text-primary uppercase tracking-wider">
                                 RECEPTION
                             </span>
 

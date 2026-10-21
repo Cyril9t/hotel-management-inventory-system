@@ -81,19 +81,19 @@ export default function AllStaff() {
                 <div className='grow'>
 
                     <h3 className="text-3xl font-bold text-foreground">System Users</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                         Manage hotel staff members, departments, and contact directory.
                     </p>
                 </div>
 
                 <div>
-                    <Button className="h-11 bg-brand-gold-light" onClick={() => setCreateStaff(true)}>
+                    <Button className="h-11 bg-brand-navy text-background" onClick={() => setCreateStaff(true)}>
                         Create Staff Account
                     </Button>
                 </div>
             </div>
             <CreateStaffModal isOpen={createStaff} onClose={() => setCreateStaff(false)} />
-            <Card >
+            <Card className=''>
                 <CardHeader>
                     <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
