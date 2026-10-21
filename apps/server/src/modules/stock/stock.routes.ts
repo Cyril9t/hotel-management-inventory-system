@@ -29,11 +29,12 @@ registry.registerPath({
   path: "/stock/products",
   tags: ["Stock"],
   summary: "Create a new product",
+  security: [{ bearerAuth: [] }],
   request: {
     body: { content: { "application/json": { schema: createProductSchema } } },
   },
   responses: {
-    200: {
+    201: {
       description: "Product created successfully",
       content: { "application/json": { schema: apiSuccessSchema } },
     },
@@ -62,6 +63,7 @@ registry.registerPath({
   path: "/stock/products",
   tags: ["Stock"],
   summary: "List all products",
+  security: [{ bearerAuth: [] }],
   request: {
     query: listProductsQuerySchema,
   },
@@ -91,6 +93,7 @@ registry.registerPath({
   path: "/stock/products/{id}",
   tags: ["Stock"],
   summary: "Get product by ID",
+  security: [{ bearerAuth: [] }],
   request: {
     params: productIdParamsSchema,
   },
@@ -124,6 +127,7 @@ registry.registerPath({
   path: "/stock/products/{id}",
   tags: ["Stock"],
   summary: "Update product details",
+  security: [{ bearerAuth: [] }],
   request: {
     params: productIdParamsSchema,
     body: { content: { "application/json": { schema: updateProductSchema } } },
@@ -162,6 +166,7 @@ registry.registerPath({
   path: "/stock/products/{id}/deactivate",
   tags: ["Stock"],
   summary: "Deactivate a product",
+  security: [{ bearerAuth: [] }],
   request: {
     params: productIdParamsSchema,
   },
@@ -195,6 +200,7 @@ registry.registerPath({
   path: "/stock/products/{id}/reactivate",
   tags: ["Stock"],
   summary: "Reactivate a product",
+  security: [{ bearerAuth: [] }],
   request: {
     params: productIdParamsSchema,
   },
@@ -230,6 +236,7 @@ registry.registerPath({
   path: "/stock/balances",
   tags: ["Stock"],
   summary: "List stock balances",
+  security: [{ bearerAuth: [] }],
   request: {
     query: listBalancesQuerySchema,
   },
@@ -261,6 +268,7 @@ registry.registerPath({
   path: "/stock/movements/receive",
   tags: ["Stock"],
   summary: "Receive stock into warehouse",
+  security: [{ bearerAuth: [] }],
   request: {
     body: { content: { "application/json": { schema: receiveStockSchema } } },
   },
@@ -294,6 +302,7 @@ registry.registerPath({
   path: "/stock/movements/issue",
   tags: ["Stock"],
   summary: "Issue stock from warehouse",
+  security: [{ bearerAuth: [] }],
   request: {
     body: { content: { "application/json": { schema: issueStockSchema } } },
   },
@@ -327,6 +336,7 @@ registry.registerPath({
   path: "/stock/movements/correction",
   tags: ["Stock"],
   summary: "Correct stock balance",
+  security: [{ bearerAuth: [] }],
   request: {
     body: { content: { "application/json": { schema: correctionStockSchema } } },
   },
@@ -360,6 +370,7 @@ registry.registerPath({
   path: "/stock/movements/{id}/acknowledge",
   tags: ["Stock"],
   summary: "Acknowledge a stock movement",
+  security: [{ bearerAuth: [] }],
   request: {
     params: movementIdParamsSchema,
     body: { content: { "application/json": { schema: acknowledgeMovementSchema } } },
@@ -398,6 +409,7 @@ registry.registerPath({
   path: "/stock/movements",
   tags: ["Stock"],
   summary: "List stock movements",
+  security: [{ bearerAuth: [] }],
   request: {
     query: listMovementsQuerySchema,
   },
