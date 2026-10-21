@@ -34,6 +34,44 @@ runtime:
           console.error("Token not found in response.");
         }
 
+        const headerCookie = res.getHeader("set-cookie");
+
+        if (headerCookie) {
+            const matches = headerCookie.match(/refreshToken=([^;]+)/);
+            const refreshToken = matches ? matches[1] : null;
+
+            if (refreshToken) {
+                bru.setVar("refreshToken", refreshToken);
+                console.log("Refresh token saved successfully!");
+            }
+        }
+
+
+        // // 1. Parse the response body using the getBody method
+        // const response = res.getBody(); 
+
+        // // 2. Fetch the header by passing "set-cookie" as a string literal
+        // const cookie = res.getHeader("set-cookie"); 
+
+        // // Log the inner data object to the Bruno Console
+        // console.log(response?.data);
+
+        // // 3. Extract the token safely
+        // const token = response?.data?.accessToken;
+
+        // // 4. Check if cookie exists, then store the refreshToken property
+        // if (cookie && cookie.refreshToken) {
+        //     bru.setVar("refreshToken", cookie.refreshToken);
+        // }
+
+        // // 5. Save the Access Token if it exists
+        // if (token) {
+        //     bru.setVar("token", token);
+        //     console.log("Token saved successfully!");
+        // } else {
+        //     console.error("Token not found in response.");
+        // }
+
 settings:
   encodeUrl: true
   timeout: 0

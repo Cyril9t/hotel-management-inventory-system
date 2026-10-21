@@ -10,7 +10,7 @@ http:
     - name: Content-Type
       value: application/json
     - name: Cookie
-      value: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhMTQ2MzhkNS0xMGI2LTQ1YTktOTNjOC1hN2E4NjlhZWU3MzgiLCJqdGkiOiI0ZGVjN2Q3Ny01YzczLTQ1ZWYtODFkZC1jZmMyYzAwNTQzMjUiLCJpYXQiOjE3OTIzMzY2MDIsImV4cCI6MTc5Mjk0MTQwMn0.aNgD63muieXY8u6JIANcyLb2mfI8i-r5MTltepDmQdM
+      value: refreshToken={{refreshToken}}
   auth: inherit
 
 runtime:

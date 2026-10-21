@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import { getPermissions } from "../lib/ability";
-import type { Permission } from "../lib/ability";
+import { getPermissions } from "../lib/permission";
+import type { Permission } from "../lib/permission";
 import { ForbiddenError, UnauthorizedError } from "../errors/http-errors";
 
 export const authorize = (...rule: Permission): RequestHandler => {

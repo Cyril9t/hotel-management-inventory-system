@@ -9,7 +9,7 @@ import { shiftsRepository } from "./shifts.repository";
 import { roomsService } from "#modules/rooms/rooms.service";
 import { auditService } from "#modules/audit/audit.service";
 import type { Department } from "@prisma/client";
-import type { Permissions } from "#shared/lib/ability";
+import type { Permissions } from "#shared/lib/permission.js";
 import type {
   OpenShiftBody,
   CloseShiftBody,
