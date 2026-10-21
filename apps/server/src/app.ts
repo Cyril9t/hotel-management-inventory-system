@@ -15,6 +15,8 @@ import { env } from "#shared/config/env";
 import { roomsRoutes } from "#modules/rooms/rooms.routes";
 import { bookingsRoutes } from "#modules/bookings/bookings.routes";
 import { shiftsRoutes } from "#modules/shifts/shifts.routes";
+import { stockRepository } from "#modules/stock/stock.repository";
+import { stockRoutes } from "#modules/stock/stock.routes";
 
 // const API_PREFIX = "/api/v1";
 
@@ -37,11 +39,13 @@ app.use("/api/v1/rooms", roomsRoutes);
 
 app.use("/api/v1/shifts", shiftsRoutes);
 
-if (env.isDev) {
-  const openApiDocument = generateOpenApiDocument();
-  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
-  app.get("/api/docs.json", (_req, res) => res.json(openApiDocument));
-}
+app.use("/api/v1/stock", stockRoutes);
+
+// if (env.isDev) {
+const openApiDocument = generateOpenApiDocument();
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+app.get("/api/docs.json", (_req, res) => res.json(openApiDocument));
+// }
 
 app.use(notFoundHandler);
 app.use(errorHandler);

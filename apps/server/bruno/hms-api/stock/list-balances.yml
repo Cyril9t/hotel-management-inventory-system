@@ -1,0 +1,22 @@
+info:
+  name: List Balances
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/stock/balances"
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": []
+        }

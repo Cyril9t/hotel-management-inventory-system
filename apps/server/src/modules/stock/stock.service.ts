@@ -17,6 +17,7 @@ import type {
   IssueStockBody,
   CorrectionStockBody,
   AcknowledgeMovementBody,
+  ListProductsQuery,
   ListBalancesQuery,
   ListMovementsQuery,
 } from "./stock.schema";
@@ -41,7 +42,7 @@ export const stockService = {
     return product;
   },
 
-  async listProducts(filters: { department?: Department }) {
+  async listProducts(filters: ListProductsQuery) {
     return stockRepository.listProducts(
       compact({ ...filters, isActive: true }),
     );
