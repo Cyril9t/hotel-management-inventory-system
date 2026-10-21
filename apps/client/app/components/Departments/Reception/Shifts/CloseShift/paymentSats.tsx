@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Banknote, CreditCard, ArrowLeftRight, Receipt, PieChart } from 'lucide-react';
 
 export interface BreakdownItem {

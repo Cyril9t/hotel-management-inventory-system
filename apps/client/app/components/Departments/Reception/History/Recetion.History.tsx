@@ -1,8 +1,10 @@
+import { ReceptionHistoryHeader } from "./header";
+import { HistoryFilterBar } from "./historyFilter";
+import History from "./ParentComp";
+
 function ReceptionHistory() {
     return (
-        <h1>
-            History
-        </h1>
+        <History />
     );
 }
 

@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+
 import { Lock, ShieldCheck } from 'lucide-react';
 import { CloseShiftHeader } from './header';
 import { ShiftReconciliationCard } from './shiftCard';
 import { PaymentBreakdownCard } from './paymentSats';
 import { ShiftNotesForm } from './note';
+import { useNavigate } from 'react-router';
+import { useState } from 'react';
+import { Button } from '~/components/ui/button';
 
 export interface CloseShiftContainerProps {
     isOpen?: boolean;
@@ -40,7 +43,9 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
 
     if (!isOpen) return null;
 
-    // Clamping handler
+
+    const navigate = useNavigate()
+
     const handleActualCashChange = (value: number) => {
         if (value > expectedCash) {
             setActualCash(expectedCash);
@@ -60,18 +65,11 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
 
         setTimeout(() => {
             setIsSubmitting(false);
-            if (onShiftClosed) {
-                onShiftClosed({
-                    openingCash,
-                    expectedCash,
-                    actualCash,
-                    variance,
-                    paymentBreakdown,
-                    notes,
-                });
-            }
-            if (onClose) onClose();
+
         }, 1200);
+
+        navigate("/")
+
     };
 
     return (
@@ -92,7 +90,6 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
                     })} → 09:00 PM`}
                     onClose={onClose}
                 />
-
 
                 <form onSubmit={handleFinalClose} className="flex-1 overflow-y-auto mt-10">
 
@@ -119,7 +116,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
                         onNotesChange={setNotes}
                     />
 
-                    {/* Footer Actions */}
+
                     <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
                         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                             <ShieldCheck className="h-3.5 w-3.5 text-primary" />
@@ -137,10 +134,10 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
                                 </button>
                             )}
 
-                            <button
+                            <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-6 py-2.5 text-xs font-semibold rounded-[var(--radius)] bg-primary text-primary-foreground shadow-md hover:opacity-95 transition-all flex items-center gap-2 disabled:opacity-70"
+                                className="w-50 h-10"
                             >
                                 {isSubmitting ? (
                                     <>
@@ -153,7 +150,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
                                         <span>Confirm & Close Shift</span>
                                     </>
                                 )}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </form>

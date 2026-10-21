@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { User, Clock, ShieldCheck, X } from 'lucide-react';
 
 export interface ShiftHeaderProps {

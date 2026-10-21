@@ -11,6 +11,7 @@ export function LoginForm() {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate()
+
     const handleSubmit = (e: any) => {
         e.preventDefault();
         setIsLoading(true);
@@ -20,20 +21,22 @@ export function LoginForm() {
 
         }, 1500);
 
+        navigate
+
     };
 
     const dash = [
         {
             title: "GM",
-            link: "/GM.dashboard",
+            link: "general/dashboard",
         },
         {
             title: "CEO",
-            link: "/CEO.dashboard",
+            link: "Owner/dashboard",
         },
         {
             title: "RECEP",
-            link: "/reception",
+            link: "/OpenShift",
         }
     ]
 

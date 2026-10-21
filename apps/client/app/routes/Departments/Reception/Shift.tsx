@@ -1,8 +1,9 @@
-import StaffsShifts from "~/components/Departments/Reception/Shifts/Shifts";
+
+import CloseShift from "~/components/Departments/Reception/Shifts/CloseShift/closeShift";
 
 function Shifts() {
     return (
-        <StaffsShifts />
+        <CloseShift />
     );
 }
 

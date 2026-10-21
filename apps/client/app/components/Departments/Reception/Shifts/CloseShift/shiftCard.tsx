@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { AlertCircle, CheckCircle2, DollarSign, MoveRight } from 'lucide-react';
 
 export interface ReconciliationProps {
@@ -93,7 +93,7 @@ export const ShiftReconciliationCard: React.FC<ReconciliationProps> = ({
                     </div>
                 </div>
 
-                {/* Warning Indicator */}
+
                 {showWarning && (
                     <div className="flex items-center gap-1.5 text-[11px] font-medium text-destructive animate-in fade-in duration-200">
                         <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -101,7 +101,7 @@ export const ShiftReconciliationCard: React.FC<ReconciliationProps> = ({
                     </div>
                 )}
 
-                {/* Variance Display */}
+
                 <div className="flex items-center justify-between rounded-lg border border-border/80 bg-secondary/50 p-3 text-xs">
                     <span className="font-semibold text-muted-foreground">Variance (Shortage / Balanced):</span>
                     <div className="flex items-center gap-1.5 font-bold font-serif text-sm">

@@ -1,5 +1,4 @@
-import { ActivitySquare, Bell } from "lucide-react";
-import { useState } from "react";
+import { Bell } from "lucide-react";
 import { NavLink } from "react-router";
 import Logo from "~/components/shared/Logo";
 import { Button } from "~/components/ui/button";
@@ -8,21 +7,21 @@ export const DashboardHeader = () => {
     const tabs = [
         {
             title: 'Overview',
-            link: "/reception",
+            link: "/reception/dashboard",
         }, {
             title: 'Rooms',
-            link: '/reception/rooms',
+            link: '/reception/dashboard/rooms',
         }, {
             title: 'Room Service',
-            link: '/reception/roomsService'
+            link: '/reception/dashboard/roomsService'
 
         }, {
             title: 'History',
-            link: '/reception/history'
+            link: '/reception/dashboard/history'
         },
         {
             title: 'Shift',
-            link: '/reception/shifts'
+            link: '/reception/dashboard/shifts'
         }
 
 
@@ -70,7 +69,7 @@ export const DashboardHeader = () => {
                 {tabs.map(({ title, link }) => (
                     <NavLink
                         to={link}
-                        end={link === "/reception"}
+                        end={link === "/reception/dashboard"}
                     >
                         {({ isActive }) => (
                             <button
