@@ -1,0 +1,34 @@
+info:
+  name: Create Product
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/stock/products"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Sample Product",
+        "sku": "PROD-001",
+        "description": "Sample product description",
+        "category": "Category ID",
+        "unit": "pcs",
+        "minBalance": 10,
+        "maxBalance": 100
+      }
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": { "id": "prod-123", "name": "Sample Product" }
+        }

@@ -1,0 +1,28 @@
+info:
+  name: Update Product
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/stock/products/{{productId}}"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Updated Product Name"
+      }
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": {}
+        }

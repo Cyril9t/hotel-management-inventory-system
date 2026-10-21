@@ -1,0 +1,14 @@
+import { Queue } from "bullmq";
+import { redisConnection } from "#shared/config/redis";
+
+export const autoCheckoutQueue = new Queue("auto-checkout", {
+  connection: redisConnection,
+});
+
+export async function scheduleAutoCheckoutJob() {
+  await autoCheckoutQueue.upsertJobScheduler(
+    "auto-checkout-sweep",
+    { every: 5 * 60 * 1000 },
+    { name: "sweep" },
+  );
+}

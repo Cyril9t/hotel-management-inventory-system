@@ -1,0 +1,31 @@
+info:
+  name: Receive Stock
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/stock/movements/receive"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "productId": "{{productId}}",
+        "quantity": 50,
+        "reference": "PO-123",
+        "note": "Initial stock receive"
+      }
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": {}
+        }

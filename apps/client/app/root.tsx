@@ -9,8 +9,15 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { MetricCards } from "./components/CEO.dashboard/Overview/MetricCard";
+import { RoomsMetric } from "./Context/Context";
 
 export const links: Route.LinksFunction = () => [
+  {
+    rel: "icon",
+    type: "image/svg+xml",
+    href: "/favicon.svg",
+  },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -32,8 +39,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
+
       <body>
+
         {children}
+
+
         <ScrollRestoration />
         <Scripts />
       </body>

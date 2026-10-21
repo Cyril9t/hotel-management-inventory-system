@@ -1,0 +1,30 @@
+info:
+  name: Acknowledge Movement
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/stock/movements/{{movementId}}/acknowledge"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "acknowledgedBy": "User ID",
+        "acknowledgmentDate": "2026-10-21T10:00:00Z",
+        "note": "Verified movement"
+      }
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": {}
+        }

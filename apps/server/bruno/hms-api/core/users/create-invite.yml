@@ -1,0 +1,29 @@
+info:
+  name: Create Invite
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/users/invites"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "firstName": "Robert",
+        "lastName": "Kitchen",
+        "email": "doublerobert.dev+kitchen@gmail.com",
+        "phone": "1234567890",
+        "role": "KITCHEN_STAFF"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

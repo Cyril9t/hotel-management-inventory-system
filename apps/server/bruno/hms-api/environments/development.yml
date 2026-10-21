@@ -1,0 +1,5 @@
+name: development
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+    description: ""
