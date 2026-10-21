@@ -1,0 +1,31 @@
+info:
+  name: Issue Stock
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/stock/movements/issue"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "productId": "{{productId}}",
+        "quantity": 10,
+        "reference": "REQ-123",
+        "note": "Stock issue for order"
+      }
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": {}
+        }

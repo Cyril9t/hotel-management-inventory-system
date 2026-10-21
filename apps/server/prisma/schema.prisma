@@ -376,6 +376,11 @@ model StockMovement {
   kitchenOrderId   String?           @map("kitchen_order_id")
   kitchenOrder     KitchenOrder?     @relation(fields: [kitchenOrderId], references: [id])
   correctionReason String?           @map("correction_reason")
+
+  acknowledgedAt       DateTime?     @map("acknowledged_at")
+  acknowledgedByUserId String?       @map("acknowledged_by_user_id")
+  acknowledgedQuantity Int?          @map("acknowledged_quantity")
+
   createdAt        DateTime          @default(now()) @map("created_at")
 
   @@index([productId, createdAt])

@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('OWNER', 'GM', 'RECEPTIONIST', 'BAR_STAFF', 'RESTAURANT_STAFF', 'KITCHEN_STAFF', 'STORE_MANAGER');
+CREATE TYPE "Role" AS ENUM ('OWNER', 'GENERAL_MANAGER', 'RECEPTIONIST', 'BAR_STAFF', 'RESTAURANT_STAFF', 'KITCHEN_STAFF', 'STORE_MANAGER');
 
 -- CreateEnum
 CREATE TYPE "Department" AS ENUM ('RECEPTION', 'BAR', 'RESTAURANT', 'KITCHEN', 'STORE');
@@ -249,6 +249,9 @@ CREATE TABLE "stock_movements" (
     "sale_id" TEXT,
     "kitchen_order_id" TEXT,
     "correction_reason" TEXT,
+    "acknowledged_at" TIMESTAMP(3),
+    "acknowledged_by_user_id" TEXT,
+    "acknowledged_quantity" INTEGER,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "stock_movements_pkey" PRIMARY KEY ("id")

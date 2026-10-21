@@ -8,7 +8,7 @@ import {
 import { usersRepository } from "./users.repository";
 import { password } from "#shared/lib/password";
 import { enqueueInviteEmail } from "#shared/jobs/email/email.queue";
-import type { Permissions } from "#shared/lib/ability";
+import type { Permissions } from "#shared/lib/permission.js";
 import type {
   CreateInviteBody,
   ListInvitesQuery,

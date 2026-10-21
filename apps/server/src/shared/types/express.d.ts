@@ -1,5 +1,5 @@
 import type { AccessTokenPayload } from "#shared/lib/jwt.ts";
-import type { Permissions } from "../lib/ability";
+import type { Permissions } from "../lib/permission";
 
 declare global {
   namespace Express {

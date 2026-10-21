@@ -1,0 +1,31 @@
+info:
+  name: Correction Stock
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/stock/movements/correction"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "productId": "{{productId}}",
+        "quantity": -2,
+        "reference": "AUDIT-2026",
+        "note": "Stock correction after audit"
+      }
+  auth: inherit
+
+responses:
+  - status: 200
+    body:
+      type: json
+      data: |-
+        {
+          "success": true,
+          "data": {}
+        }

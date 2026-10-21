@@ -43,7 +43,7 @@ export type Permission =
   | ["create" | "read" | "update", Subjects<Pick<Models, "Shift">>]
   | ["create" | "read" | "void", Subjects<Pick<Models, "Sale">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "KitchenOrder">>]
-  | ["read", Subjects<Pick<Models, "Product">>]
+  | ["manage" | "read", Subjects<Pick<Models, "Product">>]
   | ["read" | "update" | "manage", Subjects<Pick<Models, "StockMovement">>]
   | ["manage", Subjects<Pick<Models, "StockBalance">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "StaffInvite">>]
