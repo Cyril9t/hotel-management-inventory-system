@@ -36,3 +36,8 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+
+#  keys
+apps/server/.env.production
+apps/server/.env.production.backup

@@ -9,6 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { MetricCards } from "./components/CEO.dashboard/Overview/MetricCard";
+import { RoomsMetric } from "./Context/Context";
 
 export const links: Route.LinksFunction = () => [
   {
@@ -37,8 +39,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
+
       <body>
+
         {children}
+
+
         <ScrollRestoration />
         <Scripts />
       </body>

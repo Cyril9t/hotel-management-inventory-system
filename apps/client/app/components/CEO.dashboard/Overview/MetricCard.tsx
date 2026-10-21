@@ -2,11 +2,17 @@ import { BedDouble, CalendarIcon, ChevronDown, DollarSign, Download, Hotel, Hous
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "~/components/ui/card";
+import { UseMetricCards } from "~/Context/Context";
 
 export function MetricCards({ user = "" }) {
 
+    const { counts } = UseMetricCards()
     const [activeTab, setActiveTab] = useState('Today');
     const tabs = ['Today', 'Week', 'Month', 'Year'];
+
+    const revenueFromRooom = counts.occupied
+
+    console.log(revenueFromRooom);
     const CARDS = [
         {
             title: "Total Revenue",
@@ -16,7 +22,7 @@ export function MetricCards({ user = "" }) {
         {
             title: "Occupancy Rate",
             icons: <BedDouble className="w-4 h-4 text-primary" />,
-            figure: 8
+            figure: counts.occupied
         },
         {
             title: "Active Staff",
@@ -88,7 +94,7 @@ export function MetricCards({ user = "" }) {
                         <CardDescription >
                             <div className="">
                                 <h3 className="text-2xl font-bold text-foreground">
-                                    60
+                                    {counts.total}
                                 </h3>
                             </div>
                         </CardDescription>

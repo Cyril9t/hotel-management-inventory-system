@@ -21,32 +21,31 @@ import {
 } from "lucide-react";
 
 import Logo from "../shared/Logo";
-import { useState } from "react";
 
 const DashboardLinks = [
     {
         title: "Overview",
-        link: "/GM.dashboard",
+        link: "/general/dashboard",
         icon: LayoutDashboard,
     },
     {
         title: "Activities",
-        link: "/GM.dashboard/activities",
+        link: "/general/dashboard/activities",
         icon: Activity,
     },
     {
         title: "Users",
-        link: "/GM.dashboard/staffs",
+        link: "/general/dashboard/staffs",
         icon: Users,
     },
     {
         title: "Departments",
-        link: "/GM.dashboard/department",
+        link: "/general/dashboard/department",
         icon: Building2,
     },
     {
         title: "Settings",
-        link: "/GM.dashboard/settings",
+        link: "/general/dashboard/settings",
         icon: Settings,
     },
 ];
@@ -83,7 +82,7 @@ function GMDashboardSidebar() {
                             <SidebarMenuItem key={link}>
                                 <NavLink
                                     to={link}
-                                    end={link === "/GM.dashboard"}
+                                    end={link === "/general/dashboard"}
 
                                 >
                                     {({ isActive }) => (

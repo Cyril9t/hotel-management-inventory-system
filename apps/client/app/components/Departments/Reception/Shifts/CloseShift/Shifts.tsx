@@ -1,6 +1,9 @@
+import CloseShift from "./closeShift";
+
+
 function StaffsShifts() {
     return (
-        <h1>Open and Close shift</h1>
+        <CloseShift />
     );
 }
 

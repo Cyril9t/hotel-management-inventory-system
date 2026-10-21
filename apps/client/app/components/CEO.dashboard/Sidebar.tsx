@@ -26,27 +26,27 @@ import { useState } from "react";
 const DashboardLinks = [
     {
         title: "Overview",
-        link: "/CEO.dashboard",
+        link: "/Owner/dashboard",
         icon: LayoutDashboard,
     },
     {
         title: "Activities",
-        link: "/CEO.dashboard/activities",
+        link: "/Owner/dashboard/activities",
         icon: Activity,
     },
     {
         title: "Users",
-        link: "/CEO.dashboard/staffs",
+        link: "/Owner/dashboard/staffs",
         icon: Users,
     },
     {
         title: "Departments",
-        link: "/CEO.dashboard/departments",
+        link: "/Owner/dashboard/departments",
         icon: Building2,
     },
     {
         title: "Settings",
-        link: "/CEO.dashboard/settings",
+        link: "/Owner/dashboard/settings",
         icon: Settings,
     },
 ];
@@ -84,7 +84,7 @@ function DashboardSidebar() {
                             <SidebarMenuItem key={link}>
                                 <NavLink
                                     to={link}
-                                    end={link === "/CEO.dashboard"}
+                                    end={link === "/Owner/dashboard"}
 
                                 >
                                     {({ isActive }) => (

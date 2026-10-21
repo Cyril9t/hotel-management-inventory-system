@@ -1,8 +1,12 @@
+
 import Overview from "~/components/Departments/Reception/Overview/Overview";
+import { RoomsMetric } from "~/Context/Context";
 
 function ReceptionOverview() {
     return (
-        <Overview />
+        <RoomsMetric>
+            <Overview />
+        </RoomsMetric>
     );
 }
 

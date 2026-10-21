@@ -1,4 +1,4 @@
-import Dashboard from "../../../routes/CEO.dashboard/Layout";
+import Dashboard from "../../../routes/OwnerDashboar/Layout";
 import { MetricCards } from "./MetricCard";
 import { RevenueChart } from "./RevenueChart";
 

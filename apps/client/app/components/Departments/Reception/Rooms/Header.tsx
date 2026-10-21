@@ -1,14 +1,11 @@
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
 import type { Room } from "./type";
+import { UseMetricCards } from "~/Context/Context";
 
 export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
-    const totalRooms = rooms.length;
-    const occupiedCount = rooms.filter((r) => r.status === 'Occupied').length;
-    const availableCount = rooms.filter((r) => r.status === 'Available').length;
-    const checkoutDueCount = rooms.filter((r) => r.status === 'Checkout Due').length;
-    const overdueCount = rooms.filter((r) => r.status === 'Overdue').length;
+    const { counts } = UseMetricCards()
 
-    const data = [{ name: "Occupancy", value: 72, fill: "#d99a28" }];
+    const data = [{ name: "Occupancy", value: counts.percentage, fill: "#d99a28" }];
 
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -44,7 +41,7 @@ export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
                         </RadialBarChart>
 
                         <div className="absolute text-center">
-                            <span className="text-base font-bold text-foreground">72%</span>
+                            <span className="text-base font-bold text-foreground">{counts.percentage}%</span>
                             <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-semibold">
                                 occ
                             </p>
@@ -57,7 +54,7 @@ export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
                         Occupancy Rate
                     </span>
                     <span className="text-sm font-medium text-foreground">
-                        <strong className="text-foreground">{occupiedCount}</strong> / {totalRooms} rooms
+                        <strong className="text-foreground">{counts.occupied}</strong> / {counts.totalRoom} rooms
                     </span>
                 </div>
             </div>
@@ -68,7 +65,7 @@ export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
                     <span className="text font-semibold text-muted-foreground uppercase tracking-wider block">
                         Available
                     </span>
-                    <p className="text-xl font-bold font-serif text-foreground mt-0.5">{availableCount}</p>
+                    <p className="text-xl font-bold font-serif text-foreground mt-0.5">{counts.available}</p>
                     <p className="text-[13px] text-muted-foreground">Rooms ready</p>
                 </div>
                 <div className="w-3 h-3 rounded-full bg-emerald-500/20 border-2 border-emerald-500" />
@@ -80,7 +77,7 @@ export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
                     <span className="text font-semibold text-muted-foreground uppercase tracking-wider block">
                         Occupied
                     </span>
-                    <p className="text-xl font-bold font-serif text-foreground mt-0.5">{occupiedCount}</p>
+                    <p className="text-xl font-bold font-serif text-foreground mt-0.5">{counts.occupied}</p>
                     <p className="text-[13px] text-muted-foreground">In-house guests</p>
                 </div>
                 <div className="w-3 h-3 rounded-full bg-blue-500/20 border-2 border-blue-500" />
@@ -92,7 +89,7 @@ export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
                     <span className="text font-semibold text-muted-foreground uppercase tracking-wider block">
                         Checkout Due
                     </span>
-                    <p className="text-xl font-bold font-serif text-foreground mt-0.5">{checkoutDueCount}</p>
+                    <p className="text-xl font-bold font-serif text-foreground mt-0.5">{counts.checkoutDue}</p>
                     <p className="text-[13px] text-muted-foreground">Due by 12:00 PM</p>
                 </div>
                 <div className="w-3 h-3 rounded-full bg-amber-500/20 border-2 border-amber-500" />
@@ -103,7 +100,7 @@ export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
                     <span className="text font-semibold text-muted-foreground uppercase tracking-wider block">
                         Overdue
                     </span>
-                    <p className="text-xl font-bold font-serif text-rose-500 mt-0.5">{overdueCount}</p>
+                    <p className="text-xl font-bold font-serif text-rose-500 mt-0.5">{counts.overdue}</p>
                     <p className="text-[13px] text-muted-foreground">Late checkout</p>
                 </div>
                 <div className="w-3 h-3 rounded-full bg-rose-500/20 border-2 border-rose-500" />

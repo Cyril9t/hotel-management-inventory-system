@@ -5,9 +5,12 @@ import { RoomCard } from "./RoomsCard";
 import { RoomDetailsDrawer } from "./RoomsDetails";
 import type { Room } from "./type";
 import { INITIAL_ROOMS } from "./data";
+import { UseMetricCards } from "~/Context/Context";
 import BookRoomModal from "./BookRoom/BookGuest";
 
 export default function AvailableRoomsPage() {
+
+    const { counts } = UseMetricCards()
     const [rooms] = useState<Room[]>(INITIAL_ROOMS);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -34,16 +37,6 @@ export default function AvailableRoomsPage() {
         });
     }, [rooms, searchTerm, selectedStatus, selectedType]);
 
-    const counts = useMemo(() => {
-        return {
-            total: rooms.length,
-
-            available: rooms.filter((r) => r.status === 'Available').length,
-            occupied: rooms.filter((r) => r.status === 'Occupied').length,
-            checkoutDue: rooms.filter((r) => r.status === 'Checkout Due').length,
-            overdue: rooms.filter((r) => r.status === 'Overdue').length,
-        };
-    }, [rooms]);
 
     return (
         <div >

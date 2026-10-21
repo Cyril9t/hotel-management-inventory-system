@@ -4,7 +4,7 @@ function DashboardSettings() {
 
     return (
         <div>
-            <StaffsTable />
+            <h1>dashboard Settings</h1>
         </div>
     );
 }
