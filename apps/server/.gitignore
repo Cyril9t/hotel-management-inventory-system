@@ -17,7 +17,8 @@ build/
 # Env
 .env.keys
 .env.local
-!.env.vault
+!.env.development
+!.env.production
 .env.*.local
 
 # Logs
