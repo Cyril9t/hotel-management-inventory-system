@@ -31,6 +31,9 @@ export const env = cleanEnv(process.env, {
   CLIENT_ORIGIN: url({ devDefault: "http://localhost:5173" }),
   BASED_URL: url({ devDefault: "http://localhost:3000" }),
 
+  WORKER_HEALTH_PORT: port({ default: 9001 }),
+  WORKER_HEALTH_URL: url({ devDefault: "http://localhost:9001" }),
+
   RESEND_API_KEY: str(),
   RESEND_FROM_EMAIL: str(),
 

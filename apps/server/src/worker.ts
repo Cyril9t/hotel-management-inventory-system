@@ -10,6 +10,8 @@ import {
 } from "#shared/jobs/daily-report/daily-report.worker";
 import { emailQueue } from "#shared/jobs/email/email.queue";
 import { processEmailJob } from "#shared/jobs/email/email.worker";
+import { startWorkerHealthServer } from "./shared/http/worker-health-server";
+import { env } from "./shared/config/env";
 
 const autoCheckoutWorker = new Worker(
   autoCheckoutQueue.name,
@@ -45,6 +47,8 @@ for (const worker of [autoCheckoutWorker, dailyReportWorker, emailWorker]) {
 catchUpDailyReport().catch((err) =>
   logger.error({ error: err }, "daily report catch-up failed"),
 );
+
+startWorkerHealthServer(env.WORKER_HEALTH_PORT);
 
 process.on("SIGTERM", async () => {
   await Promise.all([
