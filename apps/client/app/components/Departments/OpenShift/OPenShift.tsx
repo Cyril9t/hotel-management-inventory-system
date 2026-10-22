@@ -5,6 +5,7 @@ import { ShiftCashInputSection } from './OpeningFloat';
 import OpenHeader from './OpenHeader';
 import { Button } from '~/components/ui/button';
 import { Navigate, NavLink, useNavigate } from 'react-router';
+import Logo from '~/components/shared/Logo';
 
 
 export interface OpenShiftPayload {
@@ -72,9 +73,15 @@ export const OpenShiftContainer: React.FC<OpenShiftContainerProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-brand-navy text-foreground p-4 md:p-8 flex flex-col justify-center items-center">
+        <div className="fixed inset-0 z-50 bg-[black]/30 backdrop-blur-sm p-4 md:p-8 flex items-center justify-center">
 
-            <div className="w-full p-5 bg-card border border-border rounded-[var(--radius)] shadow-2xl overflow-hidden flex flex-col">
+            <div className='text-[17.5em]'>
+                <h1 className="font-bold tracking-wider font-serif textColor text-brand-navy">
+                    BRANDY
+                </h1>
+
+            </div>
+            <div className="absolute p-5 bg-card border border-border rounded-[var(--radius)] shadow-2xl overflow-hidden flex flex-col">
 
                 <OpenHeader />
 
