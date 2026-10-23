@@ -7,7 +7,7 @@ import {
 } from "#shared/errors/http-errors";
 import { compact } from "#shared/utils/omit-undefined";
 import { stockRepository } from "./stock.repository";
-import { auditService } from "#modules/audit/audit.service";
+import { eventBus } from "#shared/events/bus";
 import type { Department, Prisma } from "@prisma/client";
 import type { Permissions } from "#shared/lib/permission";
 import type {
@@ -56,13 +56,12 @@ export const stockService = {
   async deactivateProduct(id: string, actorUserId: string) {
     const product = await stockService.getProductById(id);
     const updated = await stockRepository.deactivateProduct(id);
-    await auditService.log({
+
+    eventBus.emit("product.deactivated", {
+      productId: id,
       actorUserId,
-      action: "product_deactivated",
-      entityType: "Product",
-      entityId: id,
-      beforeValue: { isActive: product.isActive },
-      afterValue: { isActive: false },
+      wasActive: product.isActive,
+      department: product.department,
     });
     return updated;
   },
@@ -70,13 +69,11 @@ export const stockService = {
   async reactivateProduct(id: string, actorUserId: string) {
     const product = await stockService.getProductById(id);
     const updated = await stockRepository.reactivateProduct(id);
-    await auditService.log({
+    eventBus.emit("product.reactivated", {
+      productId: id,
       actorUserId,
-      action: "product_reactivated",
-      entityType: "Product",
-      entityId: id,
-      beforeValue: { isActive: product.isActive },
-      afterValue: { isActive: true },
+      wasActive: product.isActive,
+      department: product.department,
     });
     return updated;
   },
@@ -152,7 +149,7 @@ export const stockService = {
     const product = await stockService.getProductById(data.productId);
     const quantity = Math.abs(data.adjustment);
 
-    return database.$transaction(async (tx) => {
+    const movement = await database.$transaction(async (tx) => {
       if (data.adjustment > 0) {
         await stockRepository.creditBalance(
           tx,
@@ -181,6 +178,16 @@ export const stockService = {
         correctionReason: data.correctionReason,
       });
     });
+
+    eventBus.emit("stock.correctionApplied", {
+      productId: product.id,
+      department: data.department,
+      actorUserId,
+      adjustment: data.adjustment,
+      correctionReason: data.correctionReason,
+    });
+
+    return movement;
   },
 
   // ---- Acknowledge: Kitchen confirming an ISSUE, crediting only the confirmed amount ----
@@ -233,15 +240,19 @@ export const stockService = {
       });
 
       if (data.acknowledgedQuantity !== movement.quantity) {
-        await auditService.log({
+        eventBus.emit("stock.issueDiscrepancy", {
+          movementId,
           actorUserId,
-          action: "stock_issue_discrepancy",
-          entityType: "StockMovement",
-          entityId: movementId,
-          beforeValue: { quantity: movement.quantity },
-          afterValue: { acknowledgedQuantity: data.acknowledgedQuantity },
+          expectedQuantity: movement.quantity,
+          acknowledgedQuantity: data.acknowledgedQuantity,
         });
       }
+      eventBus.emit("stock.acknowledged", {
+        movementId,
+        productId: movement.productId,
+        department: "KITCHEN",
+        quantity: data.acknowledgedQuantity,
+      });
 
       return updated;
     });

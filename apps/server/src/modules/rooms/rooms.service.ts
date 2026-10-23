@@ -1,7 +1,7 @@
 import { NotFoundError, BadRequestError } from "#shared/errors/http-errors";
 import { compact } from "#shared/utils/omit-undefined";
 import { roomsRepository } from "./rooms.repository";
-import { auditService } from "#modules/audit/audit.service";
+import { eventBus } from "#shared/events/bus";
 import type {
   BulkCreateRoomsBody,
   CreateCategoryBody,
@@ -65,13 +65,10 @@ export const roomsService = {
   async deactivate(id: string, actorUserId: string) {
     const room = await roomsService.getById(id);
     const updated = await roomsRepository.deactivate(id);
-    await auditService.log({
+    eventBus.emit("room.deactivated", {
+      roomId: id,
       actorUserId,
-      action: "room_deactivated",
-      entityType: "Room",
-      entityId: id,
-      beforeValue: { isActive: room.isActive },
-      afterValue: { isActive: false },
+      wasActive: room.isActive,
     });
     return updated;
   },
@@ -79,13 +76,10 @@ export const roomsService = {
   async reactivate(id: string, actorUserId: string) {
     const room = await roomsService.getById(id);
     const updated = await roomsRepository.reactivate(id);
-    await auditService.log({
+    eventBus.emit("room.reactivated", {
+      roomId: id,
       actorUserId,
-      action: "room_reactivated",
-      entityType: "Room",
-      entityId: id,
-      beforeValue: { isActive: room.isActive },
-      afterValue: { isActive: true },
+      wasActive: room.isActive,
     });
     return updated;
   },
@@ -101,13 +95,11 @@ export const roomsService = {
       categoryId,
       price,
     );
-    await auditService.log({
+    eventBus.emit("room.categoryPriceChanged", {
+      categoryId,
       actorUserId,
-      action: "room_category_price_changed",
-      entityType: "RoomCategory",
-      entityId: categoryId,
-      beforeValue: { pricePerNight: category.pricePerNight },
-      afterValue: { pricePerNight: price },
+      before: category.pricePerNight,
+      after: price,
     });
     return updated;
   },
@@ -127,13 +119,11 @@ export const roomsService = {
 
     const updated = await roomsRepository.updateCategoryName(categoryId, name);
 
-    await auditService.log({
+    eventBus.emit("room.categoryNameChanged", {
+      categoryId,
       actorUserId,
-      action: "room_category_name_changed",
-      entityType: "RoomCategory",
-      entityId: categoryId,
-      beforeValue: { name: category.name },
-      afterValue: { name },
+      before: category.name,
+      after: name,
     });
 
     return updated;
