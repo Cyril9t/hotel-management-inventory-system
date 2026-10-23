@@ -1,37 +1,7 @@
-import type { Department } from "node_modules/@prisma/client";
-import type { Decimal } from "node_modules/@prisma/client/runtime/client";
+import type { Department, Prisma } from "@prisma/client";
 
 export type DomainEvents = {
-  // "room.deactivated": {
-  //   roomId: string;
-  //   actorUserId: string;
-  //   wasActive: boolean;
-  // };
-  // "room.reactivated": {
-  //   roomId: string;
-  //   actorUserId: string;
-  //   wasActive: boolean;
-  // };
-  "room.categoryPriceChanged": {
-    categoryId: string;
-    actorUserId: string;
-    before: number | Decimal;
-    after: number;
-  };
-  "booking.checkedOut": { bookingId: string; actorUserId: string };
-  "kitchenOrder.statusChanged": {
-    orderId: string;
-    destination: string;
-    status: string;
-  };
-  "stock.correctionApplied": {
-    productId: string;
-    department: string;
-    actorUserId: string;
-    quantity: number;
-    reason: string;
-  };
-
+  // ---- rooms ----
   "room.deactivated": {
     roomId: string;
     actorUserId: string;
@@ -42,30 +12,20 @@ export type DomainEvents = {
     actorUserId: string;
     wasActive: boolean;
   };
-  // "room.categoryPriceChanged": {
-  //   categoryId: string;
-  //   actorUserId: string;
-  //   before: unknown;
-  //   after: number;
-  // };
+  "room.categoryPriceChanged": {
+    categoryId: string;
+    actorUserId: string;
+    before: Prisma.Decimal;
+    after: number;
+  };
   "room.categoryNameChanged": {
     categoryId: string;
     actorUserId: string;
     before: string;
     after: string;
   };
-  "shift.closed": {
-    shiftId: string;
-    actorUserId: string;
-    before: { status: string; openingCash: unknown };
-    after: {
-      status: "CLOSED";
-      actualCash: number;
-      expectedCash: unknown;
-      variance: unknown;
-    };
-  };
 
+  // ---- bookings ----
   "booking.manualCheckout": {
     bookingId: string;
     actorUserId: string;
@@ -73,28 +33,54 @@ export type DomainEvents = {
     actualCheckoutAt: Date | null;
   };
 
+  // ---- shifts ----
+  "shift.closed": {
+    shiftId: string;
+    actorUserId: string;
+    before: { status: string; openingCash: Prisma.Decimal };
+    after: {
+      status: "CLOSED";
+      actualCash: number;
+      expectedCash: number;
+      variance: number;
+    };
+  };
+
+  // ---- orders — realtime only, not audited: status progression is
+  // routine/self-documenting, per the earlier "no audit" decision ----
+  "kitchenOrder.statusChanged": {
+    orderId: string;
+    destination: string;
+    status: string;
+  };
+
+  // ---- stock ----
   "product.deactivated": {
     productId: string;
     actorUserId: string;
     wasActive: boolean;
     department: Department;
   };
-
   "product.reactivated": {
     productId: string;
     actorUserId: string;
     wasActive: boolean;
     department: Department;
   };
-
   "stock.issueDiscrepancy": {
     movementId: string;
     actorUserId: string;
     expectedQuantity: number;
     acknowledgedQuantity: number;
   };
-
-  // add one entry per event as you wire up the rest
+  "stock.correctionApplied": {
+    productId: string;
+    department: Department;
+    actorUserId: string;
+    adjustment: number; // signed — positive = credit, negative = debit
+    correctionReason: string;
+  };
+  // realtime only, not audited: a clean (non-discrepancy) acknowledgment isn't audit-worthy on its own
   "stock.acknowledged": {
     movementId: string;
     productId: string;

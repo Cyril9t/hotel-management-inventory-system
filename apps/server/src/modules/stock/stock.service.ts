@@ -149,7 +149,7 @@ export const stockService = {
     const product = await stockService.getProductById(data.productId);
     const quantity = Math.abs(data.adjustment);
 
-    return database.$transaction(async (tx) => {
+    const movement = await database.$transaction(async (tx) => {
       if (data.adjustment > 0) {
         await stockRepository.creditBalance(
           tx,
@@ -178,6 +178,16 @@ export const stockService = {
         correctionReason: data.correctionReason,
       });
     });
+
+    eventBus.emit("stock.correctionApplied", {
+      productId: product.id,
+      department: data.department,
+      actorUserId,
+      adjustment: data.adjustment,
+      correctionReason: data.correctionReason,
+    });
+
+    return movement;
   },
 
   // ---- Acknowledge: Kitchen confirming an ISSUE, crediting only the confirmed amount ----

@@ -3,16 +3,7 @@ import { io } from "./socket";
 import { logger } from "#shared/logger";
 
 export function registerRealtimeListeners() {
-  eventBus.on("kitchenOrder.statusChanged", ({ destination }) => {
-    safeEmit(() =>
-      io.to(destination).emit("invalidate", { key: "kitchenOrders" }),
-    );
-  });
-
-  eventBus.on("booking.checkedOut", () => {
-    safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "bookings" }));
-  });
-
+  // ---- rooms ----
   eventBus.on("room.deactivated", () => {
     safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "rooms" }));
   });
@@ -21,39 +12,68 @@ export function registerRealtimeListeners() {
     safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "rooms" }));
   });
 
-  eventBus.on("stock.correctionApplied", ({ department }) => {
+  eventBus.on("room.categoryPriceChanged", () => {
+    safeEmit(() =>
+      io.to("RECEPTION").to("management").emit("invalidate", { key: "rooms" }),
+    );
+  });
+
+  eventBus.on("room.categoryNameChanged", () => {
+    safeEmit(() =>
+      io.to("RECEPTION").to("management").emit("invalidate", { key: "rooms" }),
+    );
+  });
+
+  // ---- bookings ----
+  eventBus.on("booking.manualCheckout", () => {
+    safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "bookings" }));
+  });
+
+  // ---- shifts ----
+  eventBus.on("shift.closed", () => {
+    safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" }));
+  });
+
+  // ---- orders ----
+  eventBus.on("kitchenOrder.statusChanged", ({ destination }) => {
+    safeEmit(() =>
+      io.to(destination).emit("invalidate", { key: "kitchenOrders" }),
+    );
+  });
+
+  // ---- stock ----
+  eventBus.on("product.deactivated", ({ department }) => {
+    safeEmit(() =>
+      io
+        .to(department)
+        .to("management")
+        .emit("invalidate", { key: "products" }),
+    );
+  });
+
+  eventBus.on("product.reactivated", ({ department }) => {
+    safeEmit(() =>
+      io
+        .to(department)
+        .to("management")
+        .emit("invalidate", { key: "products" }),
+    );
+  });
+
+  eventBus.on("stock.acknowledged", ({ department }) => {
     safeEmit(() =>
       io.to(department).to("management").emit("invalidate", { key: "stock" }),
     );
   });
 
-  eventBus.on("room.deactivated", () =>
-    safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "rooms" })),
-  );
-
-  eventBus.on("room.reactivated", () =>
-    safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "rooms" })),
-  );
-
-  eventBus.on("room.categoryPriceChanged", () =>
+  eventBus.on("stock.issueDiscrepancy", () => {
     safeEmit(() =>
-      io.to("RECEPTION").to("management").emit("invalidate", { key: "rooms" }),
-    ),
-  );
-
-  eventBus.on("room.categoryNameChanged", () =>
-    safeEmit(() =>
-      io.to("RECEPTION").to("management").emit("invalidate", { key: "rooms" }),
-    ),
-  );
-
-  eventBus.on("shift.closed", () =>
-    safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" })),
-  );
-
-  eventBus.on("booking.manualCheckout", () =>
-    safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "bookings" })),
-  );
+      io
+        .to("KITCHEN")
+        .to("management")
+        .emit("invalidate", { key: "stockMovements" }),
+    );
+  });
 }
 
 function safeEmit(fn: () => unknown) {
