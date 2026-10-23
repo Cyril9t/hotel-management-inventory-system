@@ -2,7 +2,7 @@ import { BadRequestError, NotFoundError } from "#shared/errors/http-errors";
 import { bookingsRepository } from "./bookings.repository";
 import { roomsRepository } from "../rooms/rooms.repository";
 import { shiftsRepository } from "../shifts/shifts.repository";
-import { auditService } from "../audit/audit.service";
+import { eventBus } from "#shared/events/bus";
 import type { CreateBookingBody, ListBookingsQuery } from "./bookings.schema";
 
 export const bookingsService = {
@@ -66,16 +66,11 @@ export const bookingsService = {
 
     const result = await bookingsRepository.checkout(id, settledByUserId);
 
-    await auditService.log({
+    eventBus.emit("booking.manualCheckout", {
+      bookingId: id,
       actorUserId: settledByUserId,
-      action: "manual_booking_checkout",
-      entityType: "Booking",
-      entityId: id,
-      beforeValue: { status: booking.status },
-      afterValue: {
-        status: "CHECKED_OUT",
-        actualCheckoutAt: result.actualCheckoutAt,
-      },
+      beforeStatus: booking.status,
+      actualCheckoutAt: result.actualCheckoutAt,
     });
 
     return result;

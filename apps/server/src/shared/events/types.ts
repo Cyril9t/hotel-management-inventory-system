@@ -1,3 +1,4 @@
+import type { Department } from "node_modules/@prisma/client";
 import type { Decimal } from "node_modules/@prisma/client/runtime/client";
 
 export type DomainEvents = {
@@ -64,11 +65,40 @@ export type DomainEvents = {
       variance: unknown;
     };
   };
+
   "booking.manualCheckout": {
     bookingId: string;
     actorUserId: string;
     beforeStatus: string;
-    actualCheckoutAt: Date;
+    actualCheckoutAt: Date | null;
   };
+
+  "product.deactivated": {
+    productId: string;
+    actorUserId: string;
+    wasActive: boolean;
+    department: Department;
+  };
+
+  "product.reactivated": {
+    productId: string;
+    actorUserId: string;
+    wasActive: boolean;
+    department: Department;
+  };
+
+  "stock.issueDiscrepancy": {
+    movementId: string;
+    actorUserId: string;
+    expectedQuantity: number;
+    acknowledgedQuantity: number;
+  };
+
   // add one entry per event as you wire up the rest
+  "stock.acknowledged": {
+    movementId: string;
+    productId: string;
+    department: Department;
+    quantity: number;
+  };
 };
