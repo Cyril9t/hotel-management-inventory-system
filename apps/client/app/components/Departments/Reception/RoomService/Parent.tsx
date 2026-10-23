@@ -12,6 +12,7 @@ import {
     ChevronRight,
     Plus
 } from 'lucide-react';
+import { Button } from '~/components/ui/button';
 
 const INITIAL_RECORDS: RoomServiceRecord[] = [
     {
@@ -112,17 +113,17 @@ export const RoomServiceModule: React.FC = () => {
     const [records, setRecords] = useState<RoomServiceRecord[]>(INITIAL_RECORDS);
     const [selectedRecord, setSelectedRecord] = useState<RoomServiceRecord | null>(INITIAL_RECORDS[0]);
 
-    // Filter States
+
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [typeFilter, setTypeFilter] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('newest');
 
-    // Pagination State
+
     const [currentPage, setCurrentPage] = useState<number>(1);
     const itemsPerPage = 5;
 
-    // Calculate real-time KPI metrics
+
     const metrics = useMemo(() => {
         return {
             total: records.length,
@@ -132,17 +133,17 @@ export const RoomServiceModule: React.FC = () => {
         };
     }, [records]);
 
-    // Filtering & Sorting Logic
+
     const filteredRecords = useMemo(() => {
         return records
             .filter((rec) => {
-                // Status Filter
+
                 const matchesStatus = statusFilter === 'all' || rec.status === statusFilter;
 
-                // Type Filter
+
                 const matchesType = typeFilter === 'all' || rec.type === typeFilter;
 
-                // Search Filter
+
                 const query = searchTerm.toLowerCase().trim();
                 const matchesSearch =
                     query === '' ||
@@ -160,14 +161,14 @@ export const RoomServiceModule: React.FC = () => {
             });
     }, [records, statusFilter, typeFilter, searchTerm, sortBy]);
 
-    // Pagination Slice
+
     const totalPages = Math.ceil(filteredRecords.length / itemsPerPage) || 1;
     const paginatedRecords = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         return filteredRecords.slice(start, start + itemsPerPage);
     }, [filteredRecords, currentPage]);
 
-    // Handler to update status (e.g. In Progress -> Delivered)
+
     const handleUpdateStatus = (id: string, newStatus: string) => {
         setRecords((prev) =>
             prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
@@ -179,20 +180,20 @@ export const RoomServiceModule: React.FC = () => {
 
     const getTypeIcon = (type: string) => {
         switch (type) {
-            case 'Food': return <Utensils className="w-3.5 h-3.5 text-amber-400" />;
-            case 'Drinks': return <Coffee className="w-3.5 h-3.5 text-sky-400" />;
-            case 'Essentials': return <Package className="w-3.5 h-3.5 text-purple-400" />;
-            default: return <Utensils className="w-3.5 h-3.5 text-primary" />;
+            case 'Food': return <Utensils className="w-4.5 h-4.5 " />;
+            case 'Drinks': return <Coffee className="w-4.5 h-4.5" />;
+            case 'Essentials': return <Package className="w-4.5 h-4.5" />;
+            default: return <Utensils className="w-4.5 h-4.5 " />;
         }
     };
 
     const getStatusBadgeClass = (status: string) => {
         switch (status) {
-            case 'In Progress': return 'bg-sky-500/10 text-sky-400 border-sky-500/30';
-            case 'Pending': return 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-            case 'Delivered': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-            case 'Completed': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
-            case 'Cancelled': return 'bg-destructive/10 text-destructive border-destructive/30';
+            case 'In Progress': return 'bg-brand-success/10 text-brand-success border-brand-success';
+            case 'Pending': return 'bg-brand-warning/10 text-brand-warning border-border';
+            case 'Delivered': return 'bg-brand-success/10 text-brand-success border-brand-success';
+            case 'Completed': return 'bg-brand-success/10 text-brand-success border-brand-success';
+            case 'Cancelled': return 'bg-brand-destructive/10 text-brand-destructive border-border';
             default: return 'bg-secondary text-muted-foreground';
         }
     };
@@ -201,22 +202,22 @@ export const RoomServiceModule: React.FC = () => {
         <div className="">
             <div className="">
 
-                {/* Page Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4  pb-6">
                     <div>
-                        <h1 className="text-2xl font-bold font-serif text-foreground">Room Service Management</h1>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <h1 className="text-3xl font-bold text-foreground">Room Service Management</h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">
                             Track, dispatch, and fulfill in-room food, beverages, and housekeeping requests.
                         </p>
                     </div>
 
-                    <button className="px-4 py-2 text-xs font-semibold rounded-[var(--radius)] bg-primary text-primary-foreground shadow-md hover:opacity-95 transition-all flex items-center gap-2 self-start sm:self-auto">
+                    <Button className="h-10">
                         <Plus className="w-4 h-4" />
                         <span>New Room Request</span>
-                    </button>
+                    </Button>
                 </div>
 
-                {/* KPI Metrics Cards */}
+
                 <RoomServiceMetrics
                     total={metrics.total}
                     inProgress={metrics.inProgress}
@@ -224,7 +225,7 @@ export const RoomServiceModule: React.FC = () => {
                     cancelled={metrics.cancelled}
                 />
 
-                {/* Top Control Filter Bar (Replacing Left Sidebar) */}
+
                 <RoomServiceTopFilter
                     searchTerm={searchTerm}
                     setSearchTerm={(term) => {
@@ -245,15 +246,16 @@ export const RoomServiceModule: React.FC = () => {
                     setSortBy={setSortBy}
                 />
 
-                {/* Main Content Layout: Table + Right Drawer */}
-                <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-                    {/* Requests Table Wrapper */}
+                <div className="flex flex-col lg:flex-row gap-6 items-start mt-9">
+
+
                     <div className="flex-1 w-full space-y-4">
+
                         <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs">
-                                    <thead className="border-b border-border bg-secondary/40 text-muted-foreground font-semibold uppercase tracking-wider text-[10px]">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="  border-border bg-brand-navy text-background font-semibold uppercase tracking-wider text-sm ">
                                         <tr>
                                             <th className="p-3.5 pl-4">Request ID</th>
                                             <th className="p-3.5">Room</th>
@@ -282,31 +284,33 @@ export const RoomServiceModule: React.FC = () => {
                                                         className={`cursor-pointer transition-colors ${isSelected ? 'bg-secondary/60' : 'hover:bg-secondary/20'
                                                             }`}
                                                     >
-                                                        <td className="p-3.5 pl-4 font-mono font-bold text-primary">
+                                                        <td className="p-3.5 pl-4 text-primary border border-border">
                                                             {rec.id}
                                                         </td>
-                                                        <td className="p-3.5 font-bold font-serif text-sm text-foreground">
+
+                                                        <td className="p-3.5 font-bold text-sm text-foreground border border-border">
                                                             {rec.room}
                                                         </td>
-                                                        <td className="p-3.5">
-                                                            <p className="font-semibold text-foreground">{rec.guest}</p>
-                                                            <p className="text-[10px] text-muted-foreground">{rec.guestsCount} Guest(s)</p>
+                                                        <td className="p-3.5 border border-border">
+                                                            <p className="font-semibold text-[16px] text-foreground">{rec.guest}</p>
+
                                                         </td>
-                                                        <td className="p-3.5 text-muted-foreground max-w-[180px] truncate">
+                                                        <td className="p-3.5 text-muted-foreground max-w-40 truncate border border-border">
                                                             {rec.itemsSummary}
                                                         </td>
-                                                        <td className="p-3.5">
-                                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary text-foreground text-[10px] font-semibold">
+
+                                                        <td className="p-3.5 border border-border">
+                                                            <span className="inline-flex items-center gap-1.5 rounded text-foreground text-[12px] font-semibold w-full ">
                                                                 {getTypeIcon(rec.type)}
                                                                 <span>{rec.type}</span>
                                                             </span>
                                                         </td>
-                                                        <td className="p-3.5">
-                                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadgeClass(rec.status)}`}>
+                                                        <td className="p-3.5 border border-border">
+                                                            <span className={`flex justify-center w-full p-1 rounded-full text-[10px] font-bold border ${getStatusBadgeClass(rec.status)}`}>
                                                                 {rec.status}
                                                             </span>
                                                         </td>
-                                                        <td className="p-3.5 font-mono text-[11px] text-muted-foreground">
+                                                        <td className="p-3.5 font-mono font-bold text-[14px] text-muted-foreground border border-border">
                                                             {rec.time}
                                                         </td>
                                                         <td className="p-3.5 pr-4 text-right">
@@ -360,7 +364,7 @@ export const RoomServiceModule: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Right Side Order Drawer Component */}
+
                     {selectedRecord && (
                         <RoomServiceDrawer
                             record={selectedRecord}
