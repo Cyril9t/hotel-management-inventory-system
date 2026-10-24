@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { Department, StockMovementType } from "@prisma/client";
+import {
+  dateRangeShape,
+  dateRangeRefinement,
+} from "#shared/utils/date-range-schema";
 
 export const createProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -68,11 +72,17 @@ export const listBalancesQuerySchema = z.object({
   department: z.enum(Department, "Invalid department").optional(),
 });
 
-export const listMovementsQuerySchema = z.object({
-  productId: z.uuid("Invalid product id").optional(),
-  department: z.enum(Department, "Invalid department").optional(),
-  movementType: z.enum(StockMovementType, "Invalid movement type").optional(),
-});
+export const listMovementsQuerySchema = z
+  .object({
+    productId: z.uuid("Invalid product id").optional(),
+    department: z.enum(Department, "Invalid department").optional(),
+    movementType: z.enum(StockMovementType, "Invalid movement type").optional(),
+    ...dateRangeShape,
+  })
+  .refine(dateRangeRefinement, {
+    message: "endDate must be on or after startDate",
+    path: ["endDate"],
+  });
 
 export type CreateProductBody = z.infer<typeof createProductSchema>;
 export type UpdateProductBody = z.infer<typeof updateProductSchema>;

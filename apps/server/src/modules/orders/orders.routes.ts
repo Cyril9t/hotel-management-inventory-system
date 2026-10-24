@@ -14,7 +14,6 @@ import {
   updateKitchenOrderStatusSchema,
   listKitchenOrdersQuerySchema,
 } from "./orders.schema";
-import type { Role } from "@prisma/client";
 
 export const ordersRoutes = Router();
 
@@ -27,7 +26,8 @@ registry.registerPath({
   path: "/sales",
   tags: ["Orders"],
   summary: "Create a new sale",
-  description: "Registers a sale for products. Supports direct payment or charging to a room booking.",
+  description:
+    "Registers a sale for products. Supports direct payment or charging to a room booking.",
   security: [{ bearerAuth: [] }],
   request: {
     body: { content: { "application/json": { schema: createSaleSchema } } },
@@ -57,7 +57,8 @@ registry.registerPath({
   path: "/sales",
   tags: ["Orders"],
   summary: "List sales",
-  description: "Retrieves a list of sales with optional filters for department, status, and payment state.",
+  description:
+    "Retrieves a list of sales with optional filters for department, status, and payment state.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listSalesQuerySchema,
@@ -83,7 +84,8 @@ registry.registerPath({
   path: "/sales/{id}",
   tags: ["Orders"],
   summary: "Get sale details",
-  description: "Retrieves detailed information about a specific sale by its ID.",
+  description:
+    "Retrieves detailed information about a specific sale by its ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: saleIdParamsSchema,
@@ -113,7 +115,8 @@ registry.registerPath({
   path: "/sales/{id}/request-void",
   tags: ["Orders"],
   summary: "Request to void a sale",
-  description: "Initiates a request to void a sale. Requires a reason for the void.",
+  description:
+    "Initiates a request to void a sale. Requires a reason for the void.",
   security: [{ bearerAuth: [] }],
   request: {
     params: saleIdParamsSchema,
@@ -144,7 +147,8 @@ registry.registerPath({
   path: "/sales/{id}/approve-void",
   tags: ["Orders"],
   summary: "Approve a void request",
-  description: "Approves a previously requested void, effectively canceling the sale.",
+  description:
+    "Approves a previously requested void, effectively canceling the sale.",
   security: [{ bearerAuth: [] }],
   request: {
     params: saleIdParamsSchema,
@@ -204,7 +208,8 @@ registry.registerPath({
   path: "/kitchen-orders",
   tags: ["Orders"],
   summary: "List kitchen orders",
-  description: "Retrieves a list of current kitchen orders, optionally filtered by status.",
+  description:
+    "Retrieves a list of current kitchen orders, optionally filtered by status.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listKitchenOrdersQuerySchema,
@@ -230,7 +235,8 @@ registry.registerPath({
   path: "/kitchen-orders/{id}",
   tags: ["Orders"],
   summary: "Get kitchen order details",
-  description: "Retrieves detailed information about a specific kitchen order by its ID.",
+  description:
+    "Retrieves detailed information about a specific kitchen order by its ID.",
   security: [{ bearerAuth: [] }],
   request: {
     params: kitchenOrderIdParamsSchema,
@@ -260,11 +266,16 @@ registry.registerPath({
   path: "/kitchen-orders/{id}/status",
   tags: ["Orders"],
   summary: "Update kitchen order status",
-  description: "Updates the status of a kitchen order (e.g., PREPARING, READY, DELIVERED).",
+  description:
+    "Updates the status of a kitchen order (e.g., PREPARING, READY, DELIVERED).",
   security: [{ bearerAuth: [] }],
   request: {
     params: kitchenOrderIdParamsSchema,
-    body: { content: { "application/json": { schema: updateKitchenOrderStatusSchema } } },
+    body: {
+      content: {
+        "application/json": { schema: updateKitchenOrderStatusSchema },
+      },
+    },
   },
   responses: {
     200: {
@@ -286,7 +297,7 @@ ordersRoutes.patch(
   "/kitchen-orders/:id/status",
   authorize("update", "KitchenOrder"),
   validate({
-    params: kitchenOrderIdParamsHema,
+    params: kitchenOrderIdParamsSchema,
     body: updateKitchenOrderStatusSchema,
   }),
   ordersController.updateKitchenOrderStatus,

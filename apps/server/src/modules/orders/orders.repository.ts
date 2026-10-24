@@ -59,9 +59,22 @@ export const ordersRepository = {
     sourceDepartment?: Department;
     status?: SaleStatus;
     paymentState?: "UNPAID" | "PAID";
+    startDate?: Date;
+    endDate?: Date;
   }) {
+    const { startDate, endDate, ...rest } = filters;
     return database.sale.findMany({
-      where: filters,
+      where: {
+        ...rest,
+        ...(startDate || endDate
+          ? {
+              createdAt: {
+                ...(startDate && { gte: startDate }),
+                ...(endDate && { lte: endDate }),
+              },
+            }
+          : {}),
+      },
       include: { items: true },
       orderBy: { createdAt: "desc" },
     });
@@ -104,9 +117,24 @@ export const ordersRepository = {
     });
   },
 
-  async listKitchenOrders(filters: { status?: KitchenOrderStatus }) {
+  async listKitchenOrders(filters: {
+    status?: KitchenOrderStatus;
+    startDate?: Date;
+    endDate?: Date;
+  }) {
+    const { startDate, endDate, ...rest } = filters;
     return database.kitchenOrder.findMany({
-      where: filters,
+      where: {
+        ...rest,
+        ...(startDate || endDate
+          ? {
+              createdAt: {
+                ...(startDate && { gte: startDate }),
+                ...(endDate && { lte: endDate }),
+              },
+            }
+          : {}),
+      },
       include: { items: true },
       orderBy: { createdAt: "asc" },
     });

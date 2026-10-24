@@ -5,6 +5,10 @@ import {
   PaymentState,
   KitchenOrderStatus,
 } from "@prisma/client";
+import {
+  dateRangeShape,
+  dateRangeRefinement,
+} from "#shared/utils/date-range-schema";
 
 export const saleItemInputSchema = z.object({
   productId: z.uuid("Invalid product id"),
@@ -22,13 +26,19 @@ export const saleIdParamsSchema = z.object({
   id: z.uuid("Invalid sale id"),
 });
 
-export const listSalesQuerySchema = z.object({
-  sourceDepartment: z
-    .enum(["BAR", "RESTAURANT"], "Invalid source department")
-    .optional(),
-  status: z.enum(SaleStatus, "Invalid status").optional(),
-  paymentState: z.enum(PaymentState, "Invalid payment state").optional(),
-});
+export const listSalesQuerySchema = z
+  .object({
+    sourceDepartment: z
+      .enum(["BAR", "RESTAURANT"], "Invalid source department")
+      .optional(),
+    status: z.enum(SaleStatus, "Invalid status").optional(),
+    paymentState: z.enum(PaymentState, "Invalid payment state").optional(),
+    ...dateRangeShape,
+  })
+  .refine(dateRangeRefinement, {
+    message: "endDate must be on or after startDate",
+    path: ["endDate"],
+  });
 
 export const requestVoidSchema = z.object({
   voidReason: z.string().min(1, "Void reason is required"),
@@ -45,9 +55,17 @@ export const updateKitchenOrderStatusSchema = z.object({
   ),
 });
 
-export const listKitchenOrdersQuerySchema = z.object({
-  status: z.enum(KitchenOrderStatus, "Invalid kitchen order status").optional(),
-});
+export const listKitchenOrdersQuerySchema = z
+  .object({
+    status: z
+      .enum(KitchenOrderStatus, "Invalid kitchen order status")
+      .optional(),
+    ...dateRangeShape,
+  })
+  .refine(dateRangeRefinement, {
+    message: "endDate must be on or after startDate",
+    path: ["endDate"],
+  });
 
 export type SaleItemInput = z.infer<typeof saleItemInputSchema>;
 export type CreateSaleBody = z.infer<typeof createSaleSchema>;

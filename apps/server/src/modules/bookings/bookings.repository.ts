@@ -21,6 +21,14 @@ export const bookingsRepository = {
         roomId: filters.roomId,
         status: filters.status,
       }),
+      ...(filters.startDate || filters.endDate
+        ? {
+            createdAt: {
+              ...(filters.startDate && { gte: filters.startDate }),
+              ...(filters.endDate && { lte: filters.endDate }),
+            },
+          }
+        : {}),
     };
 
     return database.booking.findMany({
