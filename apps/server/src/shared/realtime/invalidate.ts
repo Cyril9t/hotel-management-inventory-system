@@ -29,8 +29,16 @@ export function registerRealtimeListeners() {
     safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "bookings" }));
   });
 
+  eventBus.on("booking.created", () => {
+    safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "bookings" }));
+  });
+
   // ---- shifts ----
   eventBus.on("shift.closed", () => {
+    safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" }));
+  });
+
+  eventBus.on("shift.opened", () => {
     safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" }));
   });
 
@@ -38,6 +46,39 @@ export function registerRealtimeListeners() {
   eventBus.on("kitchenOrder.statusChanged", ({ destination }) => {
     safeEmit(() =>
       io.to(destination).emit("invalidate", { key: "kitchenOrders" }),
+    );
+  });
+
+  eventBus.on("sale.created", ({ sourceDepartment }) => {
+    safeEmit(() =>
+      io
+        .to(sourceDepartment)
+        .to("management")
+        .emit("invalidate", { key: "sales" }),
+    );
+  });
+
+  eventBus.on("sale.voidRequested", ({ sourceDepartment }) => {
+    safeEmit(() =>
+      io
+        .to(sourceDepartment)
+        .to("management")
+        .emit("invalidate", { key: "sales" }),
+    );
+  });
+
+  eventBus.on("sale.voidApproved", ({ sourceDepartment }) => {
+    safeEmit(() =>
+      io
+        .to(sourceDepartment)
+        .to("management")
+        .emit("invalidate", { key: "sales" }),
+    );
+  });
+
+  eventBus.on("sale.settled", () => {
+    safeEmit(() =>
+      io.to("RECEPTION").to("management").emit("invalidate", { key: "sales" }),
     );
   });
 
@@ -72,6 +113,22 @@ export function registerRealtimeListeners() {
         .to("KITCHEN")
         .to("management")
         .emit("invalidate", { key: "stockMovements" }),
+    );
+  });
+
+  eventBus.on("stock.received", () => {
+    safeEmit(() =>
+      io.to("STORE").to("management").emit("invalidate", { key: "stock" }),
+    );
+  });
+
+  eventBus.on("stock.issued", ({ fromDepartment, toDepartment }) => {
+    safeEmit(() =>
+      io
+        .to(fromDepartment)
+        .to(toDepartment)
+        .to("management")
+        .emit("invalidate", { key: "stock" }),
     );
   });
 }

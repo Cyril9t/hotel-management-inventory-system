@@ -40,13 +40,22 @@ export const roomsService = {
     return { ...rest, status: deriveStatus(bookings) };
   },
 
-  async create(data: CreateRoomBody) {
+  async create(data: CreateRoomBody, actorUserId: string) {
     const category = await roomsRepository.findCategoryById(data.categoryId);
     if (!category) throw new NotFoundError("Room category not found");
-    return roomsRepository.create({
+    const room = await roomsRepository.create({
       number: data.number,
       category: { connect: { id: data.categoryId } },
     });
+
+    eventBus.emit("room.created", {
+      roomId: room.id,
+      actorUserId,
+      number: room.number,
+      categoryId: data.categoryId,
+    });
+
+    return room;
   },
 
   async update(id: string, data: UpdateRoomBody) {
@@ -129,14 +138,23 @@ export const roomsService = {
     return updated;
   },
 
-  async createCategory(data: CreateCategoryBody) {
+  async createCategory(data: CreateCategoryBody, actorUserId: string) {
     const existing = await roomsRepository.findCategoryByName(data.name);
     if (existing)
       throw new BadRequestError("A category with that name already exists");
-    return roomsRepository.createCategory(data);
+    const category = await roomsRepository.createCategory(data);
+
+    eventBus.emit("roomCategory.created", {
+      categoryId: category.id,
+      actorUserId,
+      name: category.name,
+      pricePerNight: category.pricePerNight,
+    });
+
+    return category;
   },
 
-  async bulkCreateRooms(data: BulkCreateRoomsBody) {
+  async bulkCreateRooms(data: BulkCreateRoomsBody, actorUserId: string) {
     const category = await roomsRepository.findCategoryById(data.categoryId);
     if (!category) throw new NotFoundError("Room category not found");
 
@@ -152,6 +170,13 @@ export const roomsService = {
     const result = await roomsRepository.createMany(
       numbers.map((number) => ({ number, categoryId: data.categoryId })),
     );
+
+    eventBus.emit("rooms.bulkCreated", {
+      actorUserId,
+      categoryId: data.categoryId,
+      requested: numbers.length,
+      created: result.count,
+    });
 
     return {
       requested: numbers.length,

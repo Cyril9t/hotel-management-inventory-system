@@ -22,7 +22,7 @@ export const bookingsService = {
     const pricePerNightAtBooking = room.category.pricePerNight;
     const totalPrice = pricePerNightAtBooking.mul(data.nights);
 
-    return bookingsRepository.create({
+    const booking = await bookingsRepository.create({
       room: { connect: { id: data.roomId } },
       guestFirstName: data.guestFirstName,
       guestLastName: data.guestLastName,
@@ -38,6 +38,16 @@ export const bookingsService = {
       createdBy: { connect: { id: createdByUserId } },
       shift: { connect: { id: shift.id } },
     });
+
+    eventBus.emit("booking.created", {
+      bookingId: booking.id,
+      actorUserId: createdByUserId,
+      roomId: data.roomId,
+      totalPrice: booking.totalPrice,
+      paymentMethod: data.paymentMethod,
+    });
+
+    return booking;
   },
 
   async getById(id: string) {
@@ -64,7 +74,15 @@ export const bookingsService = {
       throw new BadRequestError("Booking is not in a checkout-eligible state");
     }
 
-    const result = await bookingsRepository.checkout(id, settledByUserId);
+    const unpaidSales =
+      await bookingsRepository.findUnpaidChargeToRoomSales(id);
+    if (unpaidSales.length > 0) {
+      throw new BadRequestError(
+        `Booking has ${unpaidSales.length} unpaid charge-to-room sale(s) — settle them before checkout`,
+      );
+    }
+
+    const result = await bookingsRepository.checkout(id);
 
     eventBus.emit("booking.manualCheckout", {
       bookingId: id,

@@ -34,7 +34,7 @@ export const usersController = {
     const { id } = res.locals.params as UserIdParams;
     res.json(
       success({
-        user: await usersService.deactivate(id),
+        user: await usersService.deactivate(id, req.user!.userId),
       }),
     );
   },
@@ -43,7 +43,7 @@ export const usersController = {
     const { id } = res.locals.params as UserIdParams;
     res.json(
       success({
-        user: await usersService.reactivate(id),
+        user: await usersService.reactivate(id, req.user!.userId),
       }),
     );
   },
@@ -91,7 +91,11 @@ export const usersController = {
 
   async resendInvite(req: Request, res: Response) {
     const { id } = res.locals.params as InviteIdParams;
-    const invite = await usersService.resendInvite(req.permission!, id);
+    const invite = await usersService.resendInvite(
+      req.permission!,
+      id,
+      req.user!.userId,
+    );
     res.json(success({ invite }));
   },
 

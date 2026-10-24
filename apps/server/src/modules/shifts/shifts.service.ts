@@ -48,6 +48,13 @@ export const shiftsService = {
       await shiftsRepository.createSnapshot(shift.id, roomSnapshotOpen);
     }
 
+    eventBus.emit("shift.opened", {
+      shiftId: shift.id,
+      actorUserId: userId,
+      department,
+      openingCash: shift.openingCash,
+    });
+
     return shift;
   },
 

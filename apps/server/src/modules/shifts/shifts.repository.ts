@@ -53,7 +53,10 @@ export const shiftsRepository = {
     });
   },
 
-  // TODO: extend with stock/orders cash once those modules exist
+  // Sums cash-method revenue tied to this shift. Bookings (reception) and
+  // Sales (bar/restaurant, via orders) both carry shiftId at creation, so
+  // this picks up real data automatically — no stock component, since
+  // stock movements never involve cash.
   async computeExpectedCash(shiftId: string) {
     const [bookingsCash, salesCash] = await Promise.all([
       database.booking.aggregate({

@@ -17,6 +17,7 @@ import type {
   User,
   StaffInvite,
   AuditLog,
+  DailyReportSnapshot,
 } from "@prisma/client";
 import type { AccessTokenPayload } from "./jwt";
 
@@ -33,6 +34,7 @@ type Models = {
   User: User;
   StaffInvite: StaffInvite;
   AuditLog: AuditLog;
+  DailyReportSnapshot: DailyReportSnapshot;
 };
 
 export type Permission =
@@ -41,14 +43,15 @@ export type Permission =
   | ["create" | "read" | "update", Subjects<Pick<Models, "RoomCategory">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "Booking">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "Shift">>]
-  | ["create" | "read" | "void", Subjects<Pick<Models, "Sale">>]
+  | ["create" | "read" | "update" | "void", Subjects<Pick<Models, "Sale">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "KitchenOrder">>]
   | ["manage" | "read", Subjects<Pick<Models, "Product">>]
   | ["read" | "update" | "manage", Subjects<Pick<Models, "StockMovement">>]
   | ["manage", Subjects<Pick<Models, "StockBalance">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "StaffInvite">>]
   | ["read" | "update", Subjects<Pick<Models, "User">>]
-  | ["read", Subjects<Pick<Models, "AuditLog">>];
+  | ["read", Subjects<Pick<Models, "AuditLog">>]
+  | ["read", Subjects<Pick<Models, "DailyReportSnapshot">>];
 
 export type Permissions = MongoAbility<Permission>;
 
@@ -77,6 +80,7 @@ export function getPermissions(user: AccessTokenPayload) {
       can(["create", "read", "update"], "Booking");
       can("read", ["Room", "RoomCategory"]);
       can(["create", "read", "update"], "Shift", { userId: user.userId });
+      can("update", "Sale", { paymentMethod: "CHARGE_TO_ROOM" });
       break;
 
     case "BAR_STAFF":
@@ -103,6 +107,7 @@ export function getPermissions(user: AccessTokenPayload) {
     case "STORE_MANAGER":
       can("manage", ["Product", "StockBalance", "StockMovement"]);
       can(["create", "read", "update"], "Shift", { userId: user.userId });
+      // can("read", "DailyReportSnapshot", { department: "STORE" });
       break;
   }
 

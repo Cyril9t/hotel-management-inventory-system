@@ -8,6 +8,7 @@ import {
 import { usersRepository } from "./users.repository";
 import { password } from "#shared/lib/password";
 import { enqueueInviteEmail } from "#shared/jobs/email/email.queue";
+import { eventBus } from "#shared/events/bus";
 import type { Permissions } from "#shared/lib/permission.js";
 import type {
   CreateInviteBody,
@@ -37,12 +38,26 @@ export const usersService = {
     return user;
   },
 
-  async deactivate(id: string) {
-    return usersRepository.deactivate(id);
+  async deactivate(id: string, actorUserId: string) {
+    const user = await usersService.getById(id);
+    const updated = await usersRepository.deactivate(id);
+    eventBus.emit("user.deactivated", {
+      userId: id,
+      actorUserId,
+      wasActive: user.isActive,
+    });
+    return updated;
   },
 
-  async reactivate(id: string) {
-    return usersRepository.reactivate(id);
+  async reactivate(id: string, actorUserId: string) {
+    const user = await usersService.getById(id);
+    const updated = await usersRepository.reactivate(id);
+    eventBus.emit("user.reactivated", {
+      userId: id,
+      actorUserId,
+      wasActive: user.isActive,
+    });
+    return updated;
   },
 
   async createInvite(
@@ -78,10 +93,18 @@ export const usersService = {
       rawToken,
       expiresAt: invite.expiresAt,
     });
+
+    eventBus.emit("staffInvite.created", {
+      inviteId: invite.id,
+      actorUserId: createdByUserId,
+      email: invite.email,
+      role: invite.role,
+    });
+
     return invite;
   },
 
-  async resendInvite(permission: Permissions, id: string) {
+  async resendInvite(permission: Permissions, id: string, actorUserId: string) {
     const invite = await usersRepository.findInviteById(id);
     if (!invite) throw new NotFoundError("Invite not found");
     if (invite.status !== "PENDING") {
@@ -107,6 +130,13 @@ export const usersService = {
       rawToken,
       expiresAt: invite.expiresAt,
     });
+
+    eventBus.emit("staffInvite.resent", {
+      inviteId: invite.id,
+      actorUserId,
+      email: invite.email,
+    });
+
     return invite;
   },
 
@@ -133,12 +163,18 @@ export const usersService = {
         rawToken: reissuedToken,
         expiresAt: pendingInvite.expiresAt,
       });
+
+      eventBus.emit("staffInvite.resent", {
+        inviteId: pendingInvite.id,
+        actorUserId: pendingInvite.createdByUserId,
+        email: pendingInvite.email,
+      });
+
       return pendingInvite;
     }
 
     const systemUserId = await usersRepository.ensureSystemUser();
 
-    // const rawToken = crypto.randomUUID();
     const rawToken = token.generateToken();
     const invite = await usersRepository.createInvite({
       ...data,
@@ -155,6 +191,14 @@ export const usersService = {
       rawToken,
       expiresAt: invite.expiresAt,
     });
+
+    eventBus.emit("staffInvite.created", {
+      inviteId: invite.id,
+      actorUserId: systemUserId,
+      email: invite.email,
+      role: invite.role,
+    });
+
     return invite;
   },
 
@@ -187,6 +231,13 @@ export const usersService = {
     });
 
     await usersRepository.markInviteAccepted(invite.id, user.id);
+
+    eventBus.emit("staffInvite.accepted", {
+      inviteId: invite.id,
+      userId: user.id,
+      role: user.role,
+    });
+
     return user;
   },
 

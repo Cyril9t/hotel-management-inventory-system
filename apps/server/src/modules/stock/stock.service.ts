@@ -87,7 +87,7 @@ export const stockService = {
   async receive(data: ReceiveStockBody, actorUserId: string) {
     const product = await stockService.getProductById(data.productId);
 
-    return database.$transaction(async (tx) => {
+    const movement = await database.$transaction(async (tx) => {
       await stockRepository.creditBalance(
         tx,
         product.id,
@@ -102,6 +102,15 @@ export const stockService = {
         actor: { connect: { id: actorUserId } },
       });
     });
+
+    eventBus.emit("stock.received", {
+      movementId: movement.id,
+      productId: product.id,
+      actorUserId,
+      quantity: data.quantity,
+    });
+
+    return movement;
   },
 
   // ---- Issue: works in either direction — Store->Dept (normal issue) or
@@ -109,7 +118,7 @@ export const stockService = {
   async issue(data: IssueStockBody, actorUserId: string) {
     const product = await stockService.getProductById(data.productId);
 
-    return database.$transaction(async (tx) => {
+    const movement = await database.$transaction(async (tx) => {
       const debited = await stockRepository.debitBalance(
         tx,
         product.id,
@@ -122,8 +131,6 @@ export const stockService = {
         );
       }
 
-      // Kitchen requires receipt acknowledgment before stock lands in its balance —
-      // every other destination (including a pull-back to STORE) credits immediately.
       if (data.toDepartment !== "KITCHEN") {
         await stockRepository.creditBalance(
           tx,
@@ -142,6 +149,17 @@ export const stockService = {
         actor: { connect: { id: actorUserId } },
       });
     });
+
+    eventBus.emit("stock.issued", {
+      movementId: movement.id,
+      productId: product.id,
+      actorUserId,
+      fromDepartment: data.fromDepartment,
+      toDepartment: data.toDepartment,
+      quantity: data.quantity,
+    });
+
+    return movement;
   },
 
   // ---- Correction: manual count adjustment, signed at the API, stored positive ----
@@ -220,7 +238,7 @@ export const stockService = {
       );
     }
 
-    return database.$transaction(async (tx) => {
+    const updated = await database.$transaction(async (tx) => {
       if (data.acknowledgedQuantity > 0) {
         await stockRepository.creditBalance(
           tx,
@@ -230,7 +248,7 @@ export const stockService = {
         );
       }
 
-      const updated = await tx.stockMovement.update({
+      return tx.stockMovement.update({
         where: { id: movementId },
         data: {
           acknowledgedAt: new Date(),
@@ -238,24 +256,26 @@ export const stockService = {
           acknowledgedQuantity: data.acknowledgedQuantity,
         },
       });
+    });
 
-      if (data.acknowledgedQuantity !== movement.quantity) {
-        eventBus.emit("stock.issueDiscrepancy", {
-          movementId,
-          actorUserId,
-          expectedQuantity: movement.quantity,
-          acknowledgedQuantity: data.acknowledgedQuantity,
-        });
-      }
+    // Mutually exclusive — a discrepancy is audit-worthy; a clean match is realtime-only.
+    if (data.acknowledgedQuantity !== movement.quantity) {
+      eventBus.emit("stock.issueDiscrepancy", {
+        movementId,
+        actorUserId,
+        expectedQuantity: movement.quantity,
+        acknowledgedQuantity: data.acknowledgedQuantity,
+      });
+    } else {
       eventBus.emit("stock.acknowledged", {
         movementId,
         productId: movement.productId,
         department: "KITCHEN",
         quantity: data.acknowledgedQuantity,
       });
+    }
 
-      return updated;
-    });
+    return updated;
   },
 
   async listMovements(filters: ListMovementsQuery) {
