@@ -3,29 +3,16 @@ import { NavLink } from "react-router";
 import Logo from "~/components/shared/Logo";
 import { Button } from "~/components/ui/button";
 
-export const DashboardHeader = () => {
-    const tabs = [
-        {
-            title: 'Overview',
-            link: "/reception/dashboard",
-        }, {
-            title: 'Rooms',
-            link: '/reception/dashboard/rooms',
-        }, {
-            title: 'Room Service',
-            link: '/reception/dashboard/roomsService'
+export const DashboardHeader = (
+    {
+        departments = "",
+        staffName = "",
+        tabEnd = "",
+        tabs = []
+    },
 
-        }, {
-            title: 'History',
-            link: '/reception/dashboard/history'
-        },
-        {
-            title: 'Shift',
-            link: '/reception/dashboard/shifts'
-        }
+) => {
 
-
-    ] as const;
 
     return (
         <header className="border-b mb-1">
@@ -36,11 +23,11 @@ export const DashboardHeader = () => {
                     <div className="text-right hidden sm:block">
                         <div className="flex items-center justify-end gap-4">
 
-                            <span className="px-2 py-0.5 rounded text-[14px] font-bold bg-brand-gold/15 text-primary uppercase tracking-wider">
-                                RECEPTION
+                            <span className="px-2 py-0.5 rounded text-[14px] font-bold bg-brand-navy-light/90 text-primary uppercase tracking-wider">
+                                {departments}
                             </span>
 
-                            <span className="text-xl font-bold text-brand-navy-light">David Bello</span>
+                            <span className="text-xl font-bold text-brand-navy-light">{staffName}</span>
                         </div>
                         <p className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-1 justify-end">
                             <span className="w-3 h-3 rounded-full bg-brand-success animate-pulse" />
@@ -66,10 +53,10 @@ export const DashboardHeader = () => {
 
 
             <div className="max-w-7xl mx-auto flex gap-8 border-border/60">
-                {tabs.map(({ title, link }) => (
+                {tabs.map(({ title, link }: any) => (
                     <NavLink
                         to={link}
-                        end={link === "/reception/dashboard"}
+                        end={link === `/${tabEnd}/dashboard`}
                     >
                         {({ isActive }) => (
                             <button

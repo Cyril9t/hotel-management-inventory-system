@@ -94,12 +94,12 @@ export function StaffsTable() {
 
             <CreateGMModal isOpen={createGM} onClose={() => setCreateGM(false)} />
 
-            <Card >
+            <Card className='mb-6  bg-brand-navy-light'>
                 <CardHeader>
-                    <div className="p-6 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
 
                         <div>
-                            <h3 className="text-xl font-bold text-foreground">Brandy Hotel Staffs and Departments</h3>
+                            <h3 className="text-2xl font-bold text-background">Brandy Hotel Staffs and Departments</h3>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -137,12 +137,16 @@ export function StaffsTable() {
                     </div>
                 </CardHeader>
 
+            </Card>
+            <Card >
+
+
                 <CardContent>
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="border-b border-border bg-secondary text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
+                                <tr className="border-b border-border text-[12px] uppercase tracking-wider text-brand-navy font-semibold">
                                     <th className="py-3 px-6">Name</th>
                                     <th className="py-3 px-6">Role</th>
                                     <th className="py-3 px-6">Phone Number</th>
@@ -150,12 +154,12 @@ export function StaffsTable() {
 
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border text-xs">
+                            <tbody className="divide-y divide-border text-sm">
                                 {filteredUsers.length > 0 ? (
                                     filteredUsers.map((user) => (
                                         <tr key={user.id} className="hover:bg-secondary/30 transition-colors group">
 
-                                            <td className="py-4 px-6">
+                                            <td className="py-2  px-3">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-9 h-9 rounded-full bg-accent text-accent-foreground font-bold flex items-center justify-center text-xs border border-primary/20">
                                                         {user.name.charAt(0)}
