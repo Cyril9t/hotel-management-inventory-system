@@ -35,7 +35,7 @@ export const roomsController = {
   async create(req: Request<unknown, unknown, CreateRoomBody>, res: Response) {
     res.status(201).json(
       success({
-        room: await roomsService.create(req.body),
+        room: await roomsService.create(req.body, req.user!.userId),
       }),
     );
   },
@@ -112,7 +112,7 @@ export const roomsController = {
   ) {
     res.status(201).json(
       success({
-        category: await roomsService.createCategory(req.body),
+        category: await roomsService.createCategory(req.body, req.user!.userId),
       }),
     );
   },
@@ -121,6 +121,10 @@ export const roomsController = {
     req: Request<unknown, unknown, BulkCreateRoomsBody>,
     res: Response,
   ) {
-    res.status(201).json(success(await roomsService.bulkCreateRooms(req.body)));
+    res
+      .status(201)
+      .json(
+        success(await roomsService.bulkCreateRooms(req.body, req.user!.userId)),
+      );
   },
 };

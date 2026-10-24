@@ -3,6 +3,84 @@ import { auditService } from "./audit.service";
 import { logger } from "#shared/logger";
 
 export function registerAuditListeners() {
+  // ---- users ----
+  eventBus.on("user.deactivated", ({ userId, actorUserId, wasActive }) => {
+    safeLog(() =>
+      auditService.log({
+        actorUserId,
+        action: "user_deactivated",
+        entityType: "User",
+        entityId: userId,
+        beforeValue: { isActive: wasActive },
+        afterValue: { isActive: false },
+      }),
+    );
+  });
+
+  eventBus.on("user.reactivated", ({ userId, actorUserId, wasActive }) => {
+    safeLog(() =>
+      auditService.log({
+        actorUserId,
+        action: "user_reactivated",
+        entityType: "User",
+        entityId: userId,
+        beforeValue: { isActive: wasActive },
+        afterValue: { isActive: true },
+      }),
+    );
+  });
+
+  eventBus.on(
+    "staffInvite.created",
+    ({ inviteId, actorUserId, email, role }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "staff_invite_created",
+          entityType: "StaffInvite",
+          entityId: inviteId,
+          afterValue: { email, role },
+        }),
+      );
+    },
+  );
+
+  eventBus.on("staffInvite.resent", ({ inviteId, actorUserId, email }) => {
+    safeLog(() =>
+      auditService.log({
+        actorUserId,
+        action: "staff_invite_resent",
+        entityType: "StaffInvite",
+        entityId: inviteId,
+        afterValue: { email },
+      }),
+    );
+  });
+
+  eventBus.on("staffInvite.accepted", ({ inviteId, userId, role }) => {
+    safeLog(() =>
+      auditService.log({
+        actorUserId: userId, // the invitee themselves accepted — they're the actor here
+        action: "staff_invite_accepted",
+        entityType: "StaffInvite",
+        entityId: inviteId,
+        afterValue: { userId, role },
+      }),
+    );
+  });
+
+  // ---- auth ----
+  eventBus.on("user.passwordReset", ({ userId }) => {
+    safeLog(() =>
+      auditService.log({
+        actorUserId: userId,
+        action: "password_reset",
+        entityType: "User",
+        entityId: userId,
+      }),
+    );
+  });
+
   // ---- rooms ----
   eventBus.on("room.deactivated", ({ roomId, actorUserId, wasActive }) => {
     safeLog(() =>
@@ -57,6 +135,48 @@ export function registerAuditListeners() {
           entityId: categoryId,
           beforeValue: { name: before },
           afterValue: { name: after },
+        }),
+      );
+    },
+  );
+
+  eventBus.on("room.created", ({ roomId, actorUserId, number, categoryId }) => {
+    safeLog(() =>
+      auditService.log({
+        actorUserId,
+        action: "room_created",
+        entityType: "Room",
+        entityId: roomId,
+        afterValue: { number, categoryId },
+      }),
+    );
+  });
+
+  eventBus.on(
+    "roomCategory.created",
+    ({ categoryId, actorUserId, name, pricePerNight }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "room_category_created",
+          entityType: "RoomCategory",
+          entityId: categoryId,
+          afterValue: { name, pricePerNight },
+        }),
+      );
+    },
+  );
+
+  eventBus.on(
+    "rooms.bulkCreated",
+    ({ actorUserId, categoryId, requested, created }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "rooms_bulk_created",
+          entityType: "RoomCategory",
+          entityId: categoryId,
+          afterValue: { requested, created },
         }),
       );
     },

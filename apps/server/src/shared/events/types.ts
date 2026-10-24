@@ -1,6 +1,39 @@
-import type { Department, Prisma } from "@prisma/client";
+import type { Department, Prisma, Role } from "@prisma/client";
 
 export type DomainEvents = {
+  // ---- users ----
+  "user.deactivated": {
+    userId: string;
+    actorUserId: string;
+    wasActive: boolean;
+  };
+  "user.reactivated": {
+    userId: string;
+    actorUserId: string;
+    wasActive: boolean;
+  };
+  "staffInvite.created": {
+    inviteId: string;
+    actorUserId: string;
+    email: string;
+    role: Role;
+  };
+  "staffInvite.resent": {
+    inviteId: string;
+    actorUserId: string;
+    email: string;
+  };
+  "staffInvite.accepted": {
+    inviteId: string;
+    userId: string;
+    role: Role;
+  };
+
+  // ---- auth ----
+  "user.passwordReset": {
+    userId: string;
+  };
+
   // ---- rooms ----
   "room.deactivated": {
     roomId: string;
@@ -23,6 +56,24 @@ export type DomainEvents = {
     actorUserId: string;
     before: string;
     after: string;
+  };
+  "room.created": {
+    roomId: string;
+    actorUserId: string;
+    number: string;
+    categoryId: string;
+  };
+  "roomCategory.created": {
+    categoryId: string;
+    actorUserId: string;
+    name: string;
+    pricePerNight: Prisma.Decimal;
+  };
+  "rooms.bulkCreated": {
+    actorUserId: string;
+    categoryId: string;
+    requested: number;
+    created: number;
   };
 
   // ---- bookings ----
