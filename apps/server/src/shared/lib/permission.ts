@@ -41,7 +41,7 @@ export type Permission =
   | ["create" | "read" | "update", Subjects<Pick<Models, "RoomCategory">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "Booking">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "Shift">>]
-  | ["create" | "read" | "void", Subjects<Pick<Models, "Sale">>]
+  | ["create" | "read" | "update" | "void", Subjects<Pick<Models, "Sale">>]
   | ["create" | "read" | "update", Subjects<Pick<Models, "KitchenOrder">>]
   | ["manage" | "read", Subjects<Pick<Models, "Product">>]
   | ["read" | "update" | "manage", Subjects<Pick<Models, "StockMovement">>]
@@ -77,6 +77,7 @@ export function getPermissions(user: AccessTokenPayload) {
       can(["create", "read", "update"], "Booking");
       can("read", ["Room", "RoomCategory"]);
       can(["create", "read", "update"], "Shift", { userId: user.userId });
+      can("update", "Sale", { paymentMethod: "CHARGE_TO_ROOM" });
       break;
 
     case "BAR_STAFF":
