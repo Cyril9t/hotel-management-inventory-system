@@ -39,6 +39,16 @@ export const bookingsRepository = {
     });
   },
 
+  async findUnpaidChargeToRoomSales(bookingId: string) {
+    return database.sale.findMany({
+      where: {
+        chargeToRoomBookingId: bookingId,
+        paymentState: "UNPAID",
+        status: { not: "VOIDED" }, // a voided sale is no longer owed
+      },
+    });
+  },
+
   async checkIn(id: string) {
     return database.booking.update({
       where: { id },
@@ -49,19 +59,26 @@ export const bookingsRepository = {
   // One atomic transaction — same pattern as void-reversal: booking status
   // moves to CHECKED_OUT and every UNPAID sale charged to this booking
   // gets settled together, not as two separate writes.
-  async checkout(id: string, settledByUserId: string) {
-    return database.$transaction(async (tx) => {
-      const booking = await tx.booking.update({
-        where: { id },
-        data: { status: "CHECKED_OUT", actualCheckoutAt: new Date() },
-      });
+  // async checkout(id: string, settledByUserId: string) {
+  //   return database.$transaction(async (tx) => {
+  //     const booking = await tx.booking.update({
+  //       where: { id },
+  //       data: { status: "CHECKED_OUT", actualCheckoutAt: new Date() },
+  //     });
 
-      await tx.sale.updateMany({
-        where: { chargeToRoomBookingId: id, paymentState: "UNPAID" },
-        data: { paymentState: "PAID", settledAt: new Date(), settledByUserId },
-      });
+  //     await tx.sale.updateMany({
+  //       where: { chargeToRoomBookingId: id, paymentState: "UNPAID" },
+  //       data: { paymentState: "PAID", settledAt: new Date(), settledByUserId },
+  //     });
 
-      return booking;
+  //     return booking;
+  //   });
+  // },
+
+  async checkout(id: string) {
+    return database.booking.update({
+      where: { id },
+      data: { status: "CHECKED_OUT", actualCheckoutAt: new Date() },
     });
   },
 

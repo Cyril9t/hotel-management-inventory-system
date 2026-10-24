@@ -64,7 +64,15 @@ export const bookingsService = {
       throw new BadRequestError("Booking is not in a checkout-eligible state");
     }
 
-    const result = await bookingsRepository.checkout(id, settledByUserId);
+    const unpaidSales =
+      await bookingsRepository.findUnpaidChargeToRoomSales(id);
+    if (unpaidSales.length > 0) {
+      throw new BadRequestError(
+        `Booking has ${unpaidSales.length} unpaid charge-to-room sale(s) — settle them before checkout`,
+      );
+    }
+
+    const result = await bookingsRepository.checkout(id);
 
     eventBus.emit("booking.manualCheckout", {
       bookingId: id,
