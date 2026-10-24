@@ -22,7 +22,7 @@ export const bookingsService = {
     const pricePerNightAtBooking = room.category.pricePerNight;
     const totalPrice = pricePerNightAtBooking.mul(data.nights);
 
-    return bookingsRepository.create({
+    const booking = await bookingsRepository.create({
       room: { connect: { id: data.roomId } },
       guestFirstName: data.guestFirstName,
       guestLastName: data.guestLastName,
@@ -38,6 +38,16 @@ export const bookingsService = {
       createdBy: { connect: { id: createdByUserId } },
       shift: { connect: { id: shift.id } },
     });
+
+    eventBus.emit("booking.created", {
+      bookingId: booking.id,
+      actorUserId: createdByUserId,
+      roomId: data.roomId,
+      totalPrice: booking.totalPrice,
+      paymentMethod: data.paymentMethod,
+    });
+
+    return booking;
   },
 
   async getById(id: string) {

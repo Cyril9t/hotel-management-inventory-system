@@ -79,6 +79,21 @@ export function registerAuditListeners() {
     },
   );
 
+  eventBus.on(
+    "booking.created",
+    ({ bookingId, actorUserId, roomId, totalPrice, paymentMethod }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "booking_created",
+          entityType: "Booking",
+          entityId: bookingId,
+          afterValue: { roomId, totalPrice, paymentMethod },
+        }),
+      );
+    },
+  );
+
   // ---- shifts ----
   eventBus.on("shift.closed", ({ shiftId, actorUserId, before, after }) => {
     safeLog(() =>
@@ -93,6 +108,111 @@ export function registerAuditListeners() {
     );
   });
 
+  eventBus.on(
+    "shift.opened",
+    ({ shiftId, actorUserId, department, openingCash }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "shift_opened",
+          entityType: "Shift",
+          entityId: shiftId,
+          afterValue: { department, openingCash },
+        }),
+      );
+    },
+  );
+
+  // ---- orders ----
+  eventBus.on(
+    "sale.created",
+    ({
+      saleId,
+      actorUserId,
+      sourceDepartment,
+      totalAmount,
+      paymentMethod,
+      kitchenOrderId,
+    }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "sale_created",
+          entityType: "Sale",
+          entityId: saleId,
+          afterValue: {
+            sourceDepartment,
+            totalAmount,
+            paymentMethod,
+            kitchenOrderId,
+          },
+        }),
+      );
+    },
+  );
+
+  eventBus.on(
+    "sale.voidRequested",
+    ({ saleId, actorUserId, sourceDepartment, totalAmount, voidReason }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "sale_void_requested",
+          entityType: "Sale",
+          entityId: saleId,
+          beforeValue: { status: "COMPLETED" },
+          afterValue: {
+            status: "VOID_REQUESTED",
+            sourceDepartment,
+            totalAmount,
+            voidReason,
+          },
+        }),
+      );
+    },
+  );
+
+  eventBus.on(
+    "sale.voidApproved",
+    ({
+      saleId,
+      actorUserId,
+      requestedByUserId,
+      sourceDepartment,
+      totalAmount,
+    }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "sale_void_approved",
+          entityType: "Sale",
+          entityId: saleId,
+          beforeValue: { status: "VOID_REQUESTED", requestedByUserId },
+          afterValue: { status: "VOIDED", sourceDepartment, totalAmount },
+        }),
+      );
+    },
+  );
+
+  eventBus.on(
+    "sale.settled",
+    ({ saleId, actorUserId, chargeToRoomBookingId, totalAmount }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "sale_settled",
+          entityType: "Sale",
+          entityId: saleId,
+          beforeValue: { paymentState: "UNPAID" },
+          afterValue: {
+            paymentState: "PAID",
+            chargeToRoomBookingId,
+            totalAmount,
+          },
+        }),
+      );
+    },
+  );
   // kitchenOrder.statusChanged intentionally NOT subscribed here — see types.ts comment
 
   // ---- stock ----
@@ -154,6 +274,43 @@ export function registerAuditListeners() {
           entityType: "Product",
           entityId: productId,
           afterValue: { department, adjustment, reason: correctionReason },
+        }),
+      );
+    },
+  );
+
+  eventBus.on(
+    "stock.received",
+    ({ movementId, productId, actorUserId, quantity }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "stock_received",
+          entityType: "StockMovement",
+          entityId: movementId,
+          afterValue: { productId, toDepartment: "STORE", quantity },
+        }),
+      );
+    },
+  );
+
+  eventBus.on(
+    "stock.issued",
+    ({
+      movementId,
+      productId,
+      actorUserId,
+      fromDepartment,
+      toDepartment,
+      quantity,
+    }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "stock_issued",
+          entityType: "StockMovement",
+          entityId: movementId,
+          afterValue: { productId, fromDepartment, toDepartment, quantity },
         }),
       );
     },

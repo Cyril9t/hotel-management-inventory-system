@@ -45,7 +45,7 @@ export const ordersService = {
       }
     }
 
-    return database.$transaction(async (tx) => {
+    const result = await database.$transaction(async (tx) => {
       const productIds = data.items.map((i) => i.productId);
       const products = await ordersRepository.findProductsByIds(tx, productIds);
 
@@ -94,8 +94,6 @@ export const ordersService = {
         saleItems,
       );
 
-      // Stock deducts immediately, from sourceDepartment's own balance — outright
-      // rejection on shortfall; Prisma rolls back the whole transaction on throw.
       await stockService.deductForSale(
         tx,
         data.items.map((item) => ({
@@ -123,6 +121,17 @@ export const ordersService = {
 
       return { sale, kitchenOrder };
     });
+
+    eventBus.emit("sale.created", {
+      saleId: result.sale.id,
+      actorUserId: createdByUserId,
+      sourceDepartment: data.sourceDepartment,
+      totalAmount: result.sale.totalAmount,
+      paymentMethod: data.paymentMethod,
+      kitchenOrderId: result.kitchenOrder?.id ?? null,
+    });
+
+    return result;
   },
 
   async getById(id: string) {
@@ -147,11 +156,25 @@ export const ordersService = {
         "Only completed sales can have a void requested",
       );
     }
-    // staff can only void their own department's sales — BAR can't request-void a RESTAURANT sale, and vice versa
     if (permission.cannot("void", subject("Sale", sale))) {
       throw new ForbiddenError("You cannot void this sale");
     }
-    return ordersRepository.requestVoid(id, actorUserId, voidReason);
+
+    const updated = await ordersRepository.requestVoid(
+      id,
+      actorUserId,
+      voidReason,
+    );
+
+    eventBus.emit("sale.voidRequested", {
+      saleId: id,
+      actorUserId,
+      sourceDepartment: sale.sourceDepartment,
+      totalAmount: sale.totalAmount,
+      voidReason,
+    });
+
+    return updated;
   },
 
   // GM-only in practice: GM has manage:all → can("void"); staff's void rule is
@@ -170,16 +193,14 @@ export const ordersService = {
     if (permission.cannot("void", subject("Sale", sale))) {
       throw new ForbiddenError("You cannot approve this void");
     }
-    // staff who can "void" their own department's sales must not approve their OWN request —
-    // only GM (manage:all) can actually reach this point; explicit guard closes the gap anyway
     if (sale.voidedByUserId === approvedByUserId) {
       throw new ForbiddenError(
         "You cannot approve a void you requested yourself",
       );
     }
 
-    const result = await database.$transaction(async (tx) => {
-      const updated = await ordersRepository.approveVoid(
+    const updated = await database.$transaction(async (tx) => {
+      const result = await ordersRepository.approveVoid(
         tx,
         id,
         approvedByUserId,
@@ -200,10 +221,18 @@ export const ordersService = {
         await ordersRepository.voidKitchenOrder(tx, id);
       }
 
-      return updated;
+      return result;
     });
 
-    return result;
+    eventBus.emit("sale.voidApproved", {
+      saleId: id,
+      actorUserId: approvedByUserId,
+      requestedByUserId: sale.voidedByUserId!,
+      sourceDepartment: sale.sourceDepartment,
+      totalAmount: sale.totalAmount,
+    });
+
+    return updated;
   },
 
   async settle(id: string, settledByUserId: string, permission: Permissions) {
@@ -224,7 +253,17 @@ export const ordersService = {
         "Cannot settle a voided or void-requested sale",
       );
     }
-    return ordersRepository.settle(id, settledByUserId);
+
+    const updated = await ordersRepository.settle(id, settledByUserId);
+
+    eventBus.emit("sale.settled", {
+      saleId: id,
+      actorUserId: settledByUserId,
+      chargeToRoomBookingId: sale.chargeToRoomBookingId!,
+      totalAmount: sale.totalAmount,
+    });
+
+    return updated;
   },
 
   async getKitchenOrderById(id: string) {

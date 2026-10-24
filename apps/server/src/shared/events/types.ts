@@ -32,6 +32,13 @@ export type DomainEvents = {
     beforeStatus: string;
     actualCheckoutAt: Date | null;
   };
+  "booking.created": {
+    bookingId: string;
+    actorUserId: string;
+    roomId: string;
+    totalPrice: Prisma.Decimal;
+    paymentMethod: string;
+  };
 
   // ---- shifts ----
   "shift.closed": {
@@ -45,6 +52,12 @@ export type DomainEvents = {
       variance: number;
     };
   };
+  "shift.opened": {
+    shiftId: string;
+    actorUserId: string;
+    department: Department;
+    openingCash: Prisma.Decimal;
+  };
 
   // ---- orders — realtime only, not audited: status progression is
   // routine/self-documenting, per the earlier "no audit" decision ----
@@ -52,6 +65,36 @@ export type DomainEvents = {
     orderId: string;
     destination: string;
     status: string;
+  };
+
+  // ---- orders ----
+  "sale.voidRequested": {
+    saleId: string;
+    actorUserId: string;
+    sourceDepartment: Department;
+    totalAmount: Prisma.Decimal;
+    voidReason: string;
+  };
+  "sale.voidApproved": {
+    saleId: string;
+    actorUserId: string;
+    requestedByUserId: string;
+    sourceDepartment: Department;
+    totalAmount: Prisma.Decimal;
+  };
+  "sale.settled": {
+    saleId: string;
+    actorUserId: string;
+    chargeToRoomBookingId: string;
+    totalAmount: Prisma.Decimal;
+  };
+  "sale.created": {
+    saleId: string;
+    actorUserId: string;
+    sourceDepartment: Department;
+    totalAmount: Prisma.Decimal;
+    paymentMethod: string;
+    kitchenOrderId: string | null;
   };
 
   // ---- stock ----
@@ -80,6 +123,21 @@ export type DomainEvents = {
     adjustment: number; // signed — positive = credit, negative = debit
     correctionReason: string;
   };
+  "stock.received": {
+    movementId: string;
+    productId: string;
+    actorUserId: string;
+    quantity: number;
+  };
+  "stock.issued": {
+    movementId: string;
+    productId: string;
+    actorUserId: string;
+    fromDepartment: Department;
+    toDepartment: Department;
+    quantity: number;
+  };
+
   // realtime only, not audited: a clean (non-discrepancy) acknowledgment isn't audit-worthy on its own
   "stock.acknowledged": {
     movementId: string;
