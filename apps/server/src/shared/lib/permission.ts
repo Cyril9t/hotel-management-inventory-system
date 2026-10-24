@@ -107,7 +107,7 @@ export function getPermissions(user: AccessTokenPayload) {
     case "STORE_MANAGER":
       can("manage", ["Product", "StockBalance", "StockMovement"]);
       can(["create", "read", "update"], "Shift", { userId: user.userId });
-      can("read", "DailyReportSnapshot", { department: "STORE" });
+      // can("read", "DailyReportSnapshot", { department: "STORE" });
       break;
   }
 
