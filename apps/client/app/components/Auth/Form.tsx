@@ -3,6 +3,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { NavLink, useNavigate } from "react-router";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader } from "../ui/card";
+import api from "~/lib/api";
 
 export function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
@@ -10,18 +11,23 @@ export function LoginForm() {
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
     const navigate = useNavigate()
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: any) => {
+
         e.preventDefault();
-        setIsLoading(true);
+        try {
+            setIsLoading(true);
+            const login = await api.post("/auth/refresh")
+            const data = await login
 
-        setTimeout(() => {
+            console.log(data)
+        } catch (error) {
+            console.log(error)
             setIsLoading(false)
+        }
 
-        }, 1500);
-
-        navigate
 
     };
 
@@ -37,6 +43,10 @@ export function LoginForm() {
         {
             title: "RECEP",
             link: "/OpenShift",
+        },
+        {
+            title: "BAr",
+            link: "/bar/dashboard",
         }
     ]
 
