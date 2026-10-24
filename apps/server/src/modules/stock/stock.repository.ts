@@ -86,14 +86,24 @@ export const stockRepository = {
     productId?: string;
     movementType?: StockMovementType;
     department?: Department;
+    startDate?: Date;
+    endDate?: Date;
   }) {
-    const { department, ...rest } = filters;
+    const { department, startDate, endDate, ...rest } = filters;
     return database.stockMovement.findMany({
       where: {
         ...rest,
         ...(department && {
           OR: [{ fromDepartment: department }, { toDepartment: department }],
         }),
+        ...(startDate || endDate
+          ? {
+              createdAt: {
+                ...(startDate && { gte: startDate }),
+                ...(endDate && { lte: endDate }),
+              },
+            }
+          : {}),
       },
       include: { product: true, actor: true },
       orderBy: { createdAt: "desc" },

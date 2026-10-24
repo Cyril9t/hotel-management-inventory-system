@@ -7,7 +7,7 @@ import {
 import { compact } from "#shared/utils/omit-undefined";
 import { shiftsRepository } from "./shifts.repository";
 import { roomsService } from "#modules/rooms/rooms.service";
-import { auditService } from "#modules/audit/audit.service";
+import { eventBus } from "#shared/events/bus";
 import type { Department } from "@prisma/client";
 import type { Permissions } from "#shared/lib/permission.js";
 import type {
@@ -48,6 +48,13 @@ export const shiftsService = {
       await shiftsRepository.createSnapshot(shift.id, roomSnapshotOpen);
     }
 
+    eventBus.emit("shift.opened", {
+      shiftId: shift.id,
+      actorUserId: userId,
+      department,
+      openingCash: shift.openingCash,
+    });
+
     return shift;
   },
 
@@ -80,13 +87,11 @@ export const shiftsService = {
       await shiftsRepository.closeSnapshot(shiftId, roomSnapshotClose);
     }
 
-    await auditService.log({
+    eventBus.emit("shift.closed", {
+      shiftId,
       actorUserId,
-      action: "shift_closed",
-      entityType: "Shift",
-      entityId: shiftId,
-      beforeValue: { status: shift.status, openingCash: shift.openingCash },
-      afterValue: {
+      before: { status: shift.status, openingCash: shift.openingCash },
+      after: {
         status: "CLOSED",
         actualCash: data.actualCash,
         expectedCash,

@@ -4,6 +4,7 @@ import { usersRepository } from "../users/users.repository";
 import { password } from "#shared/lib/password";
 import { enqueuePasswordResetEmail } from "#shared/jobs/email/email.queue";
 import { jwt } from "#shared/lib/jwt";
+import { eventBus } from "#shared/events/bus";
 import type { Role, Department } from "@prisma/client";
 import { token } from "#shared/lib/token.js";
 
@@ -73,6 +74,8 @@ export const authService = {
     const passwordHash = await password.hash(newPassword);
     await usersRepository.updatePassword(resetToken.userId, passwordHash);
     await authRepository.markPasswordResetTokenUsed(resetToken.id);
+
+    eventBus.emit("user.passwordReset", { userId: resetToken.userId });
   },
 
   async issueTokenPair(

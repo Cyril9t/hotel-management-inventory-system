@@ -64,6 +64,7 @@ enum PaymentState {
 
 enum SaleStatus {
   COMPLETED
+  VOID_REQUESTED
   VOIDED
 }
 

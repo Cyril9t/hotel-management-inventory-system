@@ -1,0 +1,23 @@
+info:
+  name: Settle Sale
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/sales/{{saleId}}/settle"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: id
+      value: "{{saleId}}"
+      type: path
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

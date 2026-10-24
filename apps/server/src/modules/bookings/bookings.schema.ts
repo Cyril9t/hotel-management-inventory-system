@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { BookingStatus, PaymentMethod } from "@prisma/client";
+import {
+  dateRangeShape,
+  dateRangeRefinement,
+} from "#shared/utils/date-range-schema";
 
 export const createBookingSchema = z.object({
   roomId: z.uuid("Invalid room id"),
@@ -17,10 +21,16 @@ export const bookingIdParamsSchema = z.object({
   id: z.uuid("Invalid booking id"),
 });
 
-export const listBookingsQuerySchema = z.object({
-  roomId: z.uuid("Room ID must be a valid UUID").optional(),
-  status: z.enum(BookingStatus, "Invalid booking status").optional(),
-});
+export const listBookingsQuerySchema = z
+  .object({
+    roomId: z.uuid("Room ID must be a valid UUID").optional(),
+    status: z.enum(BookingStatus, "Invalid booking status").optional(),
+    ...dateRangeShape,
+  })
+  .refine(dateRangeRefinement, {
+    message: "endDate must be on or after startDate",
+    path: ["endDate"],
+  });
 
 export type CreateBookingBody = z.infer<typeof createBookingSchema>;
 export type BookingIdParams = z.infer<typeof bookingIdParamsSchema>;

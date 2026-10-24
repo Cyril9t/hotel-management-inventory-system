@@ -1,7 +1,7 @@
 import { NotFoundError, BadRequestError } from "#shared/errors/http-errors";
 import { compact } from "#shared/utils/omit-undefined";
 import { roomsRepository } from "./rooms.repository";
-import { auditService } from "#modules/audit/audit.service";
+import { eventBus } from "#shared/events/bus";
 import type {
   BulkCreateRoomsBody,
   CreateCategoryBody,
@@ -40,13 +40,22 @@ export const roomsService = {
     return { ...rest, status: deriveStatus(bookings) };
   },
 
-  async create(data: CreateRoomBody) {
+  async create(data: CreateRoomBody, actorUserId: string) {
     const category = await roomsRepository.findCategoryById(data.categoryId);
     if (!category) throw new NotFoundError("Room category not found");
-    return roomsRepository.create({
+    const room = await roomsRepository.create({
       number: data.number,
       category: { connect: { id: data.categoryId } },
     });
+
+    eventBus.emit("room.created", {
+      roomId: room.id,
+      actorUserId,
+      number: room.number,
+      categoryId: data.categoryId,
+    });
+
+    return room;
   },
 
   async update(id: string, data: UpdateRoomBody) {
@@ -65,13 +74,10 @@ export const roomsService = {
   async deactivate(id: string, actorUserId: string) {
     const room = await roomsService.getById(id);
     const updated = await roomsRepository.deactivate(id);
-    await auditService.log({
+    eventBus.emit("room.deactivated", {
+      roomId: id,
       actorUserId,
-      action: "room_deactivated",
-      entityType: "Room",
-      entityId: id,
-      beforeValue: { isActive: room.isActive },
-      afterValue: { isActive: false },
+      wasActive: room.isActive,
     });
     return updated;
   },
@@ -79,13 +85,10 @@ export const roomsService = {
   async reactivate(id: string, actorUserId: string) {
     const room = await roomsService.getById(id);
     const updated = await roomsRepository.reactivate(id);
-    await auditService.log({
+    eventBus.emit("room.reactivated", {
+      roomId: id,
       actorUserId,
-      action: "room_reactivated",
-      entityType: "Room",
-      entityId: id,
-      beforeValue: { isActive: room.isActive },
-      afterValue: { isActive: true },
+      wasActive: room.isActive,
     });
     return updated;
   },
@@ -101,13 +104,11 @@ export const roomsService = {
       categoryId,
       price,
     );
-    await auditService.log({
+    eventBus.emit("room.categoryPriceChanged", {
+      categoryId,
       actorUserId,
-      action: "room_category_price_changed",
-      entityType: "RoomCategory",
-      entityId: categoryId,
-      beforeValue: { pricePerNight: category.pricePerNight },
-      afterValue: { pricePerNight: price },
+      before: category.pricePerNight,
+      after: price,
     });
     return updated;
   },
@@ -127,26 +128,33 @@ export const roomsService = {
 
     const updated = await roomsRepository.updateCategoryName(categoryId, name);
 
-    await auditService.log({
+    eventBus.emit("room.categoryNameChanged", {
+      categoryId,
       actorUserId,
-      action: "room_category_name_changed",
-      entityType: "RoomCategory",
-      entityId: categoryId,
-      beforeValue: { name: category.name },
-      afterValue: { name },
+      before: category.name,
+      after: name,
     });
 
     return updated;
   },
 
-  async createCategory(data: CreateCategoryBody) {
+  async createCategory(data: CreateCategoryBody, actorUserId: string) {
     const existing = await roomsRepository.findCategoryByName(data.name);
     if (existing)
       throw new BadRequestError("A category with that name already exists");
-    return roomsRepository.createCategory(data);
+    const category = await roomsRepository.createCategory(data);
+
+    eventBus.emit("roomCategory.created", {
+      categoryId: category.id,
+      actorUserId,
+      name: category.name,
+      pricePerNight: category.pricePerNight,
+    });
+
+    return category;
   },
 
-  async bulkCreateRooms(data: BulkCreateRoomsBody) {
+  async bulkCreateRooms(data: BulkCreateRoomsBody, actorUserId: string) {
     const category = await roomsRepository.findCategoryById(data.categoryId);
     if (!category) throw new NotFoundError("Room category not found");
 
@@ -162,6 +170,13 @@ export const roomsService = {
     const result = await roomsRepository.createMany(
       numbers.map((number) => ({ number, categoryId: data.categoryId })),
     );
+
+    eventBus.emit("rooms.bulkCreated", {
+      actorUserId,
+      categoryId: data.categoryId,
+      requested: numbers.length,
+      created: result.count,
+    });
 
     return {
       requested: numbers.length,

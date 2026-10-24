@@ -16,6 +16,8 @@ import { bookingsRoutes } from "#modules/bookings/bookings.routes";
 import { shiftsRoutes } from "#modules/shifts/shifts.routes";
 import { stockRoutes } from "#modules/stock/stock.routes";
 import { healthCheck } from "./shared/http/health";
+import { ordersRoutes } from "./modules/orders/orders.routes";
+import { reportsRoutes } from "./modules/reports/reports.routes";
 
 // const API_PREFIX = "/api/v1";
 
@@ -39,6 +41,9 @@ app.use("/api/v1/rooms", roomsRoutes);
 app.use("/api/v1/shifts", shiftsRoutes);
 
 app.use("/api/v1/stock", stockRoutes);
+app.use("/api/v1/orders", ordersRoutes);
+
+app.use("/api/v1/reports", reportsRoutes);
 
 const openApiDocument = generateOpenApiDocument();
 // if (env.isDev) {

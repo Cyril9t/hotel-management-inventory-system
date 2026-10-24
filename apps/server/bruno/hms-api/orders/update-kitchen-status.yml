@@ -1,0 +1,29 @@
+info:
+  name: Update Kitchen Order Status
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/kitchen-orders/{{kitchenOrderId}}/status"
+  headers:
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: id
+      value: "{{kitchenOrderId}}"
+      type: path
+  body:
+    type: json
+    data: |-
+      {
+        "status": "READY"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

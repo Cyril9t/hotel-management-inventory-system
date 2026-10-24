@@ -1,15 +1,18 @@
+import { createServer } from "node:http";
 import app from "./app";
 import { env } from "./shared/config/env";
 import { logger } from "./shared/logger";
 import { database } from "./shared/database/prisma";
 import { scheduleAutoCheckoutJob } from "./shared/jobs/auto-checkout/auto-checkout.queue";
 import { scheduleDailyReportJob } from "./shared/jobs/daily-report/daily-report.queue";
+import { initSocket } from "./shared/realtime/socket";
+import { registerAuditListeners } from "./modules/audit/audit.listener";
+import { registerRealtimeListeners } from "./shared/realtime/invalidate";
 
 const port = env.PORT;
 
 try {
   await database.$queryRaw`SELECT 1`;
-  // await database.execute("select 1");
   logger.info("database connected");
 
   await scheduleAutoCheckoutJob();
@@ -20,7 +23,13 @@ try {
   process.exit(1);
 }
 
-const server = app.listen(port, () => {
+const httpServer = createServer(app);
+
+initSocket(httpServer);
+registerAuditListeners();
+registerRealtimeListeners();
+
+const server = httpServer.listen(port, () => {
   logger.info({ port }, `server listening on port ${port}`);
 });
 

@@ -2,7 +2,7 @@ import { BadRequestError, NotFoundError } from "#shared/errors/http-errors";
 import { bookingsRepository } from "./bookings.repository";
 import { roomsRepository } from "../rooms/rooms.repository";
 import { shiftsRepository } from "../shifts/shifts.repository";
-import { auditService } from "../audit/audit.service";
+import { eventBus } from "#shared/events/bus";
 import type { CreateBookingBody, ListBookingsQuery } from "./bookings.schema";
 
 export const bookingsService = {
@@ -22,7 +22,7 @@ export const bookingsService = {
     const pricePerNightAtBooking = room.category.pricePerNight;
     const totalPrice = pricePerNightAtBooking.mul(data.nights);
 
-    return bookingsRepository.create({
+    const booking = await bookingsRepository.create({
       room: { connect: { id: data.roomId } },
       guestFirstName: data.guestFirstName,
       guestLastName: data.guestLastName,
@@ -38,6 +38,16 @@ export const bookingsService = {
       createdBy: { connect: { id: createdByUserId } },
       shift: { connect: { id: shift.id } },
     });
+
+    eventBus.emit("booking.created", {
+      bookingId: booking.id,
+      actorUserId: createdByUserId,
+      roomId: data.roomId,
+      totalPrice: booking.totalPrice,
+      paymentMethod: data.paymentMethod,
+    });
+
+    return booking;
   },
 
   async getById(id: string) {
@@ -64,18 +74,21 @@ export const bookingsService = {
       throw new BadRequestError("Booking is not in a checkout-eligible state");
     }
 
-    const result = await bookingsRepository.checkout(id, settledByUserId);
+    const unpaidSales =
+      await bookingsRepository.findUnpaidChargeToRoomSales(id);
+    if (unpaidSales.length > 0) {
+      throw new BadRequestError(
+        `Booking has ${unpaidSales.length} unpaid charge-to-room sale(s) — settle them before checkout`,
+      );
+    }
 
-    await auditService.log({
+    const result = await bookingsRepository.checkout(id);
+
+    eventBus.emit("booking.manualCheckout", {
+      bookingId: id,
       actorUserId: settledByUserId,
-      action: "manual_booking_checkout",
-      entityType: "Booking",
-      entityId: id,
-      beforeValue: { status: booking.status },
-      afterValue: {
-        status: "CHECKED_OUT",
-        actualCheckoutAt: result.actualCheckoutAt,
-      },
+      beforeStatus: booking.status,
+      actualCheckoutAt: result.actualCheckoutAt,
     });
 
     return result;

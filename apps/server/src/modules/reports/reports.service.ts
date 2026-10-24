@@ -1,5 +1,5 @@
 import { reportsRepository } from "./reports.repository";
-import type { Department } from "@prisma/client";
+import type { Department, Prisma } from "@prisma/client";
 
 const DEPARTMENTS: Department[] = [
   "BAR",
@@ -16,8 +16,6 @@ export const reportsService = {
       department,
     );
     if (snapshot) return snapshot.data;
-    // No snapshot yet (today, or a day the nightly job hasn't run for) —
-    // the snapshot is a cache, never the source of truth.
     return reportsRepository.computeLiveReport(reportDate, department);
   },
 
@@ -26,7 +24,11 @@ export const reportsService = {
       reportDate,
       department,
     );
-    return reportsRepository.upsertSnapshot(reportDate, department, data);
+    return reportsRepository.upsertSnapshot(
+      reportDate,
+      department,
+      data as Prisma.InputJsonValue,
+    );
   },
 
   async generateAllSnapshots(reportDate: Date) {
