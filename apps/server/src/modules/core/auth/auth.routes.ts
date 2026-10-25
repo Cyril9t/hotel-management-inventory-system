@@ -8,6 +8,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "./auth.schema";
+import { authenticate } from "src/shared/middleware/authenticate";
 
 export const authRoutes = Router();
 
@@ -41,6 +42,29 @@ authRoutes.post(
   validate({ body: loginSchema }),
   authController.login,
 );
+
+// GET /auth/session
+registry.registerPath({
+  method: "get",
+  path: "/auth/session",
+  tags: ["Auth"],
+  summary: "Get current session",
+  description:
+    "Returns the authenticated user's profile for the current access token.",
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: {
+      description: "Session retrieved",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    401: {
+      description: "Invalid or expired session",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
+authRoutes.get("/session", authenticate, authController.getSession);
 
 // POST /auth/refresh
 registry.registerPath({

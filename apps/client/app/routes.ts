@@ -27,6 +27,14 @@ export default [
         route("shifts", "./routes/Departments/Reception/Shift.tsx"),
     ]),
 
+    route("bar/dashboard", "./routes/Departments/Bar/Layouts.tsx", [
+        index("./routes/Departments/Bar/Overview.tsx"),
+        route("orders", "./routes/Departments/Bar/Order.tsx"),
+        route("sales", "./routes/Departments/Bar/Sale.tsx"),
+        route("stock", "./routes/Departments/Bar/Stock.tsx"),
+        route("shifts", "./routes/Departments/Bar/Shift.tsx")
+    ]),
+
     route("OpenShift", "./routes/openShift.tsx")
 
 ] satisfies RouteConfig;

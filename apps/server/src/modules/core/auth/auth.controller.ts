@@ -6,16 +6,24 @@ import type {
   LoginBody,
   ForgotPasswordBody,
   ResetPasswordBody,
-} from "./auth.schema.js";
+} from "./auth.schema";
 
 export const authController = {
   async login(req: Request<unknown, unknown, LoginBody>, res: Response) {
-    const { accessToken, refreshToken, expiresAt } = await authService.login(
-      req.body.email,
-      req.body.password,
-    );
+    const {
+      user,
+      tokens: { accessToken, refreshToken, expiresAt },
+    } = await authService.login(req.body.email, req.body.password);
     cookie.setRefreshToken(res, refreshToken, expiresAt);
-    res.json(success({ accessToken }));
+    res.json(success({ user, accessToken }));
+  },
+
+  async getSession(req: Request, res: Response) {
+    res.json(
+      success({
+        user: await authService.getSession(req.user!.userId),
+      }),
+    );
   },
 
   async refresh(req: Request, res: Response) {

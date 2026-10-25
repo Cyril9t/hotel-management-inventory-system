@@ -14,12 +14,23 @@ export const authService = {
     if (!user || !(await password.compare(plainPassword, user.passwordHash))) {
       throw new UnauthorizedError("Invalid email or password");
     }
-    return authService.issueTokenPair(
-      user.id,
-      user.role,
-      user.isActive,
-      user.department,
-    );
+    return {
+      user,
+      tokens: await authService.issueTokenPair(
+        user.id,
+        user.role,
+        user.isActive,
+        user.department,
+      ),
+    };
+  },
+
+  async getSession(userId: string) {
+    const user = await usersRepository.findById(userId);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedError("Session is no longer valid");
+    }
+    return user;
   },
 
   async refresh(refreshToken?: string) {

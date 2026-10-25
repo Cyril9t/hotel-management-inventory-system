@@ -1,8 +1,8 @@
+import RoomServiceModule from "./Parent";
+
 function HotelRoomService() {
     return (
-        <h1>
-            Hotel Services
-        </h1>
+        <RoomServiceModule />
     );
 }
 
