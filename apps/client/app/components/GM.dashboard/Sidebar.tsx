@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import Logo from "../shared/Logo";
+import { UseMetricCards } from "~/Context/Context";
 
 const DashboardLinks = [
     {
@@ -53,6 +54,7 @@ const DashboardLinks = [
 function GMDashboardSidebar() {
 
     const navigate = useNavigate()
+    const { clearSession } = UseMetricCards()
     return (
         <Sidebar className="bg-brand-navy text-background">
             <SidebarHeader className="px-4 py-5">
@@ -108,6 +110,7 @@ function GMDashboardSidebar() {
 
                         <SidebarMenuButton
                             onClick={() => {
+                                clearSession();
                                 navigate("/", { replace: true })
                             }}
                             className="h-11 text-background/80 hover:bg-brand-navy-light hover:text-background"

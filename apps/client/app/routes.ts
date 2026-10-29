@@ -3,7 +3,7 @@ import { type RouteConfig, index, route } from "@react-router/dev/routes";
 export default [
 
     index("routes/home.tsx"),
-    route("Owner/dashboard", "./routes/OwnerDashboar/Layout.tsx", [
+    route("owner/dashboard", "./routes/OwnerDashboar/Layout.tsx", [
         index("./routes/OwnerDashboar/dashboard.tsx"),
         route("activities", "./routes/OwnerDashboar/activities.tsx"),
         route("staffs", "./routes/OwnerDashboar/Staffs.tsx"),
@@ -35,6 +35,7 @@ export default [
         route("shifts", "./routes/Departments/Bar/Shift.tsx")
     ]),
 
-    route("OpenShift", "./routes/openShift.tsx")
+    route("OpenShift", "./routes/openShift.tsx"),
+    route("accept-invite", "./routes/createAccount.tsx")
 
 ] satisfies RouteConfig;

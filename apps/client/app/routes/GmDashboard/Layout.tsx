@@ -1,3 +1,4 @@
+import { DashboardRouteGuard } from "~/Context/Context";
 
 import {
     SidebarProvider,
@@ -10,6 +11,7 @@ import { Outlet } from "react-router";
 
 function Dashboard() {
     return (
+        <DashboardRouteGuard role="general-manager">
         <SidebarProvider>
             <GMDashboardSidebar />
             <main className="flex-1 p-4">
@@ -19,6 +21,7 @@ function Dashboard() {
                 <Outlet />
             </main>
         </SidebarProvider>
+        </DashboardRouteGuard>
     );
 }
 

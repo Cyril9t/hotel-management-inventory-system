@@ -32,7 +32,7 @@ function Logo({ variant = 'default', className = '', logoColor = "#142234", text
 
 
             <div>
-                <h1 className={` font-bold tracking-wider font-serif ${isHero ? "text-2xl text-card" : textColor} ${textColor ? textColor : "text-brand-navy"}`}>
+                <h1 className={` font-bold tracking-wider font-serif ${isHero ? `text-2xl text-[${textColor}]` : `text-[${textColor}]`} ${textColor ? `text-[${textColor}]` : "text-brand-navy"}`}>
                     BRANDY <span className="font-light tracking-widest text-brand-gold">HOTEL</span>
                 </h1>
                 {isHero && (

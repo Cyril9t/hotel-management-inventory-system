@@ -4,6 +4,11 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter()],
+  server: {
+    watch: {
+      usePolling: true,
+    },
+  },
   resolve: {
     tsconfigPaths: true,
   },

@@ -1,35 +1,19 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { NavLink, useNavigate } from "react-router";
+import { NavLink, useNavigate, } from "react-router";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader } from "../ui/card";
-import api from "~/lib/api";
+import { getDashboardPathForRole, UseMetricCards } from "~/Context/Context";
+
 
 export function LoginForm() {
+
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+
+    const { setEmail, setPassword, email, password, api, isLoading, setIsLoading, saveSession } = UseMetricCards()
 
     const navigate = useNavigate()
-
-    const handleSubmit = async (e: any) => {
-
-        e.preventDefault();
-        try {
-            setIsLoading(true);
-            const login = await api.post("/auth/refresh")
-            const data = await login
-
-            console.log(data)
-        } catch (error) {
-            console.log(error)
-            setIsLoading(false)
-        }
-
-
-    };
 
     const dash = [
         {
@@ -38,7 +22,7 @@ export function LoginForm() {
         },
         {
             title: "CEO",
-            link: "Owner/dashboard",
+            link: "owner/dashboard",
         },
         {
             title: "RECEP",
@@ -50,6 +34,27 @@ export function LoginForm() {
         }
     ]
 
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        try {
+            setIsLoading(true);
+            const response = await api.post("auth/login", { email, password });
+            const data = response.data?.data;
+
+            if (typeof data?.accessToken !== "string" || !data.user || typeof data.user.role !== "string") {
+                throw new Error("The login response did not include an access token and user role.");
+            }
+
+            saveSession(data.accessToken, data.user);
+            const dashboardPath = getDashboardPathForRole(data.user.role);
+            navigate(dashboardPath ?? `${data.user.role.toLowerCase()}/dashboard`, { replace: true });
+        } catch (error: any) {
+            console.error(error?.response?.data?.error?.message ?? error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
     return (
         <div className="w-full max-w-md mx-auto">
 
@@ -165,7 +170,7 @@ export function LoginForm() {
                     <div className="flex-grow border-t border-[var(--border)]"></div>
                 </div>
 
-                {/* Google SSO Button */}
+
                 <button
                     type="button"
                     className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-[var(--radius)] border border-[var(--input)] bg-[var(--card)] text-[var(--foreground)] font-medium text-sm hover:bg-[var(--secondary)] transition-all"
@@ -179,7 +184,7 @@ export function LoginForm() {
                     Continue with Google
                 </button>
 
-                {/* Footer Admin Link */}
+
                 <div className="text-center pt-3 text-xs text-[var(--muted-foreground)]">
                     Don&apos;t have an account?{' '}
                     <a href="#admin" className="text-[var(--primary)] font-medium hover:underline">

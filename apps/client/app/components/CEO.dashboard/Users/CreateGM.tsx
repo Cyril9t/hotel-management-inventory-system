@@ -1,28 +1,60 @@
-import { useState } from 'react';
-import { X, ChevronDown, Eye, EyeOff } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { X, ChevronDown } from 'lucide-react';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
+import { UseMetricCards } from '~/Context/Context';
+import { createStaffInvite } from '~/lib/invites';
 
 
 export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
     const [formData, setFormData] = useState({
-        fullName: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phoneCode: '+234',
         phoneNumber: '',
-        role: 'General Manager',
-        password: '',
     });
-
-    const [showPassword, setShowPassword] = useState(false);
+    const { api } = UseMetricCards();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const submissionInProgress = useRef(false);
 
     if (!isOpen) return null;
 
 
-
-    const handleSubmit = (e: any) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onClose();
+        if (submissionInProgress.current) return;
+
+        submissionInProgress.current = true;
+        setIsSubmitting(true);
+        setFeedback(null);
+        try {
+            const resp = await createStaffInvite(api, {
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim(),
+                email: formData.email.trim(),
+                phone: `${formData.phoneCode}${formData.phoneNumber.trim()}`,
+                role: 'GENERAL_MANAGER',
+            });
+
+            const data = await resp.data
+            console.log(data)
+
+            setFormData({ firstName: '', lastName: '', email: '', phoneCode: '+234', phoneNumber: '' });
+            setFeedback({
+                type: 'success',
+                message: `Invitation created for ${formData.email.trim()}. They must accept the invitation to activate their account.`,
+            });
+        } catch (error: any) {
+            setFeedback({
+                type: 'error',
+                message: error?.response?.data?.error?.message ?? error?.message ?? 'Could not create the invitation. Please try again.',
+            });
+        } finally {
+            submissionInProgress.current = false;
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -46,6 +78,7 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                                 <Button
                                     variant={"outline"}
                                     onClick={onClose}
+                                    disabled={isSubmitting}
                                     className="h-10 w-10 rounded-full"
                                 >
                                     <X className="w-5 h-5" />
@@ -57,7 +90,14 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                     </CardHeader>
 
                     <CardContent>
-                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+                        <form id="create-gm-invite-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+
+                            {feedback && (
+                                <div role={feedback.type === 'error' ? 'alert' : 'status'} aria-live="polite"
+                                    className={`rounded-md border p-3 text-sm ${feedback.type === 'success' ? 'border-green-600/30 bg-green-600/10 text-green-800' : 'border-destructive/30 bg-destructive/10 text-destructive'}`}>
+                                    {feedback.message}
+                                </div>
+                            )}
 
 
                             <div>
@@ -72,14 +112,28 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
 
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-semibold text-foreground">
-                                            Full Name
+                                            First Name
                                         </label>
                                         <input
                                             type="text"
                                             required
                                             placeholder="Enter full name"
-                                            value={formData.fullName}
-                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                            value={formData.firstName}
+                                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                            className="w-full px-3.5 py-2 text-[12px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-semibold text-foreground">
+                                            Last Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Enter last name"
+                                            value={formData.lastName}
+                                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                                             className="w-full px-3.5 py-2 text-[12px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                         />
                                     </div>
@@ -137,42 +191,16 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
 
                                         <div className="relative">
                                             <select
-                                                value={formData.role}
-                                                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                                defaultValue="GENERAL_MANAGER"
                                                 className="w-full appearance-none px-3.5 py-2 text-xs rounded-[10px] border-2 border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all cursor-pointer"
                                             >
-                                                <option value="General Manager">General Manager</option>
-                                                <option value="Assistant Manager">Assistant Manager</option>
-                                                <option value="Operations Manager">Operations Manager</option>
+                                                <option value="GENERAL_MANAGER">General Manager</option>
                                             </select>
                                             <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 top-2.5 pointer-events-none" />
                                         </div>
                                     </div>
                                 </div>
                                 <br />
-
-                                <div className="space-y-2">
-                                    <label className="text-xs font-semibold text-foreground">
-                                        Password
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showPassword ? 'text' : 'password'}
-                                            required
-                                            placeholder="Create a password"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            className="w-full pl-3.5 pr-10 py-2 text-xs rounded-[10px] border-2 border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground transition-colors"
-                                        >
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </form>
 
@@ -185,6 +213,7 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
 
                                 type="button"
                                 onClick={onClose}
+                                disabled={isSubmitting}
                                 className="h-10 w-full bg-background/90"
                             >
                                 Cancel
@@ -193,9 +222,11 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                             <Button
                                 variant={"default"}
                                 type="submit"
+                                form="create-gm-invite-form"
+                                disabled={isSubmitting}
                                 className="h-10 w-full"
                             >
-                                Create GM
+                                {isSubmitting ? 'Sending…' : 'Create GM'}
                             </Button>
                         </div>
 

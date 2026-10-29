@@ -1,7 +1,12 @@
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "../ui/button";
+import { UseMetricCards } from "~/Context/Context";
 
 export function Header() {
+    const { user } = UseMetricCards()
+
+
+
     return (
         <header className="flex items-center justify-between mb-7 ">
 
@@ -13,7 +18,7 @@ export function Header() {
                 </Button>
 
                 <Button variant={"default"} className="h-10 w-10  rounded-full ">
-                    <User className="w-4 h-4" />
+                    {user.firstName[0].toUpperCase()}
                 </Button>
             </div>
         </header>

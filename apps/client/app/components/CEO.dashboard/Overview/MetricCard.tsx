@@ -12,7 +12,6 @@ export function MetricCards({ user = "" }) {
 
     const revenueFromRooom = counts.occupied
 
-    console.log(revenueFromRooom);
     const CARDS = [
         {
             title: "Total Revenue",
