@@ -5,7 +5,7 @@ import { Lock, ShieldCheck } from 'lucide-react';
 import Logo from '../Logo';
 import { Button } from '~/components/ui/button';
 import { UseMetricCards } from '~/Context/Context';
-import { Navigate, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 
 export const CreatePassword: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,15 +17,20 @@ export const CreatePassword: React.FC = () => {
     const token = searchParams.get("token")
 
 
+    const navigate = useNavigate();
 
     const handlePasswordSubmit = async (password: string) => {
         setIsSubmitting(true);
-        alert(password)
+
         try {
-            const resp = await api.post("users/invites/accept", { password: password, token: token })
-            const data = await resp.data
-            console.log(data)
-            alert(data)
+
+            const verifyToken = await api.post(`users/invites/${token}/verify`)
+            const verify = await verifyToken.data
+
+            console.log(verify);
+
+            await api.post("users/invites/accept", { password: password, token: token })
+
             setIsSuccess(true);
             setIsSubmitting(false);
         } catch (error) {
@@ -53,8 +58,14 @@ export const CreatePassword: React.FC = () => {
                                 Your credentials have been updated securely. You can now log into your Brandy Hotel dashboard.
                             </p>
                         </div>
+
                         <Button
-                            onClick={() => <Navigate to="/" replace />}
+                            onClick={
+                                () => {
+
+                                    navigate("/", { replace: true })
+                                }
+                            }
                             className="w-full h-12 font-bold text-[16px]"
                         >
                             Back to Login

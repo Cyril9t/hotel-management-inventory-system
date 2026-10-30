@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { RoomsMetric } from "./Context/Context";
+import { Toaster } from "sonner";
 
 export const links: Route.LinksFunction = () => [
   {
@@ -42,6 +43,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
 
         {children}
+
+        <Toaster position="top-right" richColors closeButton duration={5000} />
 
 
         <ScrollRestoration />

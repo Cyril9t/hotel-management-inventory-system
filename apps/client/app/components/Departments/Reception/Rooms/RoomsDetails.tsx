@@ -1,4 +1,4 @@
-import { Bed, Calendar, LogOut, Mail, Phone, Sparkles, Tv, Users, UtensilsCrossed, Wifi, Wind } from "lucide-react";
+import { Bed, Calendar, LogOut, Mail, Phone, Plus, Sparkles, Tv, Users, UtensilsCrossed, Wifi, Wind } from "lucide-react";
 import type { Room } from "./type";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
@@ -8,6 +8,8 @@ interface RoomDetailsDrawerProps {
     onCheckOut?: (room: Room) => void;
     onOrderService?: (room: Room) => void;
     onBookNow?: (room: Room) => void;
+    onCreateRoom?: () => void;
+    action: boolean;
 }
 
 export const RoomDetailsDrawer: React.FC<RoomDetailsDrawerProps> = ({
@@ -15,6 +17,8 @@ export const RoomDetailsDrawer: React.FC<RoomDetailsDrawerProps> = ({
     onCheckOut,
     onOrderService,
     onBookNow,
+    onCreateRoom,
+    action,
 }) => {
     if (!room) {
         return (
@@ -24,6 +28,7 @@ export const RoomDetailsDrawer: React.FC<RoomDetailsDrawerProps> = ({
                 <p className="text-xs text-muted-foreground mt-1 max-w-xs">
                     Click on any room card from the list to view detailed guest information and quick actions.
                 </p>
+                {action && onCreateRoom && <Button onClick={onCreateRoom} className="mt-4 gap-2"><Plus className="h-4 w-4" />Create room</Button>}
             </div>
         );
     }
@@ -105,9 +110,13 @@ export const RoomDetailsDrawer: React.FC<RoomDetailsDrawerProps> = ({
                             )}
                         </div>
                     </div>
-                ) : (
+                ) : room.status === 'Available' ? (
                     <div className="p-3 rounded-lg bg-brand-success/10 border border-brand-success text-xs text-brand-success mt-2 mb-2 font-medium">
                         ✨ This room is currently vacant and ready for guest check-in.
+                    </div>
+                ) : (
+                    <div className="p-3 rounded-lg bg-secondary text-xs text-muted-foreground mt-2 mb-2 font-medium">
+                        This room has an active booking. Guest details are not included in the Rooms API response.
                     </div>
                 )}
 
@@ -137,38 +146,40 @@ export const RoomDetailsDrawer: React.FC<RoomDetailsDrawerProps> = ({
                     </div>
                 </div>
 
+                {action && (
+                    <div className="mt-3 pt-4 border-t border-border space-y-2">
+                        {onCreateRoom && <Button variant="outline" onClick={onCreateRoom} className="w-full h-10"><Plus className="w-4 h-4" /><span>Create room</span></Button>}
+                        {isOccupied ? (
+                            <>
+                                <Button
+                                    variant={"destructive"}
+                                    onClick={() => onCheckOut?.(room)}
+                                    className="w-full h-10"
+                                >
+                                    <LogOut className="w-4 h-4 text-destructive" />
+                                    <span>Check Out Guest</span>
+                                </Button>
 
-                <div className="mt-3 pt-4 border-t border-border space-y-2">
-                    {isOccupied ? (
-                        <>
+                                <Button
+                                    variant={"secondary"}
+                                    onClick={() => onOrderService?.(room)}
+                                    className="w-full h-10"
+                                >
+                                    <UtensilsCrossed className="w-4 h-4 text-primary" />
+                                    <span>Order Room Service</span>
+                                </Button>
+                            </>
+                        ) : (
                             <Button
-                                variant={"destructive"}
-                                onClick={() => onCheckOut?.(room)}
-                                className="w-full h-10"
+                                onClick={() => onBookNow?.(room)}
+                                className="w-full h-11"
                             >
-                                <LogOut className="w-4 h-4 text-destructive" />
-                                <span>Check Out Guest</span>
+                                <Sparkles className="w-4 h-4" />
+                                <span>Book Room Now</span>
                             </Button>
-
-                            <Button
-                                variant={"secondary"}
-                                onClick={() => onOrderService?.(room)}
-                                className="w-full h-10"
-                            >
-                                <UtensilsCrossed className="w-4 h-4 text-primary" />
-                                <span>Order Room Service</span>
-                            </Button>
-                        </>
-                    ) : (
-                        <Button
-                            onClick={() => onBookNow?.(room)}
-                            className="w-full h-11"
-                        >
-                            <Sparkles className="w-4 h-4" />
-                            <span>Book Room Now</span>
-                        </Button>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
 
 
             </CardContent>

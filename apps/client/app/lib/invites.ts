@@ -14,7 +14,7 @@ export type CreateInviteRequest = {
     lastName: string;
     email: string;
     phone: string;
-    role: InviteRole;
+    role: string;
 };
 
 export function createStaffInvite(api: AxiosInstance, invite: CreateInviteRequest) {

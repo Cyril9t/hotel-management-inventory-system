@@ -19,7 +19,7 @@ export default [
         route("settings", "./routes/GmDashboard/settings.tsx")
     ]),
 
-    route("reception/dashboard", "./routes/Departments/Reception/Layouts.tsx", [
+    route("receptionist/dashboard", "./routes/Departments/Reception/Layouts.tsx", [
         index("./routes/Departments/Reception/Overview.tsx"),
         route("rooms", "./routes/Departments/Reception/Rooms.tsx"),
         route("roomsService", "./routes/Departments/Reception/Room.Service.tsx"),

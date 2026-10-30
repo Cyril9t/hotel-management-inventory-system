@@ -111,7 +111,7 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-foreground">
+                                        <label className="text-sm font-semibold text-foreground">
                                             First Name
                                         </label>
                                         <input
@@ -120,12 +120,13 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                                             placeholder="Enter full name"
                                             value={formData.firstName}
                                             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                            className="w-full px-3.5 py-2 text-[12px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                            className="w-full px-5 py-2 text-[15px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                         />
+
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-foreground">
+                                        <label className="text-sm font-semibold text-foreground">
                                             Last Name
                                         </label>
                                         <input
@@ -134,13 +135,13 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                                             placeholder="Enter last name"
                                             value={formData.lastName}
                                             onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                            className="w-full px-3.5 py-2 text-[12px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                            className="w-full px-5 py-2 text-[15px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                         />
                                     </div>
 
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-foreground">
+                                        <label className="text-sm font-semibold text-foreground">
                                             Email Address
                                         </label>
                                         <input
@@ -149,14 +150,14 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                                             placeholder="Enter email address"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="w-full px-3.5 py-2 text-[12px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                            className="w-full px-5 py-2 text-[15px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                         />
                                     </div>
 
 
                                     <div className="space-y-3 ">
                                         <div>
-                                            <label className="text-xs font-semibold text-foreground">
+                                            <label className="text-sm font-semibold text-foreground">
                                                 Phone Number
                                             </label>
                                             <div className="flex gap-2">
@@ -178,21 +179,21 @@ export function CreateGMModal({ isOpen = true, onClose = () => { } }) {
                                                     placeholder="Enter phone number"
                                                     value={formData.phoneNumber}
                                                     onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                                                    className="flex-1 w-full px-3.5 py-2 text-[12px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                                    className="w-full px-5 py-2 text-[15px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                     <div>
 
-                                        <label className="text-xs font-semibold text-foreground">
+                                        <label className="text-sm font-semibold text-foreground">
                                             Role
                                         </label>
 
                                         <div className="relative">
                                             <select
                                                 defaultValue="GENERAL_MANAGER"
-                                                className="w-full appearance-none px-3.5 py-2 text-xs rounded-[10px] border-2 border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all cursor-pointer"
+                                                className="w-full px-5 py-2 text-[15px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                             >
                                                 <option value="GENERAL_MANAGER">General Manager</option>
                                             </select>

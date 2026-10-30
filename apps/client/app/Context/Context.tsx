@@ -1,7 +1,10 @@
 import axios, { type AxiosRequestConfig } from "axios";
+import { toast } from "sonner";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { INITIAL_ROOMS } from "~/components/Departments/Reception/Rooms/data";
+import GlobalLoadingSkeleton from "~/components/shared/LoadingState/LoadingState";
+import { MoveRight } from "lucide-react";
 
 const RoomsStat = createContext<any | null>(null);
 type DashboardRole = "owner" | "general-manager";
@@ -11,6 +14,21 @@ function normalizeRole(role: unknown) {
     return typeof role === "string"
         ? role.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ")
         : "";
+}
+
+type TrackedRequestConfig = AxiosRequestConfig & { _sonnerToastId?: string | number };
+
+function requestLabel(config: AxiosRequestConfig) {
+    const url = (config.url ?? "(unknown endpoint)").split(/[?#]/, 1)[0];
+    return `from server`;
+}
+
+function apiErrorMessage(error: any) {
+    const data = error?.response?.data?.error;
+    if (typeof data?.message === "string") return `${data.message} → ${data.code}`;
+    if (typeof data?.code === "string") return data.code;
+    console.log(error?.response)
+    return error?.response ? "Request failed" : "Network error";
 }
 
 export function getDashboardPathForRole(role: unknown) {
@@ -38,7 +56,7 @@ export function RoomsMetric({ children }: { children: ReactNode }) {
     const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
 
     const api = useMemo(() => axios.create({
-        baseURL: "https://hotel-management-inventory-system.onrender.com/api/v1/",
+        baseURL: "https://hms-d740.onrender.com/api/v1/",
         withCredentials: true,
     }), []);
 
@@ -121,6 +139,8 @@ export function RoomsMetric({ children }: { children: ReactNode }) {
                 setUser(storedUser);
             }
 
+            // Let the Axios interceptor effect attach before the initial session refresh request.
+            await Promise.resolve();
             await refreshToken();
             if (cancelled) return;
             // refreshToken clears the invalid session on failure and saves the renewed session on success.
@@ -132,20 +152,40 @@ export function RoomsMetric({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const requestInterceptor = api.interceptors.request.use((config) => {
+            const trackedConfig = config as typeof config & { _sonnerToastId?: string | number };
             const url = config.url ?? "";
             const isAuthRequest = url.includes("auth/login") || url.includes("auth/refresh");
             if (tokenRef.current && !isAuthRequest) {
                 config.headers.set("Authorization", `Bearer ${tokenRef.current}`);
             }
+            if (typeof window !== "undefined" && !trackedConfig._sonnerToastId) {
+                trackedConfig._sonnerToastId = toast.loading(`Requesting ${requestLabel(config)}…`, {
+                    description: "Waiting for the server",
+                });
+            }
+
+
             return config;
         });
 
         const responseInterceptor = api.interceptors.response.use(
-            (response) => response,
+            (response) => {
+                const config = response.config as typeof response.config & { _sonnerToastId?: string | number };
+                if (config._sonnerToastId !== undefined) {
+                    const responseMessage = response.data?.message;
+                    toast.success(` ${response.status}`, {
+                        id: config._sonnerToastId,
+                        description: typeof responseMessage === "string"
+                            ? responseMessage
+                            : "Request completed successfully",
+                    });
+                }
+                return response;
+            },
             async (error) => {
-                const request = error?.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined;
+                const request = error?.config as (TrackedRequestConfig & { _retry?: boolean }) | undefined;
                 const url = request?.url ?? "";
-                const isAuthRequest = url.includes("auth/login") || url.includes("auth/refresh") || url.includes("users/invites/accept");
+                const isAuthRequest = url.includes("auth/login") || url.includes(`users/invites/${token}/verify`) || url.includes("auth/refresh") || url.includes("users/invites/accept");
 
                 if (error?.response?.status === 401 && request && !request._retry && !isAuthRequest) {
                     request._retry = true;
@@ -154,6 +194,14 @@ export function RoomsMetric({ children }: { children: ReactNode }) {
                         request.headers = { ...request.headers, Authorization: `Bearer ${nextToken}` };
                         return api(request);
                     }
+                }
+
+                if (request?._sonnerToastId !== undefined) {
+                    toast.error(apiErrorMessage(error), {
+                        id: request._sonnerToastId,
+                    });
+
+
                 }
 
                 return Promise.reject(error);
@@ -206,7 +254,9 @@ export function DashboardRouteGuard({ role, children }: { role: DashboardRole; c
     const location = useLocation();
 
     if (authLoading) {
-        return <div role="status" className="p-6">Checking your session…</div>;
+        return <div role="status" className="p-6">
+            <GlobalLoadingSkeleton />
+        </div>;
     }
 
     if (!token || !user) {

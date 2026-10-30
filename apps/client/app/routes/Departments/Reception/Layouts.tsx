@@ -4,21 +4,21 @@ import { DashboardHeader } from "../../../components/Departments/Shared/header";
 const tab = [
     {
         title: 'Overview',
-        link: "/reception/dashboard",
+        link: "/receptionist/dashboard",
     }, {
         title: 'Rooms',
-        link: '/reception/dashboard/rooms',
+        link: '/receptionist/dashboard/rooms',
     }, {
         title: 'Room Service',
-        link: '/reception/dashboard/roomsService'
+        link: '/receptionist/dashboard/roomsService'
 
     }, {
         title: 'History',
-        link: '/reception/dashboard/history'
+        link: '/receptionist/dashboard/history'
     },
     {
         title: 'Shift',
-        link: '/reception/dashboard/shifts'
+        link: '/receptionist/dashboard/shifts'
     }
 
 
@@ -29,7 +29,7 @@ function DepartmentsDashboard() {
     return (
 
         <div>
-            <DashboardHeader departments="Reception" staffName="Joel David" tabs={tab} tabEnd="reception" />
+            <DashboardHeader departments="reception" staffName="Joel David" tabs={tab} tabEnd="receptionist" />
             <main className="p-6">
                 <Outlet />
             </main>
