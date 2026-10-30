@@ -2,15 +2,16 @@ import type { Request, Response } from "express";
 import { env } from "../config/env";
 
 const REFRESH_COOKIE_NAME = "refreshToken";
+const REFRESH_COOKIE_PATH = "/api/v1/auth";
 
 export const cookie = {
   setRefreshToken(res: Response, token: string, expiresAt: Date): void {
     res.cookie(REFRESH_COOKIE_NAME, token, {
       httpOnly: true,
       secure: env.isProd,
-      sameSite: "strict",
+      sameSite: "none",
       expires: expiresAt,
-      path: "/auth",
+      path: REFRESH_COOKIE_PATH,
     });
   },
 
@@ -18,8 +19,8 @@ export const cookie = {
     res.clearCookie(REFRESH_COOKIE_NAME, {
       httpOnly: true,
       secure: env.isProd,
-      sameSite: "strict",
-      path: "/auth",
+      sameSite: "none",
+      path: REFRESH_COOKIE_PATH,
     });
   },
 
