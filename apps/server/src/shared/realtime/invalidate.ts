@@ -33,6 +33,16 @@ export function registerRealtimeListeners() {
     safeEmit(() => io.to("RECEPTION").emit("invalidate", { key: "bookings" }));
   });
 
+  // ---- payments ----
+  eventBus.on("payment.recorded", () => {
+    safeEmit(() =>
+      io
+        .to("RECEPTION")
+        .to("management")
+        .emit("invalidate", { key: "bookings" }),
+    );
+  });
+
   // ---- shifts ----
   eventBus.on("shift.closed", () => {
     safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" }));

@@ -32,6 +32,14 @@ export const listBookingsQuerySchema = z
     path: ["endDate"],
   });
 
+export const createBookingPaymentSchema = z.object({
+  amount: z.coerce.number().positive("Amount must be a positive number"),
+  method: z.enum(["CASH", "TRANSFER", "CARD"], "Payment method is required"),
+});
+
 export type CreateBookingBody = z.infer<typeof createBookingSchema>;
 export type BookingIdParams = z.infer<typeof bookingIdParamsSchema>;
 export type ListBookingsQuery = z.infer<typeof listBookingsQuerySchema>;
+export type CreateBookingPaymentBody = z.infer<
+  typeof createBookingPaymentSchema
+>;

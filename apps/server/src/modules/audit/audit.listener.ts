@@ -214,6 +214,22 @@ export function registerAuditListeners() {
     },
   );
 
+  // ---- payments ----
+  eventBus.on(
+    "payment.recorded",
+    ({ paymentId, bookingId, actorUserId, amount, method, shiftId }) => {
+      safeLog(() =>
+        auditService.log({
+          actorUserId,
+          action: "payment_recorded",
+          entityType: "Payment",
+          entityId: paymentId,
+          afterValue: { bookingId, amount, method, shiftId },
+        }),
+      );
+    },
+  );
+
   // ---- shifts ----
   eventBus.on("shift.closed", ({ shiftId, actorUserId, before, after }) => {
     safeLog(() =>

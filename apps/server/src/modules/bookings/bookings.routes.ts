@@ -9,6 +9,7 @@ import {
   createBookingSchema,
   bookingIdParamsSchema,
   listBookingsQuerySchema,
+  createBookingPaymentSchema,
 } from "./bookings.schema";
 
 export const bookingsRoutes = Router();
@@ -176,4 +177,25 @@ bookingsRoutes.post(
   authorize("update", "Booking"),
   validate({ params: bookingIdParamsSchema }),
   bookingsController.checkout,
+);
+
+bookingsRoutes.post(
+  "/:id/payments",
+  authorize("create", "Payment"),
+  validate({ params: bookingIdParamsSchema, body: createBookingPaymentSchema }),
+  bookingsController.createPayment,
+);
+
+bookingsRoutes.get(
+  "/:id/payments",
+  authorize("read", "Payment"),
+  validate({ params: bookingIdParamsSchema }),
+  bookingsController.listPayments,
+);
+
+bookingsRoutes.get(
+  "/:id/payments/balance",
+  authorize("read", "Payment"),
+  validate({ params: bookingIdParamsSchema }),
+  bookingsController.getBalance,
 );
