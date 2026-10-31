@@ -14,8 +14,9 @@ export const authService = {
     if (!user || !(await password.compare(plainPassword, user.passwordHash))) {
       throw new UnauthorizedError("Invalid email or password");
     }
+    const { passwordHash, ...safeUser } = user;
     return {
-      user,
+      user: safeUser,
       tokens: await authService.issueTokenPair(
         user.id,
         user.role,

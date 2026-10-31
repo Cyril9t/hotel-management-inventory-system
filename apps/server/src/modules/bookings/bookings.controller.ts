@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
 import { bookingsService } from "./bookings.service";
 import { success } from "#shared/utils/api-response";
+import { paymentsService } from "#modules/payments/payments.service";
 import type {
   CreateBookingBody,
   BookingIdParams,
   ListBookingsQuery,
+  CreateBookingPaymentBody,
 } from "./bookings.schema";
 
 export const bookingsController = {
@@ -21,8 +23,8 @@ export const bookingsController = {
   },
 
   async list(_req: Request, res: Response) {
-    const { roomId, status } = res.locals.query as ListBookingsQuery;
-    const bookings = await bookingsService.listBookings({ roomId, status });
+    const filters = res.locals.query as ListBookingsQuery;
+    const bookings = await bookingsService.listBookings(filters);
     res.json(success({ bookings }));
   },
 
@@ -52,5 +54,31 @@ export const bookingsController = {
         booking: await bookingsService.checkout(id, settledByUserId),
       }),
     );
+  },
+
+  async createPayment(
+    req: Request<unknown, unknown, CreateBookingPaymentBody>,
+    res: Response,
+  ) {
+    const { id } = res.locals.params as BookingIdParams;
+    res.status(201).json(
+      success({
+        payment: await paymentsService.recordForBooking(
+          id,
+          req.body,
+          req.user!.userId,
+        ),
+      }),
+    );
+  },
+
+  async listPayments(req: Request, res: Response) {
+    const { id } = res.locals.params as BookingIdParams;
+    res.json(success({ payments: await paymentsService.listForBooking(id) }));
+  },
+
+  async getBalance(req: Request, res: Response) {
+    const { id } = res.locals.params as BookingIdParams;
+    res.json(success({ balance: await paymentsService.getBookingBalance(id) }));
   },
 };

@@ -4,11 +4,22 @@ import { authenticate } from "#shared/middleware/authenticate";
 import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
 import {
   listAuditLogsQuerySchema,
   entityParamsSchema,
   actorParamsSchema,
+
+  // success responses
+  auditLogsListResponseSchema,
+  auditEntityHistoryResponseSchema,
+  auditActorHistoryResponseSchema,
+
+  // error responses
+  auditBadRequestResponse,
+  auditUnauthorizedResponse,
+  auditForbiddenResponse,
+  invalidEntityParamsResponse,
+  invalidActorIdResponse,
 } from "./audit.schema";
 
 export const auditRoutes = Router();
@@ -29,7 +40,31 @@ registry.registerPath({
   responses: {
     200: {
       description: "Audit logs retrieved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: auditLogsListResponseSchema } },
+    },
+    400: {
+      description: "Invalid query parameters",
+      content: {
+        "application/json": {
+          schema: auditBadRequestResponse,
+        },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": {
+          schema: auditUnauthorizedResponse,
+        },
+      },
+    },
+    403: {
+      description: "Forbidden",
+      content: {
+        "application/json": {
+          schema: auditForbiddenResponse,
+        },
+      },
     },
   },
 });
@@ -55,11 +90,29 @@ registry.registerPath({
   responses: {
     200: {
       description: "Entity logs retrieved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: auditEntityHistoryResponseSchema },
+      },
     },
     400: {
       description: "Invalid entity parameters",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: invalidEntityParamsResponse } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": {
+          schema: auditUnauthorizedResponse,
+        },
+      },
+    },
+    403: {
+      description: "Forbidden",
+      content: {
+        "application/json": {
+          schema: auditForbiddenResponse,
+        },
+      },
     },
   },
 });
@@ -84,11 +137,29 @@ registry.registerPath({
   responses: {
     200: {
       description: "Actor logs retrieved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: auditActorHistoryResponseSchema },
+      },
     },
     400: {
       description: "Invalid actor ID",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: invalidActorIdResponse } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": {
+          schema: auditUnauthorizedResponse,
+        },
+      },
+    },
+    403: {
+      description: "Forbidden",
+      content: {
+        "application/json": {
+          schema: auditForbiddenResponse,
+        },
+      },
     },
   },
 });

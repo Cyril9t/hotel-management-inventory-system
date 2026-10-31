@@ -4,12 +4,30 @@ import { authenticate } from "#shared/middleware/authenticate";
 import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
+import { z } from "zod";
 import {
   openShiftSchema,
   closeShiftSchema,
   shiftIdParamsSchema,
   listShiftsQuerySchema,
+
+  // success responses
+  currentShiftResponseSchema,
+  suggestedOpeningCashResponseSchema,
+  shiftOpenedResponseSchema,
+  shiftClosedResponseSchema,
+  shiftDetailsResponseSchema,
+  shiftsListResponseSchema,
+
+  // error responses
+  noOpenShiftResponse,
+  shiftAlreadyOpenResponse,
+  userDepartmentMissingResponse,
+  shiftNotFoundResponse,
+  shiftAlreadyClosedResponse,
+  cannotCloseShiftResponse,
+  cannotViewShiftResponse,
+  shiftDynamicBadRequestResponse,
 } from "./shifts.schema";
 
 export const shiftsRoutes = Router();
@@ -26,14 +44,23 @@ registry.registerPath({
   responses: {
     200: {
       description: "Current open shift",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: currentShiftResponseSchema,
+        },
+      },
     },
     404: {
-      description: "No open shift",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "No open shift found",
+      content: {
+        "application/json": {
+          schema: noOpenShiftResponse,
+        },
+      },
     },
   },
 });
+
 shiftsRoutes.get(
   "/current",
   authorize("read", "Shift"),
@@ -52,10 +79,15 @@ registry.registerPath({
   responses: {
     200: {
       description: "Suggested opening cash",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: suggestedOpeningCashResponseSchema,
+        },
+      },
     },
   },
 });
+
 shiftsRoutes.get(
   "/suggested-opening-cash",
   authorize("read", "Shift"),
@@ -75,14 +107,26 @@ registry.registerPath({
   responses: {
     201: {
       description: "Shift opened",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: shiftOpenedResponseSchema,
+        },
+      },
     },
     400: {
-      description: "Already has an open shift",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Cannot open shift",
+      content: {
+        "application/json": {
+          schema: z.union([
+            shiftAlreadyOpenResponse,
+            userDepartmentMissingResponse,
+          ]),
+        },
+      },
     },
   },
 });
+
 shiftsRoutes.post(
   "/open",
   authorize("create", "Shift"),
@@ -104,14 +148,42 @@ registry.registerPath({
   responses: {
     200: {
       description: "Shift closed",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: shiftClosedResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Shift cannot be closed",
+      content: {
+        "application/json": {
+          schema: z.union([
+            shiftAlreadyClosedResponse,
+            shiftDynamicBadRequestResponse,
+          ]),
+        },
+      },
+    },
+    403: {
+      description: "Not allowed to close this shift",
+      content: {
+        "application/json": {
+          schema: cannotCloseShiftResponse,
+        },
+      },
     },
     404: {
       description: "Shift not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: shiftNotFoundResponse,
+        },
+      },
     },
   },
 });
+
 shiftsRoutes.patch(
   "/:id/close",
   authorize("update", "Shift"),
@@ -130,14 +202,31 @@ registry.registerPath({
   responses: {
     200: {
       description: "Shift details",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: shiftDetailsResponseSchema,
+        },
+      },
+    },
+    403: {
+      description: "Not allowed to view this shift",
+      content: {
+        "application/json": {
+          schema: cannotViewShiftResponse,
+        },
+      },
     },
     404: {
       description: "Shift not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: shiftNotFoundResponse,
+        },
+      },
     },
   },
 });
+
 shiftsRoutes.get(
   "/:id",
   authorize("read", "Shift"),
@@ -155,10 +244,15 @@ registry.registerPath({
   responses: {
     200: {
       description: "List of shifts",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: shiftsListResponseSchema,
+        },
+      },
     },
   },
 });
+
 shiftsRoutes.get(
   "/",
   authorize("read", "Shift"),

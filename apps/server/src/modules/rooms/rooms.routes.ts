@@ -4,7 +4,6 @@ import { authenticate } from "#shared/middleware/authenticate";
 import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
 import {
   createRoomSchema,
   updateRoomSchema,
@@ -15,6 +14,27 @@ import {
   createCategorySchema,
   bulkCreateRoomsSchema,
   listRoomsQuerySchema,
+
+  // success schemas
+  roomsListResponseSchema,
+  roomDetailsResponseSchema,
+  roomCreatedResponseSchema,
+  roomUpdatedResponseSchema,
+  roomDeactivatedResponseSchema,
+  roomReactivatedResponseSchema,
+  roomCategoryPriceUpdatedResponseSchema,
+  roomCategoryNameUpdatedResponseSchema,
+  roomCategoriesListResponseSchema,
+  roomCategoryCreatedResponseSchema,
+  roomsBulkCreatedResponseSchema,
+
+  // error schemas
+  roomsBadRequestResponse,
+  roomsUnauthorizedResponse,
+  roomsForbiddenResponse,
+  roomNotFoundResponse,
+  roomCategoryNotFoundResponse,
+  duplicateCategoryNameResponse,
 } from "./rooms.schema";
 
 export const roomsRoutes = Router();
@@ -33,7 +53,7 @@ registry.registerPath({
   responses: {
     200: {
       description: "List of rooms retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: roomsListResponseSchema } },
     },
   },
 });
@@ -56,7 +76,9 @@ registry.registerPath({
   responses: {
     200: {
       description: "List of categories retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomCategoriesListResponseSchema },
+      },
     },
   },
 });
@@ -82,11 +104,11 @@ registry.registerPath({
   responses: {
     200: {
       description: "Room details retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: roomDetailsResponseSchema } },
     },
     404: {
       description: "Room not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomNotFoundResponse } },
     },
   },
 });
@@ -112,15 +134,15 @@ registry.registerPath({
   responses: {
     201: {
       description: "Room created successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: roomCreatedResponseSchema } },
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomsBadRequestResponse } },
     },
     404: {
       description: "Room category not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomCategoryNotFoundResponse } },
     },
   },
 });
@@ -148,11 +170,11 @@ registry.registerPath({
   responses: {
     200: {
       description: "Room updated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: roomUpdatedResponseSchema } },
     },
     404: {
       description: "Room not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomNotFoundResponse } },
     },
   },
 });
@@ -178,11 +200,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Room deactivated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomDeactivatedResponseSchema },
+      },
     },
     404: {
       description: "Room not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomNotFoundResponse } },
     },
   },
 });
@@ -208,11 +232,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Room reactivated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomReactivatedResponseSchema },
+      },
     },
     404: {
       description: "Room not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomNotFoundResponse } },
     },
   },
 });
@@ -241,11 +267,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Price updated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomCategoryPriceUpdatedResponseSchema },
+      },
     },
     404: {
       description: "Room category not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomCategoryNotFoundResponse } },
     },
   },
 });
@@ -274,15 +302,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Category name updated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomCategoryNameUpdatedResponseSchema },
+      },
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: duplicateCategoryNameResponse },
+      },
     },
     404: {
       description: "Room category not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomCategoryNotFoundResponse } },
     },
   },
 });
@@ -309,11 +341,15 @@ registry.registerPath({
   responses: {
     201: {
       description: "Category created successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomCategoryCreatedResponseSchema },
+      },
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: duplicateCategoryNameResponse },
+      },
     },
   },
 });
@@ -341,11 +377,13 @@ registry.registerPath({
   responses: {
     201: {
       description: "Rooms created successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: roomsBulkCreatedResponseSchema },
+      },
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: roomCategoryNotFoundResponse } },
     },
   },
 });

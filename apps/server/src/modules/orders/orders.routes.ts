@@ -4,7 +4,7 @@ import { authenticate } from "#shared/middleware/authenticate";
 import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
+import { z } from "zod";
 import {
   createSaleSchema,
   saleIdParamsSchema,
@@ -13,6 +13,32 @@ import {
   kitchenOrderIdParamsSchema,
   updateKitchenOrderStatusSchema,
   listKitchenOrdersQuerySchema,
+
+  // success responses
+  saleCreatedResponseSchema,
+  salesListResponseSchema,
+  saleDetailsResponseSchema,
+  saleVoidRequestedResponseSchema,
+  saleVoidApprovedResponseSchema,
+  saleSettledResponseSchema,
+  kitchenOrdersListResponseSchema,
+  kitchenOrderDetailsResponseSchema,
+  kitchenOrderStatusUpdatedResponseSchema,
+
+  // error responses
+  ordersBadRequestResponse,
+  ordersUnauthorizedResponse,
+  ordersForbiddenResponse,
+  ordersNotFoundResponse,
+  saleNotFoundResponse,
+  kitchenOrderNotFoundResponse,
+  bookingNotFoundResponse,
+  saleNotCompletedResponse,
+  pendingVoidRequestRequiredResponse,
+  cannotSettleSaleResponse,
+  saleAlreadySettledResponse,
+  cannotSettleVoidedSaleResponse,
+  kitchenOrderTransitionNotAllowedResponse,
 } from "./orders.schema";
 
 export const ordersRoutes = Router();
@@ -35,11 +61,23 @@ registry.registerPath({
   responses: {
     201: {
       description: "Sale created successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: saleCreatedResponseSchema } },
     },
     400: {
-      description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Invalid request or sale cannot be completed",
+      content: { "application/json": { schema: ordersBadRequestResponse } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "Forbidden",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
+    },
+    404: {
+      description: "Booking or product not found",
+      content: { "application/json": { schema: ordersNotFoundResponse } },
     },
   },
 });
@@ -66,7 +104,15 @@ registry.registerPath({
   responses: {
     200: {
       description: "List of sales retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: salesListResponseSchema } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "Forbidden",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
   },
 });
@@ -93,11 +139,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Sale details retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: saleDetailsResponseSchema } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "Forbidden",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
     404: {
       description: "Sale not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: saleNotFoundResponse } },
     },
   },
 });
@@ -125,11 +179,25 @@ registry.registerPath({
   responses: {
     200: {
       description: "Void request submitted successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: saleVoidRequestedResponseSchema },
+      },
+    },
+    400: {
+      description: "Sale cannot be voided",
+      content: { "application/json": { schema: saleNotCompletedResponse } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "You cannot void this sale",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
     404: {
       description: "Sale not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: saleNotFoundResponse } },
     },
   },
 });
@@ -156,11 +224,27 @@ registry.registerPath({
   responses: {
     200: {
       description: "Void approved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: saleVoidApprovedResponseSchema },
+      },
+    },
+    400: {
+      description: "Sale has no pending void request",
+      content: {
+        "application/json": { schema: pendingVoidRequestRequiredResponse },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "You cannot approve this void",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
     404: {
       description: "Sale not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: saleNotFoundResponse } },
     },
   },
 });
@@ -186,11 +270,31 @@ registry.registerPath({
   responses: {
     200: {
       description: "Sale settled successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: saleSettledResponseSchema } },
+    },
+    400: {
+      description: "Sale cannot be settled",
+      content: {
+        "application/json": {
+          schema: z.union([
+            cannotSettleSaleResponse,
+            cannotSettleVoidedSaleResponse,
+            saleAlreadySettledResponse,
+          ]),
+        },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "You cannot settle this sale",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
     404: {
       description: "Sale not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: saleNotFoundResponse } },
     },
   },
 });
@@ -217,7 +321,17 @@ registry.registerPath({
   responses: {
     200: {
       description: "List of kitchen orders retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: kitchenOrdersListResponseSchema },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "Forbidden",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
   },
 });
@@ -244,11 +358,23 @@ registry.registerPath({
   responses: {
     200: {
       description: "Kitchen order details retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: kitchenOrderDetailsResponseSchema },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "Forbidden",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
     404: {
       description: "Kitchen order not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: kitchenOrderNotFoundResponse },
+      },
     },
   },
 });
@@ -280,15 +406,29 @@ registry.registerPath({
   responses: {
     200: {
       description: "Kitchen order status updated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: kitchenOrderStatusUpdatedResponseSchema,
+        },
+      },
     },
     400: {
-      description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Invalid request or kitchen order transition",
+      content: { "application/json": { schema: ordersBadRequestResponse } },
+    },
+    401: {
+      description: "Unauthorized",
+      content: { "application/json": { schema: ordersUnauthorizedResponse } },
+    },
+    403: {
+      description: "Forbidden",
+      content: { "application/json": { schema: ordersForbiddenResponse } },
     },
     404: {
       description: "Kitchen order not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: kitchenOrderNotFoundResponse },
+      },
     },
   },
 });
