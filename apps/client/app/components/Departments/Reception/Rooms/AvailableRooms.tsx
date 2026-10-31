@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RoomOccupancyHeader } from "./Header";
 import { RoomFiltersBar } from "./RoomFilter";
 import { RoomCard } from "./RoomsCard";
 import { RoomDetailsDrawer } from "./RoomsDetails";
-import type { Room } from "./type";
+import type { ApiRoom, Room } from "./type";
 import { UseMetricCards } from "~/Context/Context";
 import BookRoomModal from "./BookRoom/BookGuest";
 import { Button } from "~/components/ui/button";
@@ -15,7 +15,7 @@ const roomImages = [
     "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
 ];
 
-function mapApiRoom(room: any, index: number,): Room {
+function mapApiRoom(room: ApiRoom, index: number,): Room {
     const statusByApiValue: Record<string, Room["status"]> = {
         AVAILABLE: "Available",
         RESERVED: "Occupied",
@@ -24,7 +24,9 @@ function mapApiRoom(room: any, index: number,): Room {
         CHECKOUT_DUE: "Checkout Due",
         OVERDUE: "Overdue",
     };
-    const status = statusByApiValue[String(room.status ?? "AVAILABLE").toUpperCase()] ?? "Available";
+    const apiStatus = String(room.status ?? "UNKNOWN").trim();
+    const normalizedStatus = apiStatus.toUpperCase().replace(/[ _-]+/g, "_");
+    const status = statusByApiValue[normalizedStatus] ?? apiStatus.toLowerCase().split(/[ _-]+/).map((part) => part[0]?.toUpperCase() + part.slice(1)).join(" ");
     const number = String(room.number ?? "");
     return {
         id: String(room.id ?? room._id ?? number),
@@ -34,19 +36,17 @@ function mapApiRoom(room: any, index: number,): Room {
         bedCount: 1,
         maxGuests: 2,
         status,
-        occupancyProgress: status === "Available" ? 0 : 100,
+        occupancyProgress: normalizedStatus === "AVAILABLE" ? 0 : 100,
         floor: number.length > 1 ? `Floor ${number.slice(0, -2) || "1"}` : undefined,
         wing: "",
         image: roomImages[index % roomImages.length],
     };
 }
 
-export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, }: { onCreateRoom?: () => void; refreshKey?: number; } = {}, action: true) {
+export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allowRoomActions = true, }: { onCreateRoom?: () => void; refreshKey?: number; allowRoomActions?: boolean; } = {}) {
 
-    const { api } = UseMetricCards();
-    const [rooms, setRooms] = useState<Room[]>([]);
-    const [roomsLoading, setRoomsLoading] = useState(true);
-    const [roomsError, setRoomsError] = useState(false);
+    const { api, rooms: apiRooms, roomsLoading, roomsError, refreshRooms } = UseMetricCards();
+    const rooms = useMemo(() => apiRooms.map(mapApiRoom), [apiRooms]);
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -59,36 +59,26 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, }: { 
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
     useEffect(() => {
-        let cancelled = false;
-        setRoomsLoading(true);
-        setRoomsError(false);
-        void api.get("/rooms", { params: { isActive: true } }).then((response: any) => {
-            console.log("Rooms API response:", response.data);
-            const payload = response.data?.data?.rooms ?? response.data?.data ?? response.data?.rooms ?? [];
-            const nextRooms = (Array.isArray(payload) ? payload : []).map(mapApiRoom);
-            if (!cancelled) {
-                setRooms(nextRooms);
-                setSelectedRoom((current) => nextRooms.find((room) => room.id === current?.id) ?? nextRooms[0] ?? null);
-            }
-        }).catch((error: any) => {
-            console.error("Failed to load rooms:", error);
-            if (!cancelled) setRoomsError(true);
-        }).finally(() => {
-            if (!cancelled) setRoomsLoading(false);
-        });
-        return () => { cancelled = true; };
-    }, [api, refreshKey]);
+        setSelectedRoom((current) => rooms.find((room: any) => room.id === current?.id) ?? rooms[0] ?? null);
+    }, [rooms]);
+
+    const lastRefreshKey = useRef(refreshKey);
+    useEffect(() => {
+        if (lastRefreshKey.current === refreshKey) return;
+        lastRefreshKey.current = refreshKey;
+        void refreshRooms().catch(() => { });
+    }, [refreshKey, refreshRooms]);
 
     const roomCounts = useMemo(() => {
-        const available = rooms.filter((room) => room.status === "Available").length;
-        const checkoutDue = rooms.filter((room) => room.status === "Checkout Due").length;
-        const overdue = rooms.filter((room) => room.status === "Overdue").length;
+        const available = rooms.filter((room: any) => room.status === "Available").length;
+        const checkoutDue = rooms.filter((room: any) => room.status === "Checkout Due").length;
+        const overdue = rooms.filter((room: any) => room.status === "Overdue").length;
         return { total: rooms.length, available, occupied: rooms.length - available, checkoutDue, overdue };
     }, [rooms]);
-    const roomTypes = useMemo(() => Array.from(new Set(rooms.map((room) => room.type))), [rooms]);
+    const roomTypes = useMemo<string[]>(() => Array.from(new Set(rooms.map((room: any) => String(room.type)))), [rooms]);
 
     const filteredRooms = useMemo(() => {
-        return rooms.filter((room) => {
+        return rooms.filter((room: any) => {
             const matchesSearch =
                 room.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (room.guestName && room.guestName.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -106,8 +96,10 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, }: { 
         <div >
 
             <BookRoomModal
+                api={api}
                 isOpen={bookRooms}
                 room={selectedRoom as unknown as Parameters<typeof BookRoomModal>[0]["room"]}
+                onBookingComplete={() => { void refreshRooms().catch(() => { }); }}
                 onClose={() => {
                     setBookRooms(false)
                 }}
@@ -152,7 +144,7 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, }: { 
                 <div className="lg:col-span-8 space-y-4">
                     {roomsLoading ? <div role="status" className="rounded-xl border border-border bg-card p-12 text-center text-sm text-muted-foreground">Loading rooms…</div> : roomsError ? <div role="alert" className="rounded-xl border border-destructive/30 bg-card p-12 text-center text-sm text-muted-foreground">Could not load rooms from the Rooms API. Try reopening this department.</div> : filteredRooms.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {filteredRooms.map((room) => (
+                            {filteredRooms.map((room: any) => (
                                 <RoomCard
                                     key={room.id}
                                     room={room}
@@ -176,7 +168,7 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, }: { 
                         onCheckOut={(r) => alert(`Checking out room ${r.number}`)}
                         onOrderService={(r) => alert(`Ordering room service for room ${r.number}`)}
                         onBookNow={(r) => setBookRooms(true)}
-                        action={action}
+                        action={allowRoomActions}
                     />
                 </div>
             </div>

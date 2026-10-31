@@ -1,87 +1,43 @@
-import { LogIn, LogOut, UtensilsCrossed } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import { BedDouble } from "lucide-react";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { UseMetricCards } from "~/Context/Context";
 
-interface ActivityItem {
-    id: number;
-    room: string;
-    action: string;
-    time: string;
-    detail: string;
-    type: 'checkin' | 'service' | 'checkout';
+function formatStatus(status?: string) {
+    return status?.toLowerCase().split(/[_ -]+/).map((part) => part[0]?.toUpperCase() + part.slice(1)).join(" ") || "Status unavailable";
 }
 
-export const RecentActivityFeed: React.FC = () => {
-    const activities: ActivityItem[] = [
-        {
-            id: 1,
-            room: 'Room 204',
-            action: 'Check-in',
-            time: '10:42 PM',
-            detail: 'John Smith',
-            type: 'checkin',
-        },
-        {
-            id: 2,
-            room: 'Room 312',
-            action: 'Room Service',
-            time: '10:21 PM',
-            detail: 'Burger, Fries, Coke',
-            type: 'service',
-        },
-        {
-            id: 3,
-            room: 'Room 110',
-            action: 'Check-out',
-            time: '09:54 PM',
-            detail: 'Sarah Wilson',
-            type: 'checkout',
-        },
-    ];
+export const RecentActivityFeed = () => {
+    const { rooms, roomsLoading, roomsError } = UseMetricCards();
 
     return (
-        <Card >
-
+        <Card>
             <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-foreground">Recent Activity</h3>
-                    <span className="text-[10px] font-semibold  uppercase tracking-wider bg-secondary px-2 py-0.5 rounded">
-                        Live Feed
-                    </span>
+                <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-foreground">Rooms</h3>
+                    <span className="rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">Live from API</span>
                 </div>
             </CardHeader>
-
-
             <CardContent>
-
-                <div className="space-y-3">
-                    {activities.map((act) => (
-                        <div
-                            key={act.id}
-                            className="flex items-center justify-between p-3.5 rounded-[var(--radius)] bg-secondary/30 border border-border/50 hover:bg-secondary/60 transition-colors"
-                        >
-                            <div className="flex items-center gap-3">
-                                <Button className={` h-10 w-10 ${act.type === 'checkin'
-                                    ? 'bg-brand-success/15 text-brand-success'
-                                    : act.type === 'service'
-                                        ? 'bg-brand-gold/15 text-brand-gold'
-                                        : 'bg-destructive/15 text-destructive'
-                                    }`}>
-                                    {act.type === 'checkin' ? <LogIn className="w-4 h-4" /> : act.type === 'service' ? <UtensilsCrossed className="w-4 h-4" /> : <LogOut className="w-4 h-4" />}
-                                </Button>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[15px] font-bold text-foreground">{act.room}</span>
-                                        <span className="text-sm font-semibold text-primary">{act.action}</span>
+                {roomsLoading ? <div role="status" aria-label="Loading rooms" className="space-y-3">{[0, 1, 2].map((item) => <div key={item} className="h-16 animate-pulse rounded-lg bg-muted" />)}</div> : roomsError ? (
+                    <p role="alert" className="text-sm text-destructive">Room information could not be loaded.</p>
+                ) : rooms.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No rooms are available to display.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {rooms.slice(0, 5).map((room, index) => (
+                            <div key={room.id ?? room._id ?? `${room.number ?? "room"}-${index}`} className="flex items-center justify-between rounded-[var(--radius)] border border-border/50 bg-secondary/30 p-3.5">
+                                <div className="flex items-center gap-3">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><BedDouble className="h-4 w-4" /></span>
+                                    <div>
+                                        <p className="text-[15px] font-bold text-foreground">Room {room.number ?? "—"}</p>
+                                        <p className="mt-0.5 text-[11px] text-muted-foreground">{room.category?.name ?? room.type ?? "Category unavailable"}</p>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                                        {act.time} • {act.detail}
-                                    </p>
                                 </div>
+                                <span className="text-sm font-semibold text-primary">{formatStatus(room.status)}</span>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

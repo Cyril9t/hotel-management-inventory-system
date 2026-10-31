@@ -29,7 +29,7 @@ export function LoginForm() {
 
             saveSession(data.accessToken, data.user);
             const dashboardPath = getDashboardPathForRole(data.user.role);
-            navigate(dashboardPath ?? `${data.user.role.toLowerCase()}/dashboard`, { replace: true });
+            navigate(dashboardPath ?? "/", { replace: true });
         } catch (error: any) {
             console.error(error?.response?.data?.error?.message ?? error);
         } finally {

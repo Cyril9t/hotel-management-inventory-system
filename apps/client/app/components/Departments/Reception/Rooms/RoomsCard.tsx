@@ -21,6 +21,8 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, isSelected, onSelect }
                 return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
             case 'Overdue':
                 return 'bg-destructive/10 text-destructive border-destructive';
+            default:
+                return 'bg-secondary text-muted-foreground border-border';
         }
     };
 

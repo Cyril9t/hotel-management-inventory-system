@@ -1,6 +1,7 @@
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { UseMetricCards } from "~/Context/Context";
+import { ThemeToggle } from "~/components/shared/ThemeToggle";
 
 export function Header() {
     const { user } = UseMetricCards()
@@ -11,6 +12,8 @@ export function Header() {
         <header className="flex items-center justify-between mb-7 ">
 
             <div className="flex items-center gap-4">
+
+                <ThemeToggle />
 
                 <Button variant={"outline"} className="h-10 w-10 relative rounded-full ">
                     <Bell className="w-4 h-4 " />

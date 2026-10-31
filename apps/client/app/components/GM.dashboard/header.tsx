@@ -1,4 +1,5 @@
 import { Calendar } from "lucide-react";
+import { ThemeToggle } from "~/components/shared/ThemeToggle";
 
 export function Header() {
     return (
@@ -17,6 +18,7 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-3">
+                <ThemeToggle />
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-card border border-border rounded-[var(--radius)] text-xs font-medium text-foreground shadow-sm">
                     <Calendar className="w-3.5 h-3.5 text-primary" />
                     <span>Today, {new Date().toLocaleDateString()}</span>

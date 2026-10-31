@@ -3,6 +3,7 @@ import { Skeleton } from '~/components/ui/skeleton'
 
 export const GlobalLoadingSkeleton: React.FC = () => {
     return (
+
         <div className="min-h-screen bg-background text-foreground space-y-6 p-4 md:p-8 animate-in fade-in duration-300">
             <div className="max-w-7xl mx-auto space-y-6">
 

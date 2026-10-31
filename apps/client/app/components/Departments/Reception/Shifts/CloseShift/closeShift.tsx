@@ -4,9 +4,10 @@ import { CloseShiftHeader } from './header';
 import { ShiftReconciliationCard } from './shiftCard';
 import { PaymentBreakdownCard } from './paymentSats';
 import { ShiftNotesForm } from './note';
-import { useNavigate } from 'react-router';
+import { replace, useNavigate } from 'react-router';
 import { useState } from 'react';
 import { Button } from '~/components/ui/button';
+import { UseMetricCards } from '~/Context/Context';
 
 export interface CloseShiftContainerProps {
     isOpen?: boolean;
@@ -19,6 +20,8 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
     onClose,
     onShiftClosed,
 }) => {
+
+    const { clearSession } = UseMetricCards()
     const openingCash = 50000;
 
     const paymentBreakdown = {
@@ -62,13 +65,13 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({
     const handleFinalClose = (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
+        clearSession()
         setTimeout(() => {
             setIsSubmitting(false);
 
         }, 1200);
 
-        navigate("/")
+        navigate("/", { replace: true })
 
     };
 

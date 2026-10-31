@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     X,
     Calendar,
     User,
-    Mail,
     Phone,
     CreditCard,
-    Building2,
-    Receipt,
     CheckCircle2,
     Lock,
     BedDouble,
     Users,
     Banknote,
-    ArrowLeftRight
+    ArrowLeftRight,
+    Receipt,
 } from 'lucide-react';
 import { formatNaira } from '../data';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
+import type { AxiosInstance } from 'axios';
+import { toast } from 'sonner';
 
 export interface SelectedRoom {
     id: string;
@@ -25,100 +25,149 @@ export interface SelectedRoom {
     type: string;
     pricePerNight: number;
     maxGuests: number;
-    bedCount: string;
+    bedCount: number;
     floor?: string;
     wing?: string;
 }
 
-export type PaymentMethod = 'cash' | 'card' | 'transfer' | 'paystack' | 'bank_transfer' | 'folio_charge' | '';
+export type PaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'CHARGE_TO_ROOM' | '';
 
 export interface BookingFormData {
-    guestName: string;
-    guestEmail: string;
+    guestFirstName: string;
+    guestLastName: string;
     guestPhone: string;
+    guestGender: string;
     checkInDate: string;
     checkOutDate: string;
-    adultsCount: number;
-    childrenCount: number;
+    checkOutTime: string;
     paymentMethod: PaymentMethod;
-    specialRequests: string;
+    checkInNow: boolean;
 }
 
 export interface BookRoomModalProps {
     isOpen: boolean;
     room: SelectedRoom | null;
+    api: AxiosInstance;
     onClose: () => void;
-    onBookingComplete?: (bookingData: BookingFormData & { room: SelectedRoom; totalAmount: number }) => void;
+    onBookingComplete?: () => void;
     modalWidthClass?: string;
+}
+
+function toLocalDateInputValue(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 export const BookRoomModal: React.FC<BookRoomModalProps> = ({
     isOpen,
     room,
+    api,
     onClose,
     onBookingComplete,
     modalWidthClass = "max-w-3xl",
 }) => {
+    const today = new Date();
+    const todayStr = toLocalDateInputValue(today);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = toLocalDateInputValue(tomorrow);
+    const [formData, setFormData] = useState<BookingFormData>(() => ({
+        guestFirstName: '',
+        guestLastName: '',
+        guestPhone: '',
+        guestGender: '',
+        checkInDate: todayStr,
+        checkOutDate: tomorrowStr,
+        checkOutTime: '',
+        paymentMethod: '',
+        checkInNow: false,
+    }));
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [submitError, setSubmitError] = useState('');
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setFormData({
+            guestFirstName: '',
+            guestLastName: '',
+            guestPhone: '',
+            guestGender: '',
+            checkInDate: todayStr,
+            checkOutDate: tomorrowStr,
+            checkOutTime: '',
+            paymentMethod: '',
+            checkInNow: false,
+        });
+        setSubmitError('');
+    }, [isOpen, room?.id]);
 
     if (!isOpen || !room) return null;
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-    const [formData, setFormData] = useState<BookingFormData>({
-        guestName: '',
-        guestEmail: '',
-        guestPhone: '',
-        checkInDate: todayStr,
-        checkOutDate: tomorrowStr,
-        adultsCount: 1,
-        childrenCount: 0,
-        paymentMethod: '',
-        specialRequests: '',
-    });
-
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
-
-
     const calculateNights = (): number => {
-
-        const start = new Date(formData.checkInDate);
-
-        const end = new Date(formData.checkOutDate);
-
-        const diffTime = end.getTime() - start.getTime();
-
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        return diffDays > 0 ? diffDays : 1;
+        const start = new Date(`${formData.checkInDate}T00:00:00`);
+        const end = new Date(`${formData.checkOutDate}T00:00:00`);
+        return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     };
 
     const nights = calculateNights();
     const roomTotal = room.pricePerNight * nights;
 
-    const grandTotal = roomTotal
+    const grandTotal = roomTotal;
 
-    const handleInputChange = (field: keyof BookingFormData, value: any) => {
+    const handleInputChange = <K extends keyof BookingFormData>(field: K, value: BookingFormData[K]) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+        setSubmitError('');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsProcessing(true);
+        if (formData.checkInDate > todayStr) {
+            setSubmitError('Future arrival dates are not supported by the current booking API. Choose today or ask the backend team to add plannedCheckInAt support.');
+            return;
+        }
+        if (nights < 1) {
+            setSubmitError('Check-out must be after the arrival date.');
+            return;
+        }
+        if (!formData.checkOutTime) {
+            setSubmitError('Select a check-out time to continue.');
+            return;
+        }
+        if (!formData.paymentMethod) {
+            setSubmitError('Select a payment method to continue.');
+            return;
+        }
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(room.id)) {
+            setSubmitError('This room is missing a valid room ID and cannot be booked. Refresh the room list and try again.');
+            return;
+        }
 
-        setTimeout(() => {
-            setIsProcessing(false);
-            if (onBookingComplete) {
-                onBookingComplete({
-                    ...formData,
-                    room,
-                    totalAmount: grandTotal,
-                });
-            }
+        setIsProcessing(true);
+        setSubmitError('');
+        try {
+            const expectedCheckoutAt = new Date(`${formData.checkOutDate}T${formData.checkOutTime}:00`).toISOString();
+            await api.post('/bookings', {
+                roomId: room.id,
+                guestFirstName: formData.guestFirstName.trim(),
+                guestLastName: formData.guestLastName.trim(),
+                guestPhone: formData.guestPhone.trim(),
+                guestGender: formData.guestGender,
+                nights,
+                expectedCheckoutAt,
+                paymentMethod: formData.paymentMethod,
+                checkInNow: formData.checkInNow,
+            });
+            onBookingComplete?.();
+            toast.success(formData.checkInNow ? 'Guest checked in and booking created' : 'Room reserved');
             onClose();
-        }, 1500);
+        } catch (error: any) {
+            const message = error?.response?.data?.error?.message;
+            setSubmitError(typeof message === 'string' ? message : 'Could not create the booking. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     return (
@@ -222,9 +271,9 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             Guest Information
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-foreground">Guest Full Name</label>
+                                <label className="text-sm font-semibold text-foreground">First Name</label>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground pointer-events-none">
                                         <User className="w-4 h-4" />
@@ -232,33 +281,28 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                     <input
                                         type="text"
                                         required
-                                        placeholder="Enter guest name"
-                                        value={formData.guestName}
-                                        onChange={(e) => handleInputChange('guestName', e.target.value)}
+                                        placeholder="Enter first name"
+                                        value={formData.guestFirstName}
+                                        onChange={(e) => handleInputChange('guestFirstName', e.target.value)}
                                         className="w-full text-sm h-10 pl-9 pr-3.5 py-2 rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Email Address</label>
-                                <div className="relative">
-                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground pointer-events-none">
-                                        <Mail className="w-4 h-4" />
-                                    </span>
-                                    <input
-                                        type="email"
-                                        required
-                                        placeholder="guest@email.com"
-                                        value={formData.guestEmail}
-                                        onChange={(e) => handleInputChange('guestEmail', e.target.value)}
-                                        className="w-full text-sm h-10 placeholder:text-sm pl-9 pr-3.5 py-2 rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                                    />
-                                </div>
+                                <label className="text-sm font-semibold text-foreground">Last Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    placeholder="Enter last name"
+                                    value={formData.guestLastName}
+                                    onChange={(e) => handleInputChange('guestLastName', e.target.value)}
+                                    className="w-full text-sm h-10 px-3.5 py-2 rounded-[var(--radius)] border border-input bg-card text-foreground placeholder-muted-foreground placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                />
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-foreground">Phone Number</label>
+                                <label className="text-sm font-semibold text-foreground">Phone Number</label>
                                 <div className="relative">
                                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground pointer-events-none">
                                         <Phone className="w-4 h-4" />
@@ -273,6 +317,22 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                     />
                                 </div>
                             </div>
+
+                            <div className="space-y-1.5">
+                                <label htmlFor="guest-gender" className="text-sm font-semibold text-foreground">Guest Gender</label>
+                                <select
+                                    id="guest-gender"
+                                    required
+                                    value={formData.guestGender}
+                                    onChange={(e) => handleInputChange('guestGender', e.target.value)}
+                                    className="w-full h-10 px-3.5 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                >
+                                    <option value="">Select gender</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -280,19 +340,21 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                     <div className="space-y-4 pt-6 border-t border-border mt-6">
                         <h3 className="text-[16px] font-bold text-foreground flex items-center gap-2">
                             <Calendar className="w-6 h-6 text-primary" />
-                            Stay Schedule & Occupants
+                            Stay Schedule
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-foreground">Check-in Date</label>
+                                <label className="text-sm font-semibold text-foreground">Arrival Date</label>
                                 <input
                                     type="date"
                                     required
+                                    min={todayStr}
                                     value={formData.checkInDate}
                                     onChange={(e) => handleInputChange('checkInDate', e.target.value)}
                                     className="w-full px-3 py-2 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                 />
+                                <p className="text-xs text-muted-foreground">The API does not store arrival dates. Future arrivals are blocked so the date is not silently ignored.</p>
                             </div>
 
                             <div className="space-y-1.5">
@@ -300,7 +362,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 <input
                                     type="date"
                                     required
-                                    min={formData.checkInDate}
+                                    min={(() => { const nextDay = new Date(`${formData.checkInDate}T00:00:00`); nextDay.setDate(nextDay.getDate() + 1); return toLocalDateInputValue(nextDay); })()}
                                     value={formData.checkOutDate}
                                     onChange={(e) => handleInputChange('checkOutDate', e.target.value)}
                                     className="w-full px-3 py-2 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
@@ -308,32 +370,26 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-foreground">Adults</label>
-                                <select
-                                    value={formData.adultsCount}
-                                    onChange={(e) => handleInputChange('adultsCount', Number(e.target.value))}
-                                    className="w-full h-9 px-3 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                                >
-                                    <option value={1}>1 Adult</option>
-                                    <option value={2}>2 Adults</option>
-                                    <option value={3}>3 Adults</option>
-                                    <option value={4}>4 Adults</option>
-                                </select>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-sm font-semibold text-foreground">Children</label>
-                                <select
-                                    value={formData.childrenCount}
-                                    onChange={(e) => handleInputChange('childrenCount', Number(e.target.value))}
-                                    className="w-full h-9 px-3 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
-                                >
-                                    <option value={0}>0 Children</option>
-                                    <option value={1}>1 Child</option>
-                                    <option value={2}>2 Children</option>
-                                </select>
+                                <label className="text-sm font-semibold text-foreground">Check-out Time (local)</label>
+                                <input
+                                    type="time"
+                                    required
+                                    value={formData.checkOutTime}
+                                    onChange={(e) => handleInputChange('checkOutTime', e.target.value)}
+                                    className="w-full px-3 py-2 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                                />
                             </div>
                         </div>
+                        {formData.checkInDate > todayStr && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">The current booking API cannot save future arrival dates. You can still create a reservation or check-in for today.</p>}
+                        <label className="flex items-start gap-3 rounded-md border border-border bg-secondary/40 p-3 text-sm text-foreground">
+                            <input
+                                type="checkbox"
+                                checked={formData.checkInNow}
+                                onChange={(e) => handleInputChange('checkInNow', e.target.checked)}
+                                className="mt-0.5 accent-primary"
+                            />
+                            <span><span className="font-semibold">Check in the guest now</span><span className="mt-0.5 block text-xs text-muted-foreground">Leave unchecked to create a RESERVED booking for today without recording an actual check-in.</span></span>
+                        </label>
                     </div>
 
 
@@ -344,11 +400,11 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             Payment Method
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
 
 
                             <label
-                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'cash'
+                                    className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CASH'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -356,8 +412,9 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 <input
                                     type="radio"
                                     name="paymentMethod"
-                                    checked={formData.paymentMethod === 'cash'}
-                                    onChange={() => handleInputChange('paymentMethod', 'cash')}
+                                    required
+                                    checked={formData.paymentMethod === 'CASH'}
+                                    onChange={() => handleInputChange('paymentMethod', 'CASH')}
                                     className="mt-0.5 text-primary focus:ring-ring accent-primary"
                                 />
                                 <div>
@@ -371,7 +428,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
 
                             <label
-                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'card'
+                                    className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CARD'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -379,8 +436,8 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 <input
                                     type="radio"
                                     name="paymentMethod"
-                                    checked={formData.paymentMethod === 'card'}
-                                    onChange={() => handleInputChange('paymentMethod', 'card')}
+                                    checked={formData.paymentMethod === 'CARD'}
+                                    onChange={() => handleInputChange('paymentMethod', 'CARD')}
                                     className="mt-0.5 text-primary focus:ring-ring accent-primary"
                                 />
                                 <div>
@@ -388,13 +445,13 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                         <CreditCard className="w-3.5 h-3.5 text-primary" />
                                         <span>Card / POS</span>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mt-0.5">Terminal POS or Paystack Online</p>
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">Card / POS payment method</p>
                                 </div>
                             </label>
 
 
                             <label
-                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'transfer'
+                                    className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'TRANSFER'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -402,8 +459,8 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 <input
                                     type="radio"
                                     name="paymentMethod"
-                                    checked={formData.paymentMethod === 'transfer'}
-                                    onChange={() => handleInputChange('paymentMethod', 'transfer')}
+                                    checked={formData.paymentMethod === 'TRANSFER'}
+                                    onChange={() => handleInputChange('paymentMethod', 'TRANSFER')}
                                     className="mt-0.5 text-primary focus:ring-ring accent-primary"
                                 />
                                 <div>
@@ -415,7 +472,30 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 </div>
                             </label>
 
+                            <label
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CHARGE_TO_ROOM'
+                                    ? 'bg-accent/40 border-primary shadow-sm'
+                                    : 'bg-card border-input hover:bg-secondary'
+                                    }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="paymentMethod"
+                                    checked={formData.paymentMethod === 'CHARGE_TO_ROOM'}
+                                    onChange={() => handleInputChange('paymentMethod', 'CHARGE_TO_ROOM')}
+                                    className="mt-0.5 text-primary focus:ring-ring accent-primary"
+                                />
+                                <div>
+                                    <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                                        <Receipt className="w-3.5 h-3.5 text-primary" />
+                                        <span>Charge to Room</span>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground mt-0.5">Add the amount to the guest folio</p>
+                                </div>
+                            </label>
+
                         </div>
+                        <p className="text-xs text-muted-foreground">The booking API records the payment method; it does not process a payment.</p>
                     </div>
 
                     <div className="bg-secondary/40 border border-border rounded-[var(--radius)] p-4 space-y-2 text-xs">
@@ -428,6 +508,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             <span className='text-sm'>Total Payable Amount</span>
                             <span className="text-xl text-primary font-serif">₦ {grandTotal.toLocaleString()}</span>
                         </div>
+                        <p className="text-[11px] text-muted-foreground">Estimate only. The booking API calculates the stored total from the room category price.</p>
                     </div>
 
 
@@ -448,28 +529,24 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             </Button>
                             <Button
                                 type="submit"
-
-                                disabled={isProcessing}
+                                disabled={isProcessing || formData.checkInDate > todayStr || nights < 1 || !formData.checkOutTime || !formData.paymentMethod}
                                 className="h-10"
                             >
                                 {isProcessing ? (
                                     <>
                                         <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                        <span>Processing Payment...</span>
+                                        <span>Creating booking...</span>
                                     </>
                                 ) : (
                                     <>
                                         <CheckCircle2 className="w-4 h-4" />
-                                        <span>
-                                            {formData.paymentMethod === 'paystack'
-                                                ? 'Pay with Paystack'
-                                                : 'Confirm & Book Room'}
-                                        </span>
+                                        <span>{formData.checkInNow ? 'Check In & Book Room' : 'Reserve Room'}</span>
                                     </>
                                 )}
                             </Button>
                         </div>
                     </div>
+                    {submitError && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{submitError}</p>}
 
                 </form>
             </div>
