@@ -1,10 +1,9 @@
 import { Router } from "express";
 import { usersController } from "./users.controller";
-import { authenticate } from "../../../shared/middleware/authenticate";
-import { authorize } from "../../../shared/middleware/authorize";
-import { validate } from "../../../shared/middleware/validator";
+import { authenticate } from "#shared/middleware/authenticate";
+import { authorize } from "#shared/middleware/authorize";
+import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
 import {
   createInviteSchema,
   acceptInviteSchema,
@@ -13,6 +12,25 @@ import {
   listUsersQuerySchema,
   inviteIdParamsSchema,
   listInvitesQuerySchema,
+
+  // responses
+  usersListResponse,
+  userDetailsResponse,
+  userDeactivatedResponse,
+  userReactivatedResponse,
+  userAcceptedInviteResponse,
+  inviteVerifiedResponse,
+  invitesListResponse,
+  inviteCreatedResponse,
+  inviteResentResponse,
+  inviteRoleForbiddenResponse,
+  usersBadRequestResponse,
+  usersUnauthorizedResponse,
+  usersForbiddenResponse,
+  userNotFoundResponse,
+  inviteNotFoundResponse,
+  invalidInviteResponse,
+  pendingInviteRequiredResponse,
 } from "./users.schema";
 
 export const usersRoutes = Router();
@@ -31,11 +49,15 @@ registry.registerPath({
   responses: {
     200: {
       description: "Invite verified successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: inviteVerifiedResponse },
+      },
     },
     400: {
-      description: "Invalid or expired invite",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Invalid or expired invite token",
+      content: {
+        "application/json": { schema: invalidInviteResponse },
+      },
     },
   },
 });
@@ -58,13 +80,17 @@ registry.registerPath({
     body: { content: { "application/json": { schema: acceptInviteSchema } } },
   },
   responses: {
-    200: {
-      description: "Invite accepted and user created",
-      content: { "application/json": { schema: apiSuccessSchema } },
+    201: {
+      description: "Invite accepted and user account created",
+      content: {
+        "application/json": { schema: userAcceptedInviteResponse },
+      },
     },
     400: {
-      description: "Invalid or expired invite",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Invalid or expired invite token or password",
+      content: {
+        "application/json": { schema: invalidInviteResponse },
+      },
     },
   },
 });
@@ -91,8 +117,28 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "List of users retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "List of users retrieved successfully",
+      content: {
+        "application/json": { schema: usersListResponse },
+      },
+    },
+    400: {
+      description: "Invalid query parameters",
+      content: {
+        "application/json": { schema: usersBadRequestResponse },
+      },
+    },
+    401: {
+      description: "Authentication required",
+      content: {
+        "application/json": { schema: usersUnauthorizedResponse },
+      },
+    },
+    403: {
+      description: "Insufficient permissions",
+      content: {
+        "application/json": { schema: usersForbiddenResponse },
+      },
     },
   },
 });
@@ -119,7 +165,7 @@ registry.registerPath({
   responses: {
     200: {
       description: "List of invites retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: invitesListResponse } },
     },
   },
 });
@@ -145,12 +191,34 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "User details retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "User details retrieved successfully",
+      content: {
+        "application/json": { schema: userDetailsResponse },
+      },
+    },
+    400: {
+      description: "Invalid user ID",
+      content: {
+        "application/json": { schema: usersBadRequestResponse },
+      },
+    },
+    401: {
+      description: "Authentication required",
+      content: {
+        "application/json": { schema: usersUnauthorizedResponse },
+      },
+    },
+    403: {
+      description: "Insufficient permissions",
+      content: {
+        "application/json": { schema: usersForbiddenResponse },
+      },
     },
     404: {
       description: "User not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: userNotFoundResponse },
+      },
     },
   },
 });
@@ -177,15 +245,15 @@ registry.registerPath({
   responses: {
     201: {
       description: "Invite created successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: inviteCreatedResponse } },
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: usersBadRequestResponse } },
     },
     403: {
-      description: "Forbidden: Actor role is not permitted to invite this role",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Actor role is not permitted to invite this role",
+      content: { "application/json": { schema: inviteRoleForbiddenResponse } },
     },
   },
 });
@@ -212,11 +280,33 @@ registry.registerPath({
   responses: {
     200: {
       description: "User deactivated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: userDeactivatedResponse },
+      },
+    },
+    400: {
+      description: "Invalid user ID",
+      content: {
+        "application/json": { schema: usersBadRequestResponse },
+      },
+    },
+    401: {
+      description: "Authentication required",
+      content: {
+        "application/json": { schema: usersUnauthorizedResponse },
+      },
+    },
+    403: {
+      description: "Insufficient permissions",
+      content: {
+        "application/json": { schema: usersForbiddenResponse },
+      },
     },
     404: {
       description: "User not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: userNotFoundResponse },
+      },
     },
   },
 });
@@ -242,11 +332,33 @@ registry.registerPath({
   responses: {
     200: {
       description: "User reactivated successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": { schema: userReactivatedResponse },
+      },
+    },
+    400: {
+      description: "Invalid user ID",
+      content: {
+        "application/json": { schema: usersBadRequestResponse },
+      },
+    },
+    401: {
+      description: "Authentication required",
+      content: {
+        "application/json": { schema: usersUnauthorizedResponse },
+      },
+    },
+    403: {
+      description: "Insufficient permissions",
+      content: {
+        "application/json": { schema: usersForbiddenResponse },
+      },
     },
     404: {
       description: "User not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": { schema: userNotFoundResponse },
+      },
     },
   },
 });
@@ -273,11 +385,17 @@ registry.registerPath({
   responses: {
     200: {
       description: "Invitation email resent successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: { "application/json": { schema: inviteResentResponse } },
+    },
+    400: {
+      description: "Only pending invites can be resent",
+      content: {
+        "application/json": { schema: pendingInviteRequiredResponse },
+      },
     },
     404: {
       description: "Invite not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: { "application/json": { schema: inviteNotFoundResponse } },
     },
   },
 });

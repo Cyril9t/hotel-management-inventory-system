@@ -1,5 +1,6 @@
 import { database } from "#shared/database/prisma";
 import type { Department, Prisma, StockMovementType } from "@prisma/client";
+import { PUBLIC_USER_SELECT } from "../core/users/users.repository";
 
 export const stockRepository = {
   // ---- Products ----
@@ -105,7 +106,12 @@ export const stockRepository = {
             }
           : {}),
       },
-      include: { product: true, actor: true },
+      include: {
+        product: true,
+        actor: {
+          select: PUBLIC_USER_SELECT,
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   },

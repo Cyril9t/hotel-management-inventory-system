@@ -18,6 +18,7 @@ import type {
   StaffInvite,
   AuditLog,
   DailyReportSnapshot,
+  Payment,
 } from "@prisma/client";
 import type { AccessTokenPayload } from "./jwt";
 
@@ -35,6 +36,7 @@ type Models = {
   StaffInvite: StaffInvite;
   AuditLog: AuditLog;
   DailyReportSnapshot: DailyReportSnapshot;
+  Payment: Payment;
 };
 
 export type Permission =
@@ -51,7 +53,8 @@ export type Permission =
   | ["create" | "read" | "update", Subjects<Pick<Models, "StaffInvite">>]
   | ["read" | "update", Subjects<Pick<Models, "User">>]
   | ["read", Subjects<Pick<Models, "AuditLog">>]
-  | ["read", Subjects<Pick<Models, "DailyReportSnapshot">>];
+  | ["read", Subjects<Pick<Models, "DailyReportSnapshot">>]
+  | ["create" | "read", Subjects<Pick<Models, "Payment">>];
 
 export type Permissions = MongoAbility<Permission>;
 
@@ -81,6 +84,7 @@ export function getPermissions(user: AccessTokenPayload) {
       can("read", ["Room", "RoomCategory"]);
       can(["create", "read", "update"], "Shift", { userId: user.userId });
       can("update", "Sale", { paymentMethod: "CHARGE_TO_ROOM" });
+      can(["create", "read"], "Payment");
       break;
 
     case "BAR_STAFF":

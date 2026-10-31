@@ -91,6 +91,16 @@ export type DomainEvents = {
     paymentMethod: string;
   };
 
+  // ---- payments ----
+  "payment.recorded": {
+    paymentId: string;
+    bookingId: string;
+    actorUserId: string;
+    amount: number;
+    method: string;
+    shiftId: string;
+  };
+
   // ---- shifts ----
   "shift.closed": {
     shiftId: string;

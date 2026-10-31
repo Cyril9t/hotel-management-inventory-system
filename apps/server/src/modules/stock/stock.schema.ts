@@ -1,9 +1,17 @@
 import { z } from "zod";
-import { Department, StockMovementType } from "@prisma/client";
+import { Department, StockMovementType, Role } from "@prisma/client";
+import { apiSuccessSchema } from "#shared/utils/api-response";
+import {
+  badRequestErrorSchema,
+  notFoundErrorSchema,
+  forbiddenErrorSchema,
+  unauthorizedErrorSchema,
+} from "#shared/errors/http-error-schemas";
 import {
   dateRangeShape,
   dateRangeRefinement,
 } from "#shared/utils/date-range-schema";
+import { publicUserSchema } from "../core/users/users.schema";
 
 export const createProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -95,3 +103,166 @@ export type AcknowledgeMovementBody = z.infer<typeof acknowledgeMovementSchema>;
 export type MovementIdParams = z.infer<typeof movementIdParamsSchema>;
 export type ListBalancesQuery = z.infer<typeof listBalancesQuerySchema>;
 export type ListMovementsQuery = z.infer<typeof listMovementsQuerySchema>;
+
+// response record schemas
+
+const productRecordSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  department: z.enum(Department),
+  unitPrice: z.string(),
+  lowStockThreshold: z.number().int(),
+  isActive: z.boolean(),
+  createdByUserId: z.uuid(),
+  createdAt: z.iso.datetime(),
+});
+
+const stockBalanceRecordSchema = z.object({
+  id: z.uuid(),
+  productId: z.uuid(),
+  department: z.enum(Department),
+  quantity: z.number().int(),
+  product: productRecordSchema,
+});
+
+const stockMovementRecordSchema = z.object({
+  id: z.uuid(),
+  productId: z.uuid(),
+  movementType: z.enum(StockMovementType),
+  fromDepartment: z.enum(Department).nullable(),
+  toDepartment: z.enum(Department).nullable(),
+  quantity: z.number().int(),
+  actorUserId: z.uuid(),
+  saleId: z.uuid().nullable(),
+  kitchenOrderId: z.uuid().nullable(),
+  correctionReason: z.string().nullable(),
+  acknowledgedAt: z.iso.datetime().nullable(),
+  acknowledgedByUserId: z.uuid().nullable(),
+  acknowledgedQuantity: z.number().int().nullable(),
+  createdAt: z.iso.datetime(),
+});
+
+// Only expose safe user fields in movement list responses.
+const stockMovementActorSchema = publicUserSchema;
+
+const stockMovementWithRelationsSchema = stockMovementRecordSchema.extend({
+  product: productRecordSchema,
+  actor: stockMovementActorSchema,
+});
+
+// ---- Product responses ----
+
+export const productCreatedResponseSchema = apiSuccessSchema(
+  z.object({
+    product: productRecordSchema,
+  }),
+);
+
+export const productsListResponseSchema = apiSuccessSchema(
+  z.object({
+    products: z.array(productRecordSchema),
+  }),
+);
+
+export const productDetailsResponseSchema = apiSuccessSchema(
+  z.object({
+    product: productRecordSchema,
+  }),
+);
+
+export const productUpdatedResponseSchema = apiSuccessSchema(
+  z.object({
+    product: productRecordSchema,
+  }),
+);
+
+export const productDeactivatedResponseSchema = apiSuccessSchema(
+  z.object({
+    product: productRecordSchema,
+  }),
+);
+
+export const productReactivatedResponseSchema = apiSuccessSchema(
+  z.object({
+    product: productRecordSchema,
+  }),
+);
+
+// ---- Balance responses ----
+
+export const stockBalancesListResponseSchema = apiSuccessSchema(
+  z.object({
+    balances: z.array(stockBalanceRecordSchema),
+  }),
+);
+
+// ---- Movement responses ----
+
+export const stockReceivedResponseSchema = apiSuccessSchema(
+  z.object({
+    movement: stockMovementRecordSchema,
+  }),
+);
+
+export const stockIssuedResponseSchema = apiSuccessSchema(
+  z.object({
+    movement: stockMovementRecordSchema,
+  }),
+);
+
+export const stockCorrectionResponseSchema = apiSuccessSchema(
+  z.object({
+    movement: stockMovementRecordSchema,
+  }),
+);
+
+export const stockMovementAcknowledgedResponseSchema = apiSuccessSchema(
+  z.object({
+    movement: stockMovementRecordSchema,
+  }),
+);
+
+export const stockMovementsListResponseSchema = apiSuccessSchema(
+  z.object({
+    movements: z.array(stockMovementWithRelationsSchema),
+  }),
+);
+
+// ---- Error responses ----
+
+// Product errors
+export const productNotFoundResponse = notFoundErrorSchema("Product not found");
+export const stockBadRequestResponse = badRequestErrorSchema("Bad request");
+export const stockUnauthorizedResponse =
+  unauthorizedErrorSchema("Unauthorized");
+export const stockForbiddenResponse = forbiddenErrorSchema("Forbidden");
+export const stockNotFoundResponse = notFoundErrorSchema("Not found");
+
+// Movement errors
+export const stockMovementNotFoundResponse = notFoundErrorSchema(
+  "Stock movement not found",
+);
+
+export const insufficientStockResponse = badRequestErrorSchema(
+  "Insufficient stock for this product",
+);
+
+export const correctionBelowZeroResponse = badRequestErrorSchema(
+  "Correction would take stock below zero",
+);
+
+export const kitchenMovementOnlyResponse = badRequestErrorSchema(
+  "Only kitchen-bound issues can be acknowledged",
+);
+
+export const movementAlreadyAcknowledgedResponse = badRequestErrorSchema(
+  "This movement has already been acknowledged",
+);
+
+export const acknowledgedQuantityExceedsIssuedResponse = badRequestErrorSchema(
+  "Acknowledged quantity cannot exceed the issued quantity",
+);
+
+export const cannotAcknowledgeMovementResponse = forbiddenErrorSchema(
+  "You cannot acknowledge this movement",
+);

@@ -4,8 +4,13 @@ import { authenticate } from "#shared/middleware/authenticate";
 import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
-import { reportQuerySchema } from "./reports.schema";
+import {
+  reportQuerySchema,
+  reportDetailsResponseSchema,
+  reportsBadRequestResponse,
+  reportsUnauthorizedResponse,
+  reportsForbiddenResponse,
+} from "./reports.schema";
 
 export const reportsRoutes = Router();
 
@@ -17,7 +22,8 @@ registry.registerPath({
   path: "/reports",
   tags: ["Reports"],
   summary: "Get daily report snapshot",
-  description: "Retrieves a financial and operational snapshot for a specific department on a given date.",
+  description:
+    "Retrieves a financial and operational snapshot for a specific department on a given date.",
   security: [{ bearerAuth: [] }],
   request: {
     query: reportQuerySchema,
@@ -25,11 +31,35 @@ registry.registerPath({
   responses: {
     200: {
       description: "Report retrieved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: reportDetailsResponseSchema,
+        },
+      },
     },
     400: {
       description: "Invalid query parameters",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: reportsBadRequestResponse,
+        },
+      },
+    },
+    401: {
+      description: "Unauthorized",
+      content: {
+        "application/json": {
+          schema: reportsUnauthorizedResponse,
+        },
+      },
+    },
+    403: {
+      description: "Forbidden",
+      content: {
+        "application/json": {
+          schema: reportsForbiddenResponse,
+        },
+      },
     },
   },
 });
