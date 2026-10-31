@@ -23,8 +23,8 @@ export const bookingsController = {
   },
 
   async list(_req: Request, res: Response) {
-    const { roomId, status } = res.locals.query as ListBookingsQuery;
-    const bookings = await bookingsService.listBookings({ roomId, status });
+    const filters = res.locals.query as ListBookingsQuery;
+    const bookings = await bookingsService.listBookings(filters);
     res.json(success({ bookings }));
   },
 

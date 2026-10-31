@@ -2,13 +2,19 @@ import { Router } from "express";
 import { authController } from "./auth.controller";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
+import { authenticate } from "src/shared/middleware/authenticate";
 import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+
+  // responses
+  loginResponseSchema,
+  getSessionResponseSchema,
+  refreshTokenResponseSchema,
+  authBadRequestResponse,
+  authUnauthorizedResponse,
 } from "./auth.schema";
-import { authenticate } from "src/shared/middleware/authenticate";
 
 export const authRoutes = Router();
 
@@ -25,13 +31,19 @@ registry.registerPath({
     200: {
       description: "Login successful",
       content: {
-        "application/json": { schema: apiSuccessSchema },
+        "application/json": { schema: loginResponseSchema },
+      },
+    },
+    400: {
+      description: "Invalid login request",
+      content: {
+        "application/json": { schema: authBadRequestResponse },
       },
     },
     401: {
       description: "Invalid email or password",
       content: {
-        "application/json": { schema: apiFailureSchema },
+        "application/json": { schema: authUnauthorizedResponse },
       },
     },
   },
@@ -54,12 +66,16 @@ registry.registerPath({
   security: [{ bearerAuth: [] }],
   responses: {
     200: {
-      description: "Session retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "Current session retrieved successfully",
+      content: {
+        "application/json": { schema: getSessionResponseSchema },
+      },
     },
     401: {
-      description: "Invalid or expired session",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Session is no longer valid",
+      content: {
+        "application/json": { schema: authUnauthorizedResponse },
+      },
     },
   },
 });
@@ -76,13 +92,13 @@ registry.registerPath({
     200: {
       description: "Access token refreshed successfully",
       content: {
-        "application/json": { schema: apiSuccessSchema },
+        "application/json": { schema: refreshTokenResponseSchema },
       },
     },
     401: {
       description: "Invalid or expired refresh token",
       content: {
-        "application/json": { schema: apiFailureSchema },
+        "application/json": { schema: authUnauthorizedResponse },
       },
     },
   },
@@ -97,18 +113,13 @@ registry.registerPath({
   tags: ["Auth"],
   summary: "Logout user and clear refresh token",
   responses: {
-    200: {
+    204: {
       description: "Logged out successfully",
-      content: {
-        "application/json": {
-          schema: apiSuccessSchema,
-        },
-      },
     },
     401: {
-      description: "Unauthorized",
+      description: "Invalid refresh token",
       content: {
-        "application/json": { schema: apiFailureSchema },
+        "application/json": { schema: authUnauthorizedResponse },
       },
     },
   },
@@ -126,13 +137,8 @@ registry.registerPath({
     body: { content: { "application/json": { schema: forgotPasswordSchema } } },
   },
   responses: {
-    200: {
+    204: {
       description: "Password reset email sent (if account exists)",
-      content: {
-        "application/json": {
-          schema: apiSuccessSchema,
-        },
-      },
     },
   },
 });
@@ -153,18 +159,13 @@ registry.registerPath({
     body: { content: { "application/json": { schema: resetPasswordSchema } } },
   },
   responses: {
-    200: {
+    204: {
       description: "Password reset successfully",
-      content: {
-        "application/json": {
-          schema: apiSuccessSchema,
-        },
-      },
     },
     400: {
-      description: "Invalid or expired reset token",
+      description: "Invalid request or expired reset token",
       content: {
-        "application/json": { schema: apiFailureSchema },
+        "application/json": { schema: authBadRequestResponse },
       },
     },
   },

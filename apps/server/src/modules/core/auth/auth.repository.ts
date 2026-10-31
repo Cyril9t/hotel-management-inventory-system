@@ -1,4 +1,4 @@
-import { database } from "../../../shared/database/prisma";
+import { database } from "#shared/database/prisma";
 
 export const authRepository = {
   async createRefreshToken(data: {

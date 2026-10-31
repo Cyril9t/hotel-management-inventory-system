@@ -11,7 +11,13 @@ export const bookingsRepository = {
   async findById(id: string) {
     return database.booking.findUnique({
       where: { id },
-      include: { room: true },
+      include: {
+        room: {
+          include: {
+            category: true,
+          },
+        },
+      },
     });
   },
 

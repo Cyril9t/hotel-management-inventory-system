@@ -3,10 +3,12 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { apiReference } from "@scalar/express-api-reference";
+// import swaggerUi from "swagger-ui-express";
 import { httpLogger } from "#shared/logger";
 import { errorHandler } from "#shared/middleware/error-handler";
 import { notFoundHandler } from "#shared/middleware/notfound-handler";
 import { corsOptions } from "#shared/config/cors";
+import { helmetOptions } from "#shared/config/helmet";
 import { authRoutes } from "#modules/core/auth/auth.routes";
 import { usersRoutes } from "#modules/core/users/users.routes";
 import { generateOpenApiDocument } from "#shared/openapi/generate";
@@ -23,7 +25,7 @@ import { reportsRoutes } from "./modules/reports/reports.routes";
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet(helmetOptions));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
@@ -45,10 +47,12 @@ app.use("/api/v1/orders", ordersRoutes);
 
 app.use("/api/v1/reports", reportsRoutes);
 
-const openApiDocument = generateOpenApiDocument();
 // if (env.isDev) {
-app.get("/api/docs.json", (_req, res) => res.json(openApiDocument));
-app.use("/api/docs", apiReference({ url: "/api/docs.json" }));
+app.get("/api/docs.json", (_req, res) => res.json(generateOpenApiDocument()));
+app.use(
+  "/api/docs",
+  apiReference({ layout: "classic", url: "/api/docs.json" }),
+);
 // }
 
 app.use(notFoundHandler);

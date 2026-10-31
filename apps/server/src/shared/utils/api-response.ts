@@ -7,21 +7,24 @@ export const apiErrorSchema = z.object({
   details: z.record(z.string(), z.unknown()).optional(),
 });
 
-export const apiDataSchema = z.record(z.string(), z.unknown());
-
-export const apiFailureSchema = z
-  .object({
-    success: z.literal(false),
-    error: apiErrorSchema,
-  })
-  .meta({ id: "ApiFailure" });
-
-export const apiSuccessSchema = z
-  .object({
+export function apiSuccessSchema<T extends z.ZodType>(data: T, id?: string) {
+  const schema = z.object({
     success: z.literal(true),
-    data: apiDataSchema,
-  })
-  .meta({ id: "ApiSuccess" });
+    data,
+  });
+  return id ? schema.meta({ id }) : schema;
+}
+
+export function apiFailureSchema<E extends z.ZodType = typeof apiErrorSchema>(
+  error: E,
+  id?: string,
+) {
+  const schema = z.object({
+    success: z.literal(false),
+    error,
+  });
+  return id ? schema.meta({ id }) : schema;
+}
 
 export type ApiSuccess<T> = {
   success: true;

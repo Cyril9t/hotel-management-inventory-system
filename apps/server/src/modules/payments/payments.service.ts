@@ -78,6 +78,12 @@ export const paymentsService = {
   },
 
   async listForBooking(bookingId: string) {
+    const booking = await bookingsRepository.findById(bookingId);
+
+    if (!booking) {
+      throw new NotFoundError("Booking not found");
+    }
+
     return paymentsRepository.listByBookingId(bookingId);
   },
 };

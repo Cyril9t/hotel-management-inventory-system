@@ -4,12 +4,32 @@ import { authenticate } from "#shared/middleware/authenticate";
 import { authorize } from "#shared/middleware/authorize";
 import { validate } from "#shared/middleware/validator";
 import { registry } from "#shared/openapi/registry";
-import { apiSuccessSchema, apiFailureSchema } from "#shared/utils/api-response";
 import {
   createBookingSchema,
   bookingIdParamsSchema,
   listBookingsQuerySchema,
   createBookingPaymentSchema,
+
+  // success responses
+  bookingCreatedResponseSchema,
+  bookingsListResponseSchema,
+  bookingDetailsResponseSchema,
+  bookingCheckInResponseSchema,
+  bookingCheckoutResponseSchema,
+  bookingPaymentCreatedResponseSchema,
+  bookingPaymentsListResponseSchema,
+  bookingBalanceResponseSchema,
+
+  // error responses
+  openShiftRequiredResponse,
+  roomAlreadyBookedResponse,
+  roomNotFoundResponse,
+  bookingNotFoundResponse,
+  invalidCheckInStatusResponse,
+  invalidCheckoutStatusResponse,
+  paymentShiftRequiredResponse,
+  bookingAlreadyPaidResponse,
+  bookingDynamicBadRequestResponse,
 } from "./bookings.schema";
 
 export const bookingsRoutes = Router();
@@ -31,15 +51,28 @@ registry.registerPath({
   responses: {
     201: {
       description: "Booking created successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: bookingCreatedResponseSchema,
+        },
+      },
     },
     400: {
-      description: "Invalid request data or room already has an active booking",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description:
+        "An open shift is required or the room already has an active booking",
+      content: {
+        "application/json": {
+          schema: openShiftRequiredResponse.or(roomAlreadyBookedResponse),
+        },
+      },
     },
     404: {
       description: "Room not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: roomNotFoundResponse,
+        },
+      },
     },
   },
 });
@@ -58,15 +91,19 @@ registry.registerPath({
   tags: ["Bookings"],
   summary: "List bookings",
   description:
-    "Retrieves a list of bookings, optionally filtered by room ID or status.",
+    "Retrieves bookings with optional filters for room ID, booking status, and date range.",
   security: [{ bearerAuth: [] }],
   request: {
     query: listBookingsQuerySchema,
   },
   responses: {
     200: {
-      description: "List of bookings retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "Bookings retrieved successfully",
+      content: {
+        "application/json": {
+          schema: bookingsListResponseSchema,
+        },
+      },
     },
   },
 });
@@ -92,12 +129,20 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "Booking details retrieved",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "Booking details retrieved successfully",
+      content: {
+        "application/json": {
+          schema: bookingDetailsResponseSchema,
+        },
+      },
     },
     404: {
       description: "Booking not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: bookingNotFoundResponse,
+        },
+      },
     },
   },
 });
@@ -123,16 +168,28 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "Check-in successful",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "Guest checked in successfully",
+      content: {
+        "application/json": {
+          schema: bookingCheckInResponseSchema,
+        },
+      },
     },
     400: {
-      description: "Invalid booking state for check-in",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description: "Only reserved bookings can be checked in",
+      content: {
+        "application/json": {
+          schema: invalidCheckInStatusResponse,
+        },
+      },
     },
     404: {
       description: "Booking not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: bookingNotFoundResponse,
+        },
+      },
     },
   },
 });
@@ -158,16 +215,31 @@ registry.registerPath({
   },
   responses: {
     200: {
-      description: "Check-out successful",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      description: "Guest checked out successfully",
+      content: {
+        "application/json": {
+          schema: bookingCheckoutResponseSchema,
+        },
+      },
     },
     400: {
-      description: "Invalid booking state for check-out",
-      content: { "application/json": { schema: apiFailureSchema } },
+      description:
+        "Booking cannot be checked out in its current state or has unpaid charge-to-room sales",
+      content: {
+        "application/json": {
+          schema: invalidCheckoutStatusResponse.or(
+            bookingDynamicBadRequestResponse,
+          ),
+        },
+      },
     },
     404: {
       description: "Booking not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: bookingNotFoundResponse,
+        },
+      },
     },
   },
 });
@@ -201,16 +273,30 @@ registry.registerPath({
   responses: {
     201: {
       description: "Payment recorded successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: bookingPaymentCreatedResponseSchema,
+        },
+      },
     },
     400: {
       description:
-        "Invalid payment data or payment cannot be applied to this booking",
-      content: { "application/json": { schema: apiFailureSchema } },
+        "Payment cannot be recorded because of an invalid payment state or amount",
+      content: {
+        "application/json": {
+          schema: paymentShiftRequiredResponse
+            .or(bookingAlreadyPaidResponse)
+            .or(bookingDynamicBadRequestResponse),
+        },
+      },
     },
     404: {
       description: "Booking not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: bookingNotFoundResponse,
+        },
+      },
     },
   },
 });
@@ -236,11 +322,11 @@ registry.registerPath({
   responses: {
     200: {
       description: "Booking payments retrieved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
-    },
-    404: {
-      description: "Booking not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: bookingPaymentsListResponseSchema,
+        },
+      },
     },
   },
 });
@@ -267,11 +353,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Booking payment balance retrieved successfully",
-      content: { "application/json": { schema: apiSuccessSchema } },
+      content: {
+        "application/json": {
+          schema: bookingBalanceResponseSchema,
+        },
+      },
     },
     404: {
       description: "Booking not found",
-      content: { "application/json": { schema: apiFailureSchema } },
+      content: {
+        "application/json": {
+          schema: bookingNotFoundResponse,
+        },
+      },
     },
   },
 });
