@@ -56,6 +56,7 @@ const shiftRecordSchema = z.object({
   actualCash: z.string().nullable(),
   variance: z.string().nullable(),
   status: z.enum(ShiftStatus),
+  isStale: z.boolean(),
 });
 
 const currentShiftRecordSchema = shiftRecordSchema

@@ -46,10 +46,12 @@ export function registerRealtimeListeners() {
   // ---- shifts ----
   eventBus.on("shift.closed", () => {
     safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" }));
+    safeEmit(() => io.to("management").emit("invalidate", { key: "staff" }));
   });
 
   eventBus.on("shift.opened", () => {
     safeEmit(() => io.to("management").emit("invalidate", { key: "shifts" }));
+    safeEmit(() => io.to("management").emit("invalidate", { key: "staff" }));
   });
 
   // ---- orders ----

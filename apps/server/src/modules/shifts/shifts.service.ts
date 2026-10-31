@@ -20,6 +20,15 @@ async function captureRoomSnapshot() {
   const rooms = await roomsService.list();
   return rooms.map(({ id, number, status }) => ({ id, number, status }));
 }
+export const STALE_SHIFT_HOURS = 18; // tune to your longest legitimate shift
+
+function withStale<T extends { status: string; openedAt: Date }>(shift: T) {
+  const isStale =
+    shift.status === "OPEN" &&
+    Date.now() - new Date(shift.openedAt).getTime() >
+      STALE_SHIFT_HOURS * 60 * 60 * 1000;
+  return { ...shift, isStale };
+}
 
 export const shiftsService = {
   async getCurrent(userId: string) {
@@ -27,7 +36,7 @@ export const shiftsService = {
     if (!shift) throw new NotFoundError("No open shift found");
 
     const expectedCash = await shiftsRepository.computeExpectedCash(shift.id);
-    return { ...shift, expectedCash };
+    return { ...withStale(shift), expectedCash };
   },
 
   async getSuggestedOpeningCash(userId: string) {
@@ -57,7 +66,7 @@ export const shiftsService = {
       openingCash: shift.openingCash,
     });
 
-    return shift;
+    return withStale(shift);
   },
 
   async close(
@@ -108,7 +117,7 @@ export const shiftsService = {
       },
     });
 
-    return updated;
+    return withStale(updated);
   },
 
   async getById(id: string, permission: Permissions) {
@@ -117,7 +126,8 @@ export const shiftsService = {
     if (permission.cannot("read", subject("Shift", shift))) {
       throw new ForbiddenError("You cannot view this shift");
     }
-    return shift;
+
+    return withStale(shift);
   },
 
   async list(
@@ -129,6 +139,7 @@ export const shiftsService = {
     const scopedFilters = canReadAll
       ? compact(filters)
       : compact({ ...filters, userId: actorUserId });
-    return shiftsRepository.findMany(scopedFilters);
+    const shifts = await shiftsRepository.findMany(scopedFilters);
+    return shifts.map(withStale);
   },
 };
