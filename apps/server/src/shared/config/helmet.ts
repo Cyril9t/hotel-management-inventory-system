@@ -5,7 +5,7 @@ export const helmetOptions: HelmetOptions = {
   contentSecurityPolicy: {
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "script-src": ["'self'", "https://cdn.jsdelivr.net"],
+      "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       "style-src": [
         "'self'",
         "'unsafe-inline'",
@@ -14,6 +14,7 @@ export const helmetOptions: HelmetOptions = {
       ],
       "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
       "img-src": ["'self'", "data:", "https:"],
+      "connect-src": ["'self'", "https://cdn.jsdelivr.net"],
     },
   },
 };
