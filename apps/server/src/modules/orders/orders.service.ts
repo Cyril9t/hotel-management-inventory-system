@@ -5,6 +5,7 @@ import {
   ForbiddenError,
 } from "#shared/errors/http-errors";
 import { compact } from "#shared/utils/omit-undefined";
+import { paymentsService } from "#modules/payments/payments.service";
 import { ordersRepository } from "./orders.repository";
 import { shiftsRepository } from "#modules/shifts/shifts.repository";
 import { bookingsRepository } from "#modules/bookings/bookings.repository";
@@ -93,6 +94,16 @@ export const ordersService = {
         },
         saleItems,
       );
+
+      if (data.paymentMethod !== "CHARGE_TO_ROOM") {
+        await paymentsService.recordForSale(tx, {
+          saleId: sale.id,
+          amount: totalAmount,
+          method: data.paymentMethod,
+          shiftId: shift.id,
+          receivedByUserId: createdByUserId,
+        });
+      }
 
       await stockService.deductForSale(
         tx,

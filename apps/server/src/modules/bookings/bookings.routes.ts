@@ -179,6 +179,42 @@ bookingsRoutes.post(
   bookingsController.checkout,
 );
 
+// POST /bookings/:id/payments
+registry.registerPath({
+  method: "post",
+  path: "/bookings/{id}/payments",
+  tags: ["Bookings"],
+  summary: "Record a booking payment",
+  description:
+    "Records a payment against a specific booking. Requires permission to create payments.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: bookingIdParamsSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: createBookingPaymentSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Payment recorded successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    400: {
+      description:
+        "Invalid payment data or payment cannot be applied to this booking",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+    404: {
+      description: "Booking not found",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
 bookingsRoutes.post(
   "/:id/payments",
   authorize("create", "Payment"),
@@ -186,12 +222,59 @@ bookingsRoutes.post(
   bookingsController.createPayment,
 );
 
+// GET /bookings/:id/payments
+registry.registerPath({
+  method: "get",
+  path: "/bookings/{id}/payments",
+  tags: ["Bookings"],
+  summary: "List booking payments",
+  description: "Retrieves all payments associated with a specific booking.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: bookingIdParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "Booking payments retrieved successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    404: {
+      description: "Booking not found",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
+
 bookingsRoutes.get(
   "/:id/payments",
   authorize("read", "Payment"),
   validate({ params: bookingIdParamsSchema }),
   bookingsController.listPayments,
 );
+
+// GET /bookings/:id/payments/balance
+registry.registerPath({
+  method: "get",
+  path: "/bookings/{id}/payments/balance",
+  tags: ["Bookings"],
+  summary: "Get booking payment balance",
+  description:
+    "Retrieves the payment summary for a booking, including the total booking amount, amount paid, and outstanding balance.",
+  security: [{ bearerAuth: [] }],
+  request: {
+    params: bookingIdParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "Booking payment balance retrieved successfully",
+      content: { "application/json": { schema: apiSuccessSchema } },
+    },
+    404: {
+      description: "Booking not found",
+      content: { "application/json": { schema: apiFailureSchema } },
+    },
+  },
+});
 
 bookingsRoutes.get(
   "/:id/payments/balance",

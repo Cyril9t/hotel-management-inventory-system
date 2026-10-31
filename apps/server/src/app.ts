@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import swaggerUi from "swagger-ui-express";
+import { apiReference } from "@scalar/express-api-reference";
 import { httpLogger } from "#shared/logger";
 import { errorHandler } from "#shared/middleware/error-handler";
 import { notFoundHandler } from "#shared/middleware/notfound-handler";
@@ -47,8 +47,8 @@ app.use("/api/v1/reports", reportsRoutes);
 
 const openApiDocument = generateOpenApiDocument();
 // if (env.isDev) {
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 app.get("/api/docs.json", (_req, res) => res.json(openApiDocument));
+app.use("/api/docs", apiReference({ url: "/api/docs.json" }));
 // }
 
 app.use(notFoundHandler);

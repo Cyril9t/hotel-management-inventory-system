@@ -53,26 +53,35 @@ export const shiftsRepository = {
     });
   },
 
-  // Sums cash-method revenue tied to this shift. Bookings (reception) and
-  // Sales (bar/restaurant, via orders) both carry shiftId at creation, so
-  // this picks up real data automatically — no stock component, since
-  // stock movements never involve cash.
+  // async computeExpectedCash(shiftId: string) {
+  //   const [bookingsCash, salesCash] = await Promise.all([
+  //     database.booking.aggregate({
+  //       where: { shiftId, paymentMethod: "CASH" },
+  //       _sum: { totalPrice: true },
+  //     }),
+  //     database.sale.aggregate({
+  //       where: { shiftId, paymentMethod: "CASH", status: "COMPLETED" },
+  //       _sum: { totalAmount: true },
+  //     }),
+  //   ]);
+
+  //   const bookingsTotal = Number(bookingsCash._sum.totalPrice ?? 0);
+  //   const salesTotal = Number(salesCash._sum.totalAmount ?? 0);
+
+  //   return bookingsTotal + salesTotal;
+  // },
+
+  // Sums CASH payments actually collected during this shift — the single
+  // source of truth is now the `payments` table (every sale-at-creation and
+  // every booking-payment write lands here), not booking.totalPrice/sale.totalAmount
+  // directly. No stock component, since stock movements never involve cash.
   async computeExpectedCash(shiftId: string) {
-    const [bookingsCash, salesCash] = await Promise.all([
-      database.booking.aggregate({
-        where: { shiftId, paymentMethod: "CASH" },
-        _sum: { totalPrice: true },
-      }),
-      database.sale.aggregate({
-        where: { shiftId, paymentMethod: "CASH", status: "COMPLETED" },
-        _sum: { totalAmount: true },
-      }),
-    ]);
+    const result = await database.payment.aggregate({
+      where: { shiftId, method: "CASH" },
+      _sum: { amount: true },
+    });
 
-    const bookingsTotal = Number(bookingsCash._sum.totalPrice ?? 0);
-    const salesTotal = Number(salesCash._sum.totalAmount ?? 0);
-
-    return bookingsTotal + salesTotal;
+    return Number(result._sum.amount ?? 0);
   },
 
   async createSnapshot(

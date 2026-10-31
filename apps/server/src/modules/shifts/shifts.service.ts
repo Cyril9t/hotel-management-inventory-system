@@ -25,7 +25,9 @@ export const shiftsService = {
   async getCurrent(userId: string) {
     const shift = await shiftsRepository.findOpenByUserId(userId);
     if (!shift) throw new NotFoundError("No open shift found");
-    return shift;
+
+    const expectedCash = await shiftsRepository.computeExpectedCash(shift.id);
+    return { ...shift, expectedCash };
   },
 
   async getSuggestedOpeningCash(userId: string) {
@@ -74,6 +76,13 @@ export const shiftsService = {
     }
 
     const expectedCash = await shiftsRepository.computeExpectedCash(shiftId);
+
+    if (data.actualCash > expectedCash) {
+      throw new BadRequestError(
+        `Actual cash (${data.actualCash}) cannot exceed expected cash (${expectedCash})`,
+      );
+    }
+
     const variance = data.actualCash - expectedCash;
 
     const updated = await shiftsRepository.close(shiftId, {
