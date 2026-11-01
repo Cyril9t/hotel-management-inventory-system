@@ -38,8 +38,8 @@ export const auditLogRecordSchema = z.object({
   action: z.string(),
   entityType: z.string(),
   entityId: z.string(),
-  beforeValue: z.json().nullable(),
-  afterValue: z.json().nullable(),
+  beforeValue: z.record(z.string(), z.unknown()).nullable(),
+  afterValue: z.record(z.string(), z.unknown()).nullable(),
   createdAt: z.iso.datetime(),
 });
 
