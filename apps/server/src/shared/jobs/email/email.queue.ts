@@ -1,14 +1,19 @@
-import { Queue } from "bullmq";
-import { redisConnection } from "#shared/config/redis";
+import { boss, startBoss } from "#shared/config/pgboss";
 
-export const emailQueue = new Queue("email", {
-  connection: redisConnection,
-});
+export const INVITE_EMAIL_QUEUE = "email-invite";
+export const PASSWORD_RESET_EMAIL_QUEUE = "email-password-reset";
 
 const RETRY_OPTIONS = {
-  attempts: 3,
-  backoff: { type: "exponential" as const, delay: 5000 },
+  retryLimit: 3,
+  retryDelay: 5,
+  retryBackoff: true,
 };
+
+export async function ensureEmailQueues() {
+  await startBoss();
+  await boss.createQueue(INVITE_EMAIL_QUEUE);
+  await boss.createQueue(PASSWORD_RESET_EMAIL_QUEUE);
+}
 
 export async function enqueueInviteEmail(data: {
   to: string;
@@ -18,7 +23,7 @@ export async function enqueueInviteEmail(data: {
   rawToken: string;
   expiresAt: Date;
 }) {
-  await emailQueue.add("invite", data, RETRY_OPTIONS);
+  await boss.send(INVITE_EMAIL_QUEUE, data, RETRY_OPTIONS);
 }
 
 export async function enqueuePasswordResetEmail(data: {
@@ -26,5 +31,5 @@ export async function enqueuePasswordResetEmail(data: {
   rawToken: string;
   expiresAt: Date;
 }) {
-  await emailQueue.add("password-reset", data, RETRY_OPTIONS);
+  await boss.send(PASSWORD_RESET_EMAIL_QUEUE, data, RETRY_OPTIONS);
 }

@@ -75,7 +75,12 @@ export const usersRepository = {
   },
 
   async findInviteByTokenHash(tokenHash: string) {
-    return database.staffInvite.findUnique({ where: { tokenHash } });
+    return database.staffInvite.findUnique({
+      where: { tokenHash },
+      omit: {
+        tokenHash: true,
+      },
+    });
   },
 
   async findPendingInviteByRole(role: Role) {
@@ -143,6 +148,7 @@ export const usersRepository = {
     return database.staffInvite.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      omit: { tokenHash: true },
     });
   },
 

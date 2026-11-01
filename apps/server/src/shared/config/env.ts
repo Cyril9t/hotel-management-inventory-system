@@ -28,6 +28,9 @@ export const env = cleanEnv(process.env, {
   REDIS_PORT: port({ default: 6379 }),
   REDIS_PASSWORD: str({ devDefault: undefined }),
 
+  PGBOSS_DATABASE_URL: str(),
+  PGBOSS_SCHEMA: str({ default: "pgboss_hms" }),
+
   CLIENT_ORIGIN: url({ devDefault: "http://localhost:5173" }),
   BASED_URL: url({ devDefault: "http://localhost:3000" }),
 
