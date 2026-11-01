@@ -20,6 +20,7 @@ import { stockRoutes } from "#modules/stock/stock.routes";
 import { healthCheck } from "./shared/http/health";
 import { ordersRoutes } from "./modules/orders/orders.routes";
 import { reportsRoutes } from "./modules/reports/reports.routes";
+import { auditRoutes } from "./modules/audit/audit.routes";
 
 // const API_PREFIX = "/api/v1";
 
@@ -46,6 +47,7 @@ app.use("/api/v1/stock", stockRoutes);
 app.use("/api/v1/orders", ordersRoutes);
 
 app.use("/api/v1/reports", reportsRoutes);
+app.use("/api/v1/audit", auditRoutes);
 
 // if (env.isDev) {
 app.get("/api/docs.json", (_req, res) => res.json(generateOpenApiDocument()));

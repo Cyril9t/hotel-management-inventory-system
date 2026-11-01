@@ -55,7 +55,7 @@ export const usersController = {
     const actor = req.user!;
     res.status(201).json(
       success({
-        user: await usersService.createInvite(
+        invite: await usersService.createInvite(
           req.permission!,
           req.body,
           actor.userId,

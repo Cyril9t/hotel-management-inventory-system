@@ -78,7 +78,7 @@ export const usersService = {
 
     const department = ROLE_DEPARTMENT_MAP[data.role];
     const rawToken = token.generateToken();
-    const invite = await usersRepository.createInvite({
+    const { tokenHash, ...invite } = await usersRepository.createInvite({
       ...data,
       department,
       tokenHash: token.hashToken(rawToken),
@@ -137,7 +137,8 @@ export const usersService = {
       email: invite.email,
     });
 
-    return invite;
+    const { tokenHash, ...safeInvite } = invite;
+    return safeInvite;
   },
 
   async createOwnerInvite(
