@@ -1,14 +1,11 @@
-import { Queue } from "bullmq";
-import { redisConnection } from "#shared/config/redis";
+import { boss, startBoss } from "#shared/config/pgboss";
 
-export const dailyReportQueue = new Queue("daily-report", {
-  connection: redisConnection,
-});
+export const DAILY_REPORT_QUEUE = "daily-report";
 
 export async function scheduleDailyReportJob() {
-  await dailyReportQueue.upsertJobScheduler(
-    "daily-report-nightly",
-    { pattern: "0 2 * * *" },
-    { name: "generate" },
-  );
+  await startBoss();
+  await boss.createQueue(DAILY_REPORT_QUEUE);
+  await boss.schedule(DAILY_REPORT_QUEUE, "0 2 * * *", null, {
+    singletonKey: "daily-report-nightly",
+  });
 }

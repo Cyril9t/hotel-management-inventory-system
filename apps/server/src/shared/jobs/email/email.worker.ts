@@ -1,14 +1,10 @@
-import type { Job } from "bullmq";
+import type { Job } from "pg-boss";
 import { email } from "#shared/lib/email";
-import { logger } from "#shared/logger";
 
-export async function processEmailJob(job: Job) {
-  switch (job.name) {
-    case "invite":
-      return email.sendInvite(job.data);
-    case "password-reset":
-      return email.sendPasswordReset(job.data);
-    default:
-      logger.warn({ jobName: job.name }, "unknown email job type");
-  }
+export async function processInviteEmailJob(jobs: Job<any>[]) {
+  for (const job of jobs) await email.sendInvite(job.data);
+}
+
+export async function processPasswordResetEmailJob(jobs: Job<any>[]) {
+  for (const job of jobs) await email.sendPasswordReset(job.data);
 }

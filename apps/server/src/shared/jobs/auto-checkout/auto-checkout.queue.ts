@@ -1,14 +1,11 @@
-import { Queue } from "bullmq";
-import { redisConnection } from "#shared/config/redis";
+import { boss, startBoss } from "#shared/config/pgboss";
 
-export const autoCheckoutQueue = new Queue("auto-checkout", {
-  connection: redisConnection,
-});
+export const AUTO_CHECKOUT_QUEUE = "auto-checkout";
 
 export async function scheduleAutoCheckoutJob() {
-  await autoCheckoutQueue.upsertJobScheduler(
-    "auto-checkout-sweep",
-    { every: 5 * 60 * 1000 },
-    { name: "sweep" },
-  );
+  await startBoss();
+  await boss.createQueue(AUTO_CHECKOUT_QUEUE);
+  await boss.schedule(AUTO_CHECKOUT_QUEUE, "*/5 * * * *", null, {
+    singletonKey: "auto-checkout-sweep",
+  });
 }

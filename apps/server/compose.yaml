@@ -16,48 +16,66 @@ services:
       timeout: 3s
       retries: 10
 
-  redis:
-    image: docker.io/library/redis:7-alpine
+  # redis:
+  #   image: docker.io/library/redis:7-alpine
+  #   restart: unless-stopped
+  #   command: redis-server --maxmemory-policy noeviction
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - hms_redis_data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 10
+
+  queue_postgres:
+    image: docker.io/library/postgres:16-alpine
     restart: unless-stopped
-    command: redis-server --maxmemory-policy noeviction
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: shared_queue
     ports:
-      - "6379:6379"
+      - "5433:5432"
     volumes:
-      - hms_redis_data:/data
+      - hms_queue_pg_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shared_queue"]
       interval: 5s
       timeout: 3s
       retries: 10
 
-  # minio:
-  #   image: docker.io/minio/minio:latest
-  #   restart: unless-stopped
-  #   command: server /data --console-address ":9001"
-  #   ports:
-  #     - "9000:9000" # S3 API endpoint
-  #     - "9001:9001" # Web Management Console UI
-  #   environment:
-  #     MINIO_ROOT_USER: minioadmin
-  #     MINIO_ROOT_PASSWORD: minioadmin
-  #   volumes:
-  #     - hms_minio_data:/data
+# minio:
+#   image: docker.io/minio/minio:latest
+#   restart: unless-stopped
+#   command: server /data --console-address ":9001"
+#   ports:
+#     - "9000:9000" # S3 API endpoint
+#     - "9001:9001" # Web Management Console UI
+#   environment:
+#     MINIO_ROOT_USER: minioadmin
+#     MINIO_ROOT_PASSWORD: minioadmin
+#   volumes:
+#     - hms_minio_data:/data
 
-  # # Auto-creates the 'assets' bucket on startup
-  # minio-create-bucket:
-  #   image: docker.io/minio/mc:latest
-  #   depends_on:
-  #     - minio
-  #   entrypoint: >
-  #     /bin/sh -c "
-  #     until (/usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin) do echo 'Waiting for MinIO...' && sleep 1; done;
-  #     /usr/bin/mc mb --ignore-existing localminio/assets;
-  #     exit 0;
-  #     "
+# # Auto-creates the 'assets' bucket on startup
+# minio-create-bucket:
+#   image: docker.io/minio/mc:latest
+#   depends_on:
+#     - minio
+#   entrypoint: >
+#     /bin/sh -c "
+#     until (/usr/bin/mc alias set localminio http://minio:9000 minioadmin minioadmin) do echo 'Waiting for MinIO...' && sleep 1; done;
+#     /usr/bin/mc mb --ignore-existing localminio/assets;
+#     exit 0;
+#     "
 
 volumes:
   hms_pg_data:
-  hms_redis_data:
+  # hms_redis_data:
+  hms_queue_pg_data:
   # hms_minio_data:
 
 # AWS_REGION=us-east-1
