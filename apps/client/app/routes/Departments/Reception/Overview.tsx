@@ -1,13 +1,8 @@
 
 import Overview from "~/components/Departments/Reception/Overview/Overview";
-import { RoomsMetric } from "~/Context/Context";
 
 function ReceptionOverview() {
-    return (
-        <RoomsMetric>
-            <Overview />
-        </RoomsMetric>
-    );
+    return <Overview />;
 }
 
 export default ReceptionOverview;

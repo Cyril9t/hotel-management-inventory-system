@@ -1,79 +1,66 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { NavLink, useNavigate } from "react-router";
+import { useLocation, useNavigate, } from "react-router";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader } from "../ui/card";
-import api from "~/lib/api";
+import { getDashboardPathForRole, UseMetricCards } from "~/Context/Context";
+
 
 export function LoginForm() {
+
     const [showPassword, setShowPassword] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+
+    const { setEmail, setPassword, email, password, api, isLoading, setIsLoading, saveSession } = UseMetricCards()
 
     const navigate = useNavigate()
+    const location = useLocation()
 
-    const handleSubmit = async (e: any) => {
 
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         try {
             setIsLoading(true);
-            const login = await api.post("/auth/refresh")
-            const data = await login
+            const response = await api.post("auth/login", { email, password });
+            const data = response.data?.data;
 
-            console.log(data)
-        } catch (error) {
-            console.log(error)
-            setIsLoading(false)
+            if (typeof data?.accessToken !== "string" || !data.user || typeof data.user.role !== "string") {
+                throw new Error("The login response did not include an access token and user role.");
+            }
+
+            saveSession(data.accessToken, data.user);
+            toast.success("Signed in successfully", {
+                description: typeof response.data?.message === "string" ? response.data.message : undefined,
+            });
+            const dashboardPath = getDashboardPathForRole(data.user.role);
+            const requestedPath = (location.state as { from?: unknown } | null)?.from;
+            const receptionistPath = dashboardPath === "/receptionist/dashboard";
+            const returnTo = receptionistPath && typeof requestedPath === "string" &&
+                (requestedPath === dashboardPath || requestedPath.startsWith(`${dashboardPath}/`))
+                ? requestedPath
+                : dashboardPath;
+            navigate(receptionistPath ? "/OpenShift" : dashboardPath ?? "/", {
+                replace: true,
+                state: receptionistPath ? { returnTo } : undefined,
+            });
+        } catch (error: any) {
+            console.error(error?.response?.data?.error?.message ?? error);
+            const apiError = error?.response?.data?.error;
+            const message = typeof apiError?.message === "string"
+                ? apiError.message
+                : typeof apiError?.code === "string"
+                    ? apiError.code
+                    : error?.response
+                        ? "Sign in failed. Check your credentials and try again."
+                        : "Unable to reach the server. Check your connection and try again.";
+            toast.error("Sign in failed", { description: message });
+        } finally {
+            setIsLoading(false);
         }
-
-
     };
-
-    const dash = [
-        {
-            title: "GM",
-            link: "general/dashboard",
-        },
-        {
-            title: "CEO",
-            link: "Owner/dashboard",
-        },
-        {
-            title: "RECEP",
-            link: "/OpenShift",
-        },
-        {
-            title: "BAr",
-            link: "/bar/dashboard",
-        }
-    ]
-
     return (
         <div className="w-full max-w-md mx-auto">
-
-            <Card >
-                <CardHeader className="bg-destructive-foreground">
-                    <h1 className="text-destructive">This is for easy navigation until Authentication is integrated</h1>
-                </CardHeader>
-
-                <CardContent>
-                    {dash.map((d) => {
-                        return (
-                            <NavLink
-                                to={d.link}
-
-                            >
-                                <Button>
-                                    {d.title}
-                                </Button>
-                            </NavLink>
-                        )
-
-                    })}
-                </CardContent>
-            </Card>
 
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome Back</h2>
@@ -165,8 +152,8 @@ export function LoginForm() {
                     <div className="flex-grow border-t border-[var(--border)]"></div>
                 </div>
 
-                {/* Google SSO Button */}
-                <button
+
+                {/* <button
                     type="button"
                     className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-[var(--radius)] border border-[var(--input)] bg-[var(--card)] text-[var(--foreground)] font-medium text-sm hover:bg-[var(--secondary)] transition-all"
                 >
@@ -177,9 +164,9 @@ export function LoginForm() {
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                     </svg>
                     Continue with Google
-                </button>
+                </button> */}
 
-                {/* Footer Admin Link */}
+
                 <div className="text-center pt-3 text-xs text-[var(--muted-foreground)]">
                     Don&apos;t have an account?{' '}
                     <a href="#admin" className="text-[var(--primary)] font-medium hover:underline">

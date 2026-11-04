@@ -1,24 +1,24 @@
 import { Outlet } from "react-router";
 import { DashboardHeader } from "../../../components/Departments/Shared/header";
-
+import { DashboardRouteGuard } from "~/Context/Context";
 const tab = [
     {
         title: 'Overview',
-        link: "/reception/dashboard",
+        link: "/receptionist/dashboard",
     }, {
         title: 'Rooms',
-        link: '/reception/dashboard/rooms',
+        link: '/receptionist/dashboard/rooms',
     }, {
         title: 'Room Service',
-        link: '/reception/dashboard/roomsService'
+        link: '/receptionist/dashboard/roomsService'
 
     }, {
         title: 'History',
-        link: '/reception/dashboard/history'
+        link: '/receptionist/dashboard/history'
     },
     {
         title: 'Shift',
-        link: '/reception/dashboard/shifts'
+        link: '/receptionist/dashboard/shifts'
     }
 
 
@@ -26,14 +26,17 @@ const tab = [
 
 
 function DepartmentsDashboard() {
+
     return (
 
-        <div>
-            <DashboardHeader departments="Reception" staffName="Joel David" tabs={tab} tabEnd="reception" />
-            <main className="p-6">
-                <Outlet />
-            </main>
-        </div>);
+        <DashboardRouteGuard role="receptionist">
+            <div>
+                <DashboardHeader departments="reception" tabs={tab} tabEnd="receptionist" />
+                <main className="p-6">
+                    <Outlet />
+                </main>
+            </div>
+        </DashboardRouteGuard>);
 }
 
 export default DepartmentsDashboard;

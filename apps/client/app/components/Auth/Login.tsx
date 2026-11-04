@@ -3,16 +3,17 @@ import { LoginForm } from "./Form";
 
 export default function LoginPage() {
     return (
-        <div className="h-screen w-full flex bg--background">
+        <div className="min-h-screen w-full flex bg-background">
 
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-brand-navy flex-col justify-between p-12">
 
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="https://i.pinimg.com/1200x/f6/f3/35/f6f335a47b6e832e8cc58caffe6e3603.jpg"
+                        src="https://i.pinimg.com/1200x/0f/7c/35/0f7c35c2c0f458f4188742f9de3f6eee.jpg"
                         alt="Luxury Hotel Reception"
-                        className="w-full h-full object-cover animate-pulse duration-2000"
+                        className="w-full h-full object-cover"
                     />
+                    <div className="absolute inset-0 animate-pulse" />
 
                 </div>
 
@@ -24,7 +25,7 @@ export default function LoginPage() {
 
 
                 <div className="relative z-10 flex flex-col items-center justify-center text-center my-auto">
-                    <Logo variant="hero" />
+                    <Logo variant="hero" logoColor="#172536" textColor="#f2c66d" />
                 </div>
 
 

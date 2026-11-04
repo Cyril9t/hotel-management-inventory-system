@@ -21,38 +21,41 @@ import {
 } from "lucide-react";
 
 import Logo from "../shared/Logo";
+import { UseMetricCards } from "~/Context/Context";
 import { useState } from "react";
 
 const DashboardLinks = [
     {
         title: "Overview",
-        link: "/Owner/dashboard",
+        link: "/owner/dashboard",
         icon: LayoutDashboard,
     },
     {
         title: "Activities",
-        link: "/Owner/dashboard/activities",
+        link: "/owner/dashboard/activities",
         icon: Activity,
     },
     {
         title: "Users",
-        link: "/Owner/dashboard/staffs",
+        link: "/owner/dashboard/staffs",
         icon: Users,
     },
     {
         title: "Departments",
-        link: "/Owner/dashboard/departments",
+        link: "/owner/dashboard/departments",
         icon: Building2,
     },
     {
         title: "Settings",
-        link: "/Owner/dashboard/settings",
+        link: "/owner/dashboard/settings",
         icon: Settings,
     },
 ];
 
 function DashboardSidebar() {
+
     const navigate = useNavigate()
+    const { clearSession, user } = UseMetricCards()
 
     return (
         <Sidebar className="bg-brand-navy text-background">
@@ -69,7 +72,7 @@ function DashboardSidebar() {
                     <SidebarGroupLabel>
                         <div className="mb-4 mt-3 flex h-auto flex-col items-start gap-1 opacity-90">
                             <span className="text-xl font-semibold tracking-tight text-background">
-                                David Jones
+                                {user.firstName} {user.lastName}
                             </span>
 
                             <span className="text-sm font-medium text-background/70">
@@ -84,7 +87,7 @@ function DashboardSidebar() {
                             <SidebarMenuItem key={link}>
                                 <NavLink
                                     to={link}
-                                    end={link === "/Owner/dashboard"}
+                                    end={link === "/owner/dashboard"}
 
                                 >
                                     {({ isActive }) => (
@@ -110,6 +113,7 @@ function DashboardSidebar() {
 
                         <SidebarMenuButton
                             onClick={() => {
+                                clearSession();
                                 navigate("/", { replace: true })
                             }}
                             className="h-11 text-background/80 hover:bg-brand-navy-light hover:text-background"

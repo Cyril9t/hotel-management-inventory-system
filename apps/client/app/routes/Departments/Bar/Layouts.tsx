@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { DashboardHeader } from "../../../components/Departments/Shared/header";
+import { DashboardRouteGuard } from "~/Context/Context";
 
 
 
@@ -31,13 +32,15 @@ function DepartmentsDashboard() {
 
     return (
 
-        <div>
-            <DashboardHeader departments="Bar" staffName="Patrick" tabs={tabs} tabEnd="bar" />
+        <DashboardRouteGuard role="bar">
+            <div>
+                <DashboardHeader departments="Bar" staffName="Patrick" tabs={tabs} tabEnd="bar" />
 
-            <main className="p-6">
-                <Outlet />
-            </main>
-        </div>);
+                <main className="p-6">
+                    <Outlet />
+                </main>
+            </div>
+        </DashboardRouteGuard>);
 }
 
 export default DepartmentsDashboard;

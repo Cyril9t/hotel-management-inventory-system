@@ -9,8 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { MetricCards } from "./components/CEO.dashboard/Overview/MetricCard";
 import { RoomsMetric } from "./Context/Context";
+import { Toaster } from "sonner";
 
 export const links: Route.LinksFunction = () => [
   {
@@ -36,6 +36,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: `try { if (localStorage.getItem("theme") === "dark") document.documentElement.classList.add("dark"); } catch {}` }} />
         <Meta />
         <Links />
       </head>
@@ -43,6 +44,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
 
         {children}
+
+        <Toaster position="top-right" richColors closeButton duration={5000} />
 
 
         <ScrollRestoration />
@@ -53,7 +56,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <RoomsMetric>
+      <Outlet />
+    </RoomsMetric>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

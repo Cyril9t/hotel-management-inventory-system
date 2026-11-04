@@ -11,6 +11,7 @@ import {
     User
 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
+import type { ShiftRecord } from '~/services/shifts';
 
 export interface ActivityRecord {
     id: string;
@@ -27,6 +28,7 @@ export interface ActivityRecord {
     status: string;
     statusColor: string;
     refId: string;
+    rawShift?: ShiftRecord;
 }
 
 export const HistoryTable: React.FC<{

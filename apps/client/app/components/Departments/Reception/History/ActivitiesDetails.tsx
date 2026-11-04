@@ -1,4 +1,5 @@
 import React from 'react';
+import { useEffect, useState } from 'react';
 import {
     X,
     User,
@@ -13,6 +14,7 @@ import {
     FileText
 } from 'lucide-react';
 import { type ActivityRecord } from './historyTable';
+import { UseMetricCards } from '~/Context/Context';
 
 export interface ActivityDetailModalProps {
     isOpen: boolean;
@@ -25,7 +27,47 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     record,
     onClose,
 }) => {
+    const { loadShiftDetails, shiftDetails } = UseMetricCards();
+    const [shiftDetailsLoading, setShiftDetailsLoading] = useState(false);
+    const [shiftDetailsError, setShiftDetailsError] = useState('');
+
+    useEffect(() => {
+        if (!isOpen || record?.type !== 'shift' || shiftDetails[record.id]) return;
+        let cancelled = false;
+        setShiftDetailsLoading(true);
+        setShiftDetailsError('');
+        void loadShiftDetails(record.id).catch((error: any) => {
+            if (!cancelled) setShiftDetailsError(error?.response?.data?.error?.message ?? 'Could not load shift details.');
+        }).finally(() => {
+            if (!cancelled) setShiftDetailsLoading(false);
+        });
+        return () => { cancelled = true; };
+    }, [isOpen, record?.id, record?.type, shiftDetails, loadShiftDetails]);
+
     if (!isOpen || !record) return null;
+
+    if (record.type === 'shift') {
+        const shift = shiftDetails[record.id] ?? record.rawShift;
+        const fields = shift ? Object.entries(shift).filter(([key]) => key !== 'id') : [];
+        return <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4 backdrop-blur-sm">
+            <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-card text-foreground shadow-2xl">
+                <div className="flex items-center justify-between border-b border-border p-5">
+                    <div><h3 className="text-base font-bold text-foreground">Shift Details</h3><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{record.id}</p></div>
+                    <button type="button" onClick={onClose} aria-label="Close details" className="rounded-md p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"><X className="h-4 w-4" /></button>
+                </div>
+                <div className="space-y-3 overflow-y-auto p-5">
+                    {shiftDetailsLoading && <div role="status" className="h-20 animate-pulse rounded-lg bg-muted" />}
+                    {shiftDetailsError && <p role="alert" className="text-sm text-destructive">{shiftDetailsError}</p>}
+                    {!shiftDetailsLoading && !shiftDetailsError && fields.length === 0 && <p className="text-sm text-muted-foreground">No additional shift fields were returned.</p>}
+                    <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">{fields.map(([key, value]) => <div key={key} className="rounded-lg border border-border bg-secondary/30 p-3">
+                        <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{key.replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' ')}</dt>
+                        <dd className="mt-1 break-words text-sm text-foreground">{typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? String(value) : JSON.stringify(value)}</dd>
+                    </div>)}</dl>
+                </div>
+                <div className="flex justify-end border-t border-border p-4"><button type="button" onClick={onClose} className="rounded-[var(--radius)] bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground">Close</button></div>
+            </div>
+        </div>;
+    }
 
     const handlePrint = () => {
         window.print();

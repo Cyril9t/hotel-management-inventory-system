@@ -53,7 +53,7 @@ function ReceptionRadialBar() {
                     {counts.occupied} <span className="text-[20px] font-semibold text-muted-foreground">/ {counts.total} Rooms Occupied</span>
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Daily occupancy rate is performing strongly across standard and deluxe suites.
+                    Occupancy is calculated from the current room statuses returned by the Rooms API.
                 </p>
             </div>
         </div>

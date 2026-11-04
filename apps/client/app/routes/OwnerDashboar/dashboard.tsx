@@ -1,12 +1,7 @@
 import Overview from "~/components/CEO.dashboard/Overview/Overview";
-import { RoomsMetric } from "~/Context/Context";
 
 function Owner() {
-    return (
-        <RoomsMetric>
-            <Overview />
-        </RoomsMetric>
-    );
+    return <Overview />;
 }
 
 export default Owner;

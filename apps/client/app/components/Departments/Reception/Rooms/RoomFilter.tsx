@@ -14,6 +14,7 @@ interface RoomFiltersBarProps {
     occupiedCount: number;
     checkoutDueCount: number;
     overdueCount: number;
+    roomTypes?: string[];
     onNewBooking: () => void;
 }
 
@@ -29,6 +30,7 @@ export const RoomFiltersBar: React.FC<RoomFiltersBarProps> = ({
     occupiedCount,
     checkoutDueCount,
     overdueCount,
+    roomTypes = ['Standard Room', 'Deluxe Room', 'Premium Room', 'Executive Suite'],
     onNewBooking,
 }) => {
     const tabs = [
@@ -65,10 +67,7 @@ export const RoomFiltersBar: React.FC<RoomFiltersBarProps> = ({
                         className="px-2 py-2 text-sm font-medium rounded-lg border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all cursor-pointer flex-1 md:flex-none"
                     >
                         <option value="All">All Room Types</option>
-                        <option value="Standard Room">Standard Room</option>
-                        <option value="Deluxe Room">Deluxe Room</option>
-                        <option value="Premium Room">Premium Room</option>
-                        <option value="Executive Suite">Executive Suite</option>
+                        {roomTypes.map((roomType) => <option key={roomType} value={roomType}>{roomType}</option>)}
                     </select>
 
 
