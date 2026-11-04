@@ -39,7 +39,7 @@ export const CreatePasswordForm: React.FC<CreatePasswordFormProps> = ({
         <form onSubmit={handleSubmit} className="space-y-5">
 
 
-            <div className='flex gap-3'>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                     <label className="text-sm font-semibold text-foreground flex items-center justify-between">
                         <span>Your Password</span>
@@ -51,13 +51,16 @@ export const CreatePasswordForm: React.FC<CreatePasswordFormProps> = ({
                         <input
                             type={showPassword ? 'text' : 'password'}
                             required
+                            autoComplete="new-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter new strong password"
-                            className="w-full pl-10 pr-10 py-2.5 text-sm font-medium rounded-(--radius) border border-input bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                            className="h-11 w-full rounded-[var(--radius)] border border-input bg-background py-2.5 pl-10 pr-10 text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                         />
                         <button
                             type="button"
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showPassword}
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-foreground hover:text-foreground transition-colors"
                         >
@@ -82,16 +85,19 @@ export const CreatePasswordForm: React.FC<CreatePasswordFormProps> = ({
                         <input
                             type={showConfirmPassword ? 'text' : 'password'}
                             required
+                            autoComplete="new-password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             placeholder="Re-enter password to confirm"
-                            className={`w-full pl-10 pr-10 py-2.5 text-sm font-medium rounded-(--radius) border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all ${confirmPassword && !passwordsMatch
+                            className={`h-11 w-full rounded-[var(--radius)] border bg-background py-2.5 pl-10 pr-10 text-sm font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all ${confirmPassword && !passwordsMatch
                                 ? 'border-destructive/80 focus:ring-destructive'
                                 : 'border-input'
                                 }`}
                         />
                         <button
                             type="button"
+                            aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
+                            aria-pressed={showConfirmPassword}
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                             className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-muted-foreground hover:text-foreground transition-colors"
                         >
@@ -109,16 +115,16 @@ export const CreatePasswordForm: React.FC<CreatePasswordFormProps> = ({
             <button
                 type="submit"
                 disabled={!canSubmit}
-                className="w-full py-3 px-4 text-xs font-semibold rounded-[var(--radius)] bg-primary text-primary-foreground shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-12 w-full rounded-[var(--radius)] bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/15 transition-all hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
             >
                 {isSubmitting ? (
                     <>
                         <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        <span>Setting Password...</span>
+                        <span>Setting password…</span>
                     </>
                 ) : (
                     <>
-                        <span>Set & Lock Account Password</span>
+                        <span>Activate account</span>
                         <ArrowRight className="w-4 h-4" />
                     </>
                 )}

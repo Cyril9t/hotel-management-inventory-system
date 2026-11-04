@@ -26,7 +26,7 @@ export const PasswordRequirementsCard: React.FC<PasswordRequirementsProps> = ({ 
     const getStrengthLabel = () => {
         if (totalMet === 0) return { text: 'Weak', color: 'text-destructive', bar: 'bg-destructive' };
         if (totalMet <= 2) return { text: 'Moderate', color: 'text-brand-gold', bar: 'bg-brand-gold' };
-        if (totalMet === 3) return { text: 'Good', color: 'text-brand-navy-light', bar: 'bg-brand-navy-light' };
+        if (totalMet === 3) return { text: 'Good', color: 'text-primary', bar: 'bg-primary' };
         return { text: 'Strong Security', color: 'text-brand-success', bar: 'bg-brand-success' };
     };
 
@@ -40,7 +40,7 @@ export const PasswordRequirementsCard: React.FC<PasswordRequirementsProps> = ({ 
                     <span className="font-semibold text-muted-foreground">Password Strength:</span>
                     <span className={`font-bold ${strength.color}`}>{strength.text}</span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                <div role="meter" aria-label="Password strength" aria-valuemin={0} aria-valuemax={4} aria-valuenow={totalMet} className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                     <div
                         className={`h-full transition-all duration-300 ${strength.bar}`}
                         style={{ width: `${strengthPercentage}%` }}
@@ -58,7 +58,7 @@ export const PasswordRequirementsCard: React.FC<PasswordRequirementsProps> = ({ 
                                 : 'bg-secondary text-muted-foreground border border-border'
                                 }`}
                         >
-                            {req.met ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" color='#dc4545' />}
+                            {req.met ? <Check className="w-4 h-4" /> : <X className="w-4 h-4 text-destructive" />}
                         </div>
                         <span className={req.met ? 'text-foreground font-medium' : 'text-muted-foreground'}>
                             {req.label}

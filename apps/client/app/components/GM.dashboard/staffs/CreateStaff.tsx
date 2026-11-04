@@ -3,10 +3,10 @@ import { X, ChevronDown } from 'lucide-react';
 import { Card, CardAction, CardContent, CardFooter, CardHeader } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import { UseMetricCards } from '~/Context/Context';
-import { createStaffInvite } from '~/lib/invites';
+import { createStaffInvite, type InviteRole } from '~/lib/invites';
 
 
-const ROLES = [
+const ROLES: InviteRole[] = [
     "RECEPTIONIST",
     "BAR_STAFF",
     "RESTAURANT_STAFF",
@@ -36,16 +36,25 @@ export function CreateStaffModal({ isOpen = true, onClose = () => { } }) {
         e.preventDefault();
         if (submissionInProgress.current) return;
 
+        const firstName = formData.firstName.trim();
+        const lastName = formData.lastName.trim();
+        const email = formData.email.trim();
+        const phoneNumber = formData.phoneNumber.trim();
+        if (!firstName || !lastName || !email || !phoneNumber || !ROLES.includes(formData.role as InviteRole)) {
+            setFeedback({ type: 'error', message: 'Enter the staff member’s first name, last name, email, phone number, and select a role.' });
+            return;
+        }
+
         submissionInProgress.current = true;
         setIsSubmitting(true);
         setFeedback(null);
         try {
             const resp = await createStaffInvite(api, {
-                firstName: formData.firstName.trim(),
-                lastName: formData.lastName.trim(),
-                email: formData.email.trim(),
-                phone: `${formData.phoneCode}${formData.phoneNumber.trim()}`,
-                role: formData.role,
+                firstName,
+                lastName,
+                email,
+                phone: `${formData.phoneCode}${phoneNumber}`,
+                role: formData.role as InviteRole,
             });
 
             const data = await resp.data
@@ -198,13 +207,15 @@ export function CreateStaffModal({ isOpen = true, onClose = () => { } }) {
                                         <div className="relative">
                                             <select
                                                 value={formData.role}
+                                                required
                                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                                 className="w-full px-5 py-2 text-[15px] font-semibold rounded-[10px] border-2 border-input text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                             >
+                                                <option value="" disabled>Select a role</option>
                                                 {ROLES.map((r) => {
 
                                                     return (
-                                                        <option value={r} >{r}</option>
+                                                        <option key={r} value={r}>{r.replaceAll('_', ' ')}</option>
                                                     )
                                                 })}
 

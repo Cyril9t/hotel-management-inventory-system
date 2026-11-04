@@ -15,7 +15,7 @@ export const DashboardHeader = (
 
 ) => {
 
-    const { user } = UseMetricCards()
+    const { user, currentShift, currentShiftLoading } = UseMetricCards()
 
 
     return (
@@ -32,14 +32,10 @@ export const DashboardHeader = (
 
                             <span className="text-xl font-bold text-brand-navy-light">{user?.firstName ? user?.firstName : <Loader className="animate-spin " />} {user?.lastName ? user?.lastName : ""} </span>
                         </div>
-                        <p className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-1 justify-end">
-                            <span className="w-3 h-3 rounded-full bg-brand-success animate-pulse" />
-
-                            Active shift • Started 10:02 PM • Present - {new Date().toLocaleTimeString("en-US", {
-                                hour: "2-digit",
-                                minute: "2-digit"
-                            })}
-                        </p>
+                        {!currentShiftLoading && <p className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-1 justify-end">
+                            <span className={`w-3 h-3 rounded-full ${currentShift ? "bg-brand-success animate-pulse" : "bg-muted-foreground"}`} />
+                            {currentShift ? "Active shift" : "No active shift"}
+                        </p>}
                     </div>
 
                     <div className="flex items-center gap-2">

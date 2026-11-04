@@ -1,148 +1,124 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Play, Lock } from 'lucide-react';
 import { StaffIdentityCard } from './identityCard';
 import { ShiftCashInputSection } from './OpeningFloat';
 import OpenHeader from './OpenHeader';
 import { Button } from '~/components/ui/button';
-import { Navigate, NavLink, useNavigate } from 'react-router';
-import Logo from '~/components/shared/Logo';
+import { Navigate, useLocation, useNavigate } from 'react-router';
+import { UseMetricCards, getDashboardPathForRole } from '~/Context/Context';
+import GlobalLoadingSkeleton from '~/components/shared/LoadingState/LoadingState';
+import { toast } from 'sonner';
+import { logShiftApiFailure } from '~/services/shifts';
 
-
-export interface OpenShiftPayload {
-    staffName: string;
-    department: string;
-    role: string;
-    openingCash: number;
-    handoverAmount: number;
-    timestamp: string;
-    stockSnapshotAutoCaptured: boolean;
+function errorMessage(error: any) {
+    return error?.response?.data?.error?.message ?? error?.message ?? 'Could not open the shift. Please try again.';
 }
 
-export interface OpenShiftContainerProps {
-    onOpenShiftComplete?: (payload: OpenShiftPayload) => void;
-    onCancel?: () => void;
-}
+export const OpenShiftContainer: React.FC = () => {
+    const {
+        token, user, authLoading, authUnavailable, currentShift, currentShiftLoading,
+        currentShiftError, refreshCurrentShift, loadSuggestedOpeningCash, startShift, retrySession,
+    } = UseMetricCards();
+    const [openingCash, setOpeningCash] = useState('');
+    const [suggestedCashLoading, setSuggestedCashLoading] = useState(false);
+    const [suggestedCashError, setSuggestedCashError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const dashboardPath = getDashboardPathForRole(user?.role);
+    const requestedReturnTo = (location.state as { returnTo?: unknown } | null)?.returnTo;
+    const returnTo = typeof requestedReturnTo === 'string' && dashboardPath &&
+        (requestedReturnTo === dashboardPath || requestedReturnTo.startsWith(`${dashboardPath}/`))
+        ? requestedReturnTo
+        : dashboardPath;
 
-export const OpenShiftContainer: React.FC<OpenShiftContainerProps> = ({
-    onOpenShiftComplete,
-    onCancel,
-}) => {
+    useEffect(() => {
+        if (!token || authLoading || currentShiftLoading || currentShift || currentShiftError) return;
+        let cancelled = false;
+        setSuggestedCashLoading(true);
+        setSuggestedCashError(null);
+        void loadSuggestedOpeningCash().then((amount: number) => {
+            if (!cancelled) setOpeningCash(String(amount));
+        }).catch((error: unknown) => {
+            logShiftApiFailure('GET /shifts/suggested-opening-cash', error);
+            if (!cancelled) setSuggestedCashError(error instanceof Error ? error.message : 'Could not load suggested opening cash.');
+        }).finally(() => {
+            if (!cancelled) setSuggestedCashLoading(false);
+        });
+        return () => { cancelled = true; };
+    }, [token, authLoading, currentShiftLoading, currentShift, currentShiftError, loadSuggestedOpeningCash]);
 
-    const currentUser = {
-        staffName: "Michael Carter",
-        department: "General Management",
-        role: "Front Office Manager",
-        openingTimestamp: new Date().toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric'
-        }) + ' • ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
-    };
+    if (authLoading || currentShiftLoading) return <div role="status" className="p-6"><GlobalLoadingSkeleton /></div>;
+    if (authUnavailable) return <div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
+        <p role="alert" className="text-sm text-muted-foreground">The authentication service is temporarily unavailable. Your saved session remains intact.</p>
+        <Button type="button" onClick={() => { void retrySession(); }}>Retry session restoration</Button>
+    </div>;
+    if (!token || !user) return <Navigate to="/" replace />;
+    if (!dashboardPath || !['/receptionist/dashboard', '/bar/dashboard'].includes(dashboardPath)) return <Navigate to={dashboardPath ?? '/'} replace />;
+    if (currentShift) return <Navigate to={returnTo ?? dashboardPath} replace />;
 
-    const [openingCash, setOpeningCash] = useState<number>(50000);
-    const [handoverAmount, setHandoverAmount] = useState<number>(0);
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const amount = Number(openingCash);
+        if (openingCash.trim() === '' || !Number.isFinite(amount) || amount < 0) {
+            setSubmitError('Enter a valid opening cash amount of zero or more.');
+            return;
+        }
 
-
-    const navigate = useNavigate()
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
         setIsSubmitting(true);
-
-        const payload: OpenShiftPayload = {
-            ...currentUser,
-            openingCash,
-            handoverAmount,
-            timestamp: currentUser.openingTimestamp,
-            stockSnapshotAutoCaptured: true,
-        };
-
-        setTimeout(() => {
+        setSubmitError('');
+        try {
+            const result = await startShift(amount);
+            if (!result?.shift) throw new Error('The shift was not returned by the server. Refresh the current shift and try again.');
+            if (result.alreadyOpen) toast.info('You already have an open shift.');
+            else toast.success('Shift opened successfully.');
+            navigate(returnTo ?? dashboardPath, { replace: true });
+        } catch (error) {
+            logShiftApiFailure('POST /shifts/open', error);
+            setSubmitError(errorMessage(error));
+        } finally {
             setIsSubmitting(false);
-            if (onOpenShiftComplete) {
-                onOpenShiftComplete(payload);
-            }
-
-        }, 1200);
-
-        navigate("/reception/dashboard")
-
-
-
+        }
     };
+
+    if (currentShiftError) return <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
+        <p role="alert" className="text-sm text-destructive">{currentShiftError}</p>
+        <Button type="button" onClick={() => { void refreshCurrentShift().catch(() => {}); }}>Retry current shift</Button>
+    </div>;
+
+    const fullName = [user.firstName, user.lastName].filter((part): part is string => typeof part === 'string' && part.length > 0).join(' ') || 'Authenticated staff member';
+    const department = typeof user.department === 'string' ? user.department : String(user.role ?? 'Staff');
+    const openingTimestamp = new Date().toLocaleString();
 
     return (
-        <div className="fixed inset-0 z-50 bg-[black]/30 backdrop-blur-sm p-4 md:p-8 flex items-center justify-center">
-
-            <div className='text-[17.5em]'>
-                <h1 className="font-bold tracking-wider font-serif textColor text-brand-navy">
-                    BRANDY
-                </h1>
-
-            </div>
-            <div className="absolute p-5 bg-card border border-border rounded-[var(--radius)] shadow-2xl overflow-hidden flex flex-col">
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[black]/30 p-4 backdrop-blur-sm md:p-8">
+            <div className="absolute p-5 flex max-h-[95vh] w-full max-w-4xl flex-col overflow-y-auto rounded-[var(--radius)] border border-border bg-card shadow-2xl">
                 <OpenHeader />
-
-                <form onSubmit={handleSubmit} className="mt-10">
-
-
+                <form onSubmit={handleSubmit} className="mt-8">
                     <StaffIdentityCard
-                        staffName={currentUser.staffName}
-                        department={currentUser.department}
-                        role={currentUser.role}
-                        openingTimestamp={currentUser.openingTimestamp}
+                        staffName={fullName}
+                        department={department}
+                        role={String(user.role ?? 'Staff')}
+                        openingTimestamp={openingTimestamp}
                     />
-
-
                     <ShiftCashInputSection
                         openingCash={openingCash}
-                        handoverAmount={handoverAmount}
-                        onOpeningCashChange={setOpeningCash}
-                        onHandoverChange={setHandoverAmount}
+                        suggestedCashLoading={suggestedCashLoading}
+                        suggestedCashError={suggestedCashError}
+                        onOpeningCashChange={(value) => { setOpeningCash(value); setSubmitError(''); }}
                     />
-
-
-                    <div className="pt-4 border-border flex items-center justify-between">
+                    {submitError && <p role="alert" className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{submitError}</p>}
+                    <div className="flex items-center justify-between gap-3 border-border pt-6">
                         <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                            <Lock className="w-3.5 h-3.5 text-primary" />
-                            <span>Shift launch logs user identity & system timestamps</span>
+                            <Lock className="h-3.5 w-3.5 text-primary" />
+                            <span>Opening cash will be recorded for this shift.</span>
                         </div>
-
-                        <div className="flex items-center gap-3">
-                            {onCancel && (
-                                <Button
-                                    type="button"
-                                    onClick={onCancel}
-                                    className=""
-                                >
-                                    Cancel
-                                </Button>
-                            )}
-
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="h-10 w-50"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                        <span>Launching Shift...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Play className="w-4 h-4 fill-current" />
-                                        <span>Open Shift</span>
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                        <Button type="submit" disabled={isSubmitting || suggestedCashLoading} className="h-10 min-w-48">
+                            {isSubmitting ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" /><span>Opening shift…</span></> : <><Play className="h-4 w-4 fill-current" /><span>Open Shift</span></>}
+                        </Button>
                     </div>
-
                 </form>
-
             </div>
         </div>
     );

@@ -3,7 +3,7 @@ import { RoomOccupancyHeader } from "./Header";
 import { RoomFiltersBar } from "./RoomFilter";
 import { RoomCard } from "./RoomsCard";
 import { RoomDetailsDrawer } from "./RoomsDetails";
-import type { ApiRoom, Room } from "./type";
+import { getRoomOccupancyMetrics, type ApiRoom, type Room } from "./type";
 import { UseMetricCards } from "~/Context/Context";
 import BookRoomModal from "./BookRoom/BookGuest";
 import { Button } from "~/components/ui/button";
@@ -57,6 +57,7 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
     const [bookRooms, setBookRooms] = useState(false);
 
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+    const [bookingRefreshKey, setBookingRefreshKey] = useState(0);
 
     useEffect(() => {
         setSelectedRoom((current) => rooms.find((room: any) => room.id === current?.id) ?? rooms[0] ?? null);
@@ -70,10 +71,10 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
     }, [refreshKey, refreshRooms]);
 
     const roomCounts = useMemo(() => {
-        const available = rooms.filter((room: any) => room.status === "Available").length;
+        const occupancy = getRoomOccupancyMetrics(rooms.map((room: Room) => room.status));
         const checkoutDue = rooms.filter((room: any) => room.status === "Checkout Due").length;
         const overdue = rooms.filter((room: any) => room.status === "Overdue").length;
-        return { total: rooms.length, available, occupied: rooms.length - available, checkoutDue, overdue };
+        return { ...occupancy, checkoutDue, overdue };
     }, [rooms]);
     const roomTypes = useMemo<string[]>(() => Array.from(new Set(rooms.map((room: any) => String(room.type)))), [rooms]);
 
@@ -99,7 +100,10 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
                 api={api}
                 isOpen={bookRooms}
                 room={selectedRoom as unknown as Parameters<typeof BookRoomModal>[0]["room"]}
-                onBookingComplete={() => { void refreshRooms().catch(() => { }); }}
+                onBookingComplete={() => {
+                    void refreshRooms().catch(() => { });
+                    setBookingRefreshKey((current) => current + 1);
+                }}
                 onClose={() => {
                     setBookRooms(false)
                 }}
@@ -165,7 +169,7 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
                 <div className="lg:col-span-4">
                     <RoomDetailsDrawer
                         room={selectedRoom}
-                        onCheckOut={(r) => alert(`Checking out room ${r.number}`)}
+                        bookingRefreshKey={bookingRefreshKey}
                         onOrderService={(r) => alert(`Ordering room service for room ${r.number}`)}
                         onBookNow={(r) => setBookRooms(true)}
                         action={allowRoomActions}

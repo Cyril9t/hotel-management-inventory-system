@@ -1,6 +1,7 @@
 import { BedDouble } from "lucide-react";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { UseMetricCards } from "~/Context/Context";
+import type { ApiRoom } from "~/components/Departments/Reception/Rooms/type";
 
 function formatStatus(status?: string) {
     return status?.toLowerCase().split(/[_ -]+/).map((part) => part[0]?.toUpperCase() + part.slice(1)).join(" ") || "Status unavailable";
@@ -24,7 +25,7 @@ export const RecentActivityFeed = () => {
                     <p className="text-sm text-muted-foreground">No rooms are available to display.</p>
                 ) : (
                     <div className="space-y-3">
-                        {rooms.slice(0, 5).map((room, index) => (
+                        {(rooms as ApiRoom[]).slice(0, 5).map((room: ApiRoom, index: number) => (
                             <div key={room.id ?? room._id ?? `${room.number ?? "room"}-${index}`} className="flex items-center justify-between rounded-[var(--radius)] border border-border/50 bg-secondary/30 p-3.5">
                                 <div className="flex items-center gap-3">
                                     <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><BedDouble className="h-4 w-4" /></span>

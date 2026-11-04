@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { useNavigate, } from "react-router";
+import { useLocation, useNavigate, } from "react-router";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { getDashboardPathForRole, UseMetricCards } from "~/Context/Context";
 
@@ -13,6 +14,7 @@ export function LoginForm() {
     const { setEmail, setPassword, email, password, api, isLoading, setIsLoading, saveSession } = UseMetricCards()
 
     const navigate = useNavigate()
+    const location = useLocation()
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,10 +30,31 @@ export function LoginForm() {
             }
 
             saveSession(data.accessToken, data.user);
+            toast.success("Signed in successfully", {
+                description: typeof response.data?.message === "string" ? response.data.message : undefined,
+            });
             const dashboardPath = getDashboardPathForRole(data.user.role);
-            navigate(dashboardPath ?? "/", { replace: true });
+            const requestedPath = (location.state as { from?: unknown } | null)?.from;
+            const receptionistPath = dashboardPath === "/receptionist/dashboard";
+            const returnTo = receptionistPath && typeof requestedPath === "string" &&
+                (requestedPath === dashboardPath || requestedPath.startsWith(`${dashboardPath}/`))
+                ? requestedPath
+                : dashboardPath;
+            navigate(receptionistPath ? "/OpenShift" : dashboardPath ?? "/", {
+                replace: true,
+                state: receptionistPath ? { returnTo } : undefined,
+            });
         } catch (error: any) {
             console.error(error?.response?.data?.error?.message ?? error);
+            const apiError = error?.response?.data?.error;
+            const message = typeof apiError?.message === "string"
+                ? apiError.message
+                : typeof apiError?.code === "string"
+                    ? apiError.code
+                    : error?.response
+                        ? "Sign in failed. Check your credentials and try again."
+                        : "Unable to reach the server. Check your connection and try again.";
+            toast.error("Sign in failed", { description: message });
         } finally {
             setIsLoading(false);
         }

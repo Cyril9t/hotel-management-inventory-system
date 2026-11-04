@@ -1,12 +1,13 @@
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
-import type { Room } from "./type";
+import { getRoomOccupancyMetrics, type Room } from "./type";
 
 export const RoomOccupancyHeader: React.FC<{ rooms: Room[] }> = ({ rooms }) => {
-    const available = rooms.filter((room) => room.status === "Available").length;
+    const occupancy = getRoomOccupancyMetrics(rooms.map((room) => room.status));
+    const available = occupancy.available;
     const checkoutDue = rooms.filter((room) => room.status === "Checkout Due").length;
     const overdue = rooms.filter((room) => room.status === "Overdue").length;
-    const occupied = rooms.length - available;
-    const percentage = rooms.length ? Math.round((occupied / rooms.length) * 100) : 0;
+    const occupied = occupancy.occupied;
+    const percentage = occupancy.percentage;
 
     const data = [{ name: "Occupancy", value: percentage, fill: "#d99a28" }];
 
