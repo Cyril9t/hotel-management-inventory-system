@@ -29,6 +29,17 @@ export const shiftsRepository = {
   }) {
     return database.shift.findMany({
       where: filters,
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            department: true,
+          },
+        },
+      },
       orderBy: { openedAt: "desc" },
     });
   },
@@ -76,12 +87,18 @@ export const shiftsRepository = {
   // every booking-payment write lands here), not booking.totalPrice/sale.totalAmount
   // directly. No stock component, since stock movements never involve cash.
   async computeExpectedCash(shiftId: string) {
+    const shift = await database.shift.findUniqueOrThrow({
+      where: { id: shiftId },
+      select: { openingCash: true },
+    });
+
     const result = await database.payment.aggregate({
       where: { shiftId, method: "CASH" },
       _sum: { amount: true },
     });
 
-    return Number(result._sum.amount ?? 0);
+    const cashCollected = Number(result._sum.amount ?? 0);
+    return Number(shift.openingCash) + cashCollected;
   },
 
   async createSnapshot(

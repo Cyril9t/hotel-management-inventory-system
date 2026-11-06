@@ -39,7 +39,18 @@ export const bookingsRepository = {
 
     return database.booking.findMany({
       where,
-      include: { room: true },
+      include: {
+        room: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            department: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
   },

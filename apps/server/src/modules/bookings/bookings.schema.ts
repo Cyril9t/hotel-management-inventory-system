@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BookingStatus, PaymentMethod } from "@prisma/client";
+import { Role, Department, BookingStatus, PaymentMethod } from "@prisma/client";
 import {
   dateRangeShape,
   dateRangeRefinement,
@@ -65,6 +65,14 @@ const roomRecordSchema = z.object({
   category: roomCategorySchema,
 });
 
+const createdByUserSchema = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  role: z.enum(Role),
+  department: z.enum(Department).nullable(),
+});
+
 const bookingRecordSchema = z.object({
   id: z.uuid(),
   roomId: z.uuid(),
@@ -83,6 +91,7 @@ const bookingRecordSchema = z.object({
   createdByUserId: z.uuid(),
   shiftId: z.uuid().nullable(),
   createdAt: z.iso.datetime(),
+  createdBy: createdByUserSchema,
 });
 
 const bookingWithRoomSchema = bookingRecordSchema.extend({
