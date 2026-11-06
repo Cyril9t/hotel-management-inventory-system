@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Department, ShiftStatus } from "@prisma/client";
+import {Role, Department, ShiftStatus } from "@prisma/client";
 import { apiSuccessSchema } from "#shared/utils/api-response";
 import {
   badRequestErrorSchema,
@@ -32,6 +32,14 @@ export type ListShiftsQuery = z.infer<typeof listShiftsQuerySchema>;
 
 // response object schemas
 
+const userSchema = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  role: z.enum(Role),
+  department: z.enum(Department).nullable(),
+});
+
 const roomSnapshotItemSchema = z.object({
   id: z.uuid(),
   number: z.string(),
@@ -57,6 +65,7 @@ const shiftRecordSchema = z.object({
   variance: z.string().nullable(),
   status: z.enum(ShiftStatus),
   isStale: z.boolean(),
+  user: userSchema
 });
 
 const currentShiftRecordSchema = shiftRecordSchema
