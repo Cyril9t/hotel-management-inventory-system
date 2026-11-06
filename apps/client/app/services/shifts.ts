@@ -17,6 +17,7 @@ export interface ShiftRecord extends Record<string, unknown> {
     variance?: string | null;
     status?: "OPEN" | "CLOSED";
     isStale?: boolean;
+    user?: { firstName?: string; lastName?: string };
     receptionSnapshot?: ReceptionSnapshot | null;
 }
 

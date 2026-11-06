@@ -1,4 +1,4 @@
-import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 
 import {
     RadialBarChart,
@@ -7,7 +7,7 @@ import {
 } from "recharts";
 
 function ReceptionRadialBar() {
-    const { counts } = UseMetricCards()
+    const { counts } = useRooms()
     const data = [{ name: "Occupancy", value: counts.percentage, fill: "#d99a28" }];
     return (
         <div className="flex items-center gap-5 my-2">

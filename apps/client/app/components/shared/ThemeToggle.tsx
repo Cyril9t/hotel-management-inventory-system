@@ -1,9 +1,9 @@
 import { Moon, Sun } from "lucide-react";
-import { UseMetricCards } from "~/Context/Context";
+import { useTheme } from "~/Context/ThemeContext";
 import { Button } from "~/components/ui/button";
 
 export function ThemeToggle() {
-    const { theme, setTheme } = UseMetricCards();
+    const { theme, setTheme } = useTheme();
     const isDark = theme === "dark";
 
     return (

@@ -2,11 +2,11 @@ import { BedDouble, CalendarIcon, ChevronDown, DollarSign, Download, Hotel, Hous
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "~/components/ui/card";
-import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 
 export function MetricCards({ user = "" }) {
 
-    const { counts } = UseMetricCards()
+    const { counts } = useRooms()
     const [activeTab, setActiveTab] = useState('Today');
     const tabs = ['Today', 'Week', 'Month', 'Year'];
 

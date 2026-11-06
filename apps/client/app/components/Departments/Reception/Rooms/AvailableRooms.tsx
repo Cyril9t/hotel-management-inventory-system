@@ -5,6 +5,7 @@ import { RoomCard } from "./RoomsCard";
 import { RoomDetailsDrawer } from "./RoomsDetails";
 import { getRoomOccupancyMetrics, type ApiRoom, type Room } from "./type";
 import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 import BookRoomModal from "./BookRoom/BookGuest";
 import { Button } from "~/components/ui/button";
 import { Plus } from "lucide-react";
@@ -45,7 +46,8 @@ function mapApiRoom(room: ApiRoom, index: number,): Room {
 
 export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allowRoomActions = true, }: { onCreateRoom?: () => void; refreshKey?: number; allowRoomActions?: boolean; } = {}) {
 
-    const { api, rooms: apiRooms, roomsLoading, roomsError, refreshRooms } = UseMetricCards();
+    const { api } = UseMetricCards();
+    const { rooms: apiRooms, roomsLoading, roomsError, refreshRooms } = useRooms();
     const rooms = useMemo(() => apiRooms.map(mapApiRoom), [apiRooms]);
 
     const [searchTerm, setSearchTerm] = useState('');

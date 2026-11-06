@@ -1,4 +1,4 @@
-import { type RouteConfig, index, route } from "@react-router/dev/routes";
+import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
 
 export default [
 
@@ -19,12 +19,15 @@ export default [
         route("settings", "./routes/GmDashboard/settings.tsx")
     ]),
 
-    route("receptionist/dashboard", "./routes/Departments/Reception/Layouts.tsx", [
-        index("./routes/Departments/Reception/Overview.tsx"),
-        route("rooms", "./routes/Departments/Reception/Rooms.tsx"),
-        route("roomsService", "./routes/Departments/Reception/Room.Service.tsx"),
-        route("history", "./routes/Departments/Reception/History.tsx"),
-        route("shifts", "./routes/Departments/Reception/Shift.tsx"),
+    layout("./routes/Shift/Layout.tsx", [
+        route("receptionist/dashboard", "./routes/Departments/Reception/Layouts.tsx", [
+            index("./routes/Departments/Reception/Overview.tsx"),
+            route("rooms", "./routes/Departments/Reception/Rooms.tsx"),
+            route("roomsService", "./routes/Departments/Reception/Room.Service.tsx"),
+            route("history", "./routes/Departments/Reception/History.tsx"),
+            route("shifts", "./routes/Departments/Reception/Shift.tsx"),
+        ]),
+        route("OpenShift", "./routes/openShift.tsx"),
     ]),
 
     route("bar/dashboard", "./routes/Departments/Bar/Layouts.tsx", [
@@ -35,7 +38,12 @@ export default [
         route("shifts", "./routes/Departments/Bar/Shift.tsx")
     ]),
 
-    route("OpenShift", "./routes/openShift.tsx"),
+    route("store_manager/dashboard", "./routes/Departments/Store/Layouts.tsx", [
+        index("./routes/Departments/Store/overview.tsx"),
+        route("inventory", "./routes/Departments/Store/Inventory.tsx"),
+        route("receive", "./routes/Departments/Store/receive.tsx"),
+    ]),
+
     route("accept-invite", "./routes/createAccount.tsx")
 
 ] satisfies RouteConfig;

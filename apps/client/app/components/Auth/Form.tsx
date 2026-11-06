@@ -4,6 +4,7 @@ import { useLocation, useNavigate, } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { getDashboardPathForRole, UseMetricCards } from "~/Context/Context";
+import { useAuth } from "~/Context/AuthContext";
 
 
 export function LoginForm() {
@@ -11,7 +12,8 @@ export function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
 
-    const { setEmail, setPassword, email, password, api, isLoading, setIsLoading, saveSession } = UseMetricCards()
+    const { api } = UseMetricCards();
+    const { setEmail, setPassword, email, password, isLoading, setIsLoading, saveSession } = useAuth();
 
     const navigate = useNavigate()
     const location = useLocation()

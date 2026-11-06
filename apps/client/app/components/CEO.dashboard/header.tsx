@@ -1,10 +1,11 @@
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { UseMetricCards } from "~/Context/Context";
+import { useAuth } from "~/Context/AuthContext";
 import { ThemeToggle } from "~/components/shared/ThemeToggle";
 
 export function Header() {
-    const { user } = UseMetricCards()
+    const { user } = useAuth()
 
 
 
@@ -21,7 +22,7 @@ export function Header() {
                 </Button>
 
                 <Button variant={"default"} className="h-10 w-10  rounded-full ">
-                    {user.firstName[0].toUpperCase()}
+                    {user?.firstName?.[0]?.toUpperCase() ?? ""}
                 </Button>
             </div>
         </header>

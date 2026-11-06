@@ -1,10 +1,15 @@
-import React from 'react';
+
 import { KeyRound, ShieldCheck } from 'lucide-react';
 
-export const CreatePasswordHeader: React.FC = () => (
+export const CreatePasswordHeader = ({ firstName, lastName }: { firstName: string, lastName: string }) => (
     <header className="space-y-4 text-center sm:text-left">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-accent/60 text-primary shadow-sm sm:mx-0">
-            <KeyRound className="h-5 w-5" />
+        <div className='flex gap-10 '>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-accent/60 text-primary shadow-sm sm:mx-0">
+                <KeyRound className="h-5 w-5" />
+            </div>
+            <div className="place-content-center">
+                <h1 className="font-bold">{firstName} {lastName}</h1>
+            </div>
         </div>
         <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Staff account setup</p>

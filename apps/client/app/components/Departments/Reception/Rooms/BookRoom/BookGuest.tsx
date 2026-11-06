@@ -20,6 +20,8 @@ import type { AxiosInstance } from 'axios';
 import { toast } from 'sonner';
 import { getBookingBalance, getBookingPayments, recordBookingPayment, type BookingPaymentMethod, type RecordedBookingPayment } from '~/services/payments';
 import { UseMetricCards } from '~/Context/Context';
+import { useAuth } from '~/Context/AuthContext';
+import { useShift } from '~/Context/ShiftContext';
 
 export interface SelectedRoom {
     id: string;
@@ -203,7 +205,8 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
     onBookingComplete,
     modalWidthClass = "max-w-3xl",
 }) => {
-    const { currentShift, user, authLoading } = UseMetricCards();
+    const { currentShift } = useShift();
+    const { user, authLoading } = useAuth();
     const today = new Date();
     const todayStr = toLocalDateInputValue(today);
     const tomorrow = new Date();

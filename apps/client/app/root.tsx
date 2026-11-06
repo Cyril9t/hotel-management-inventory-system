@@ -10,6 +10,8 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import { RoomsMetric } from "./Context/Context";
+import { AuthProvider } from "./Context/AuthContext";
+import { ThemeProvider } from "./Context/ThemeContext";
 import { Toaster } from "sonner";
 
 export const links: Route.LinksFunction = () => [
@@ -57,9 +59,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <RoomsMetric>
-      <Outlet />
-    </RoomsMetric>
+    <ThemeProvider>
+      <AuthProvider>
+        <RoomsMetric>
+          <Outlet />
+        </RoomsMetric>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

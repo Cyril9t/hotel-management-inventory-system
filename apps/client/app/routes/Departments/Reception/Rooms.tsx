@@ -1,13 +1,8 @@
 import HotelRooms from "~/components/Departments/Reception/Rooms/Rooms";
-import { RoomsMetric } from "~/Context/Context";
+import { RoomsProvider } from "~/Context/RoomsContext";
 
 function Rooms() {
-    return (
-        <RoomsMetric>
-
-            <HotelRooms />
-        </RoomsMetric>
-    );
+    return <RoomsProvider><HotelRooms /></RoomsProvider>;
 }
 
 export default Rooms;

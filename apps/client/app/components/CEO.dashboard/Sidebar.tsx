@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 import Logo from "../shared/Logo";
-import { UseMetricCards } from "~/Context/Context";
+import { useAuth } from "~/Context/AuthContext";
 import { useState } from "react";
 
 const DashboardLinks = [
@@ -55,7 +55,7 @@ const DashboardLinks = [
 function DashboardSidebar() {
 
     const navigate = useNavigate()
-    const { clearSession, user } = UseMetricCards()
+    const { clearSession, user } = useAuth()
 
     return (
         <Sidebar className="bg-brand-navy text-background">
@@ -72,7 +72,7 @@ function DashboardSidebar() {
                     <SidebarGroupLabel>
                         <div className="mb-4 mt-3 flex h-auto flex-col items-start gap-1 opacity-90">
                             <span className="text-xl font-semibold tracking-tight text-background">
-                                {user.firstName} {user.lastName}
+                                {user?.firstName} {user?.lastName}
                             </span>
 
                             <span className="text-sm font-medium text-background/70">

@@ -2,8 +2,9 @@ import { Bell, Loader, LucideAlignHorizontalDistributeStart } from "lucide-react
 import { NavLink } from "react-router";
 import Logo from "~/components/shared/Logo";
 import { Button } from "~/components/ui/button";
-import { UseMetricCards } from "~/Context/Context";
 import { ThemeToggle } from "~/components/shared/ThemeToggle";
+import { useAuth } from "~/Context/AuthContext";
+import { useShift } from "~/Context/ShiftContext";
 
 export const DashboardHeader = (
     {
@@ -15,7 +16,8 @@ export const DashboardHeader = (
 
 ) => {
 
-    const { user, currentShift, currentShiftLoading } = UseMetricCards()
+    const { currentShift, currentShiftLoading } = useShift();
+    const { user } = useAuth();
 
 
     return (

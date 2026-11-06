@@ -29,6 +29,7 @@ export const shiftsRepository = {
   }) {
     return database.shift.findMany({
       where: filters,
+      include: { user: { select: { firstName: true, lastName: true } } },
       orderBy: { openedAt: "desc" },
     });
   },

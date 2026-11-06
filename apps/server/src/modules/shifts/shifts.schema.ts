@@ -109,7 +109,11 @@ export const shiftDetailsResponseSchema = apiSuccessSchema(
 // GET /shifts
 export const shiftsListResponseSchema = apiSuccessSchema(
   z.object({
-    shifts: z.array(shiftRecordSchema),
+    shifts: z.array(
+      shiftRecordSchema.extend({
+        user: z.object({ firstName: z.string(), lastName: z.string() }),
+      }),
+    ),
   }),
 );
 

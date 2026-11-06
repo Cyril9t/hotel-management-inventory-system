@@ -9,6 +9,8 @@ import { CloseShiftHeader } from './header';
 import { ShiftReconciliationCard } from './shiftCard';
 import { logShiftApiFailure } from '~/services/shifts';
 import { getShiftCashPayments } from '~/services/payments';
+import { useAuth } from '~/Context/AuthContext';
+import { useShift } from '~/Context/ShiftContext';
 
 export interface CloseShiftContainerProps {
     isOpen?: boolean;
@@ -27,10 +29,9 @@ function displayValue(value: unknown) {
 }
 
 export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, onClose, onShiftClosed }) => {
-    const {
-        currentShift, currentShiftLoading, currentShiftError, refreshCurrentShift,
-        finishShift, loadShiftDetails, shiftDetails, user, clearSession, api,
-    } = UseMetricCards();
+    const { api } = UseMetricCards();
+    const { currentShift, currentShiftLoading, currentShiftError, refreshCurrentShift, finishShift, loadShiftDetails, shiftDetails } = useShift();
+    const { user, clearSession } = useAuth();
     const [actualCash, setActualCash] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');

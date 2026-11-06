@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { toast } from "sonner";
 import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 import { checkoutBooking, getBookingDetails, getBookingsForRoom, type BookingRecord, type BookingSummary } from "~/services/bookings";
 import { formatNaira } from "./data";
 
@@ -62,7 +63,8 @@ export const RoomDetailsDrawer: React.FC<RoomDetailsDrawerProps> = ({
     onCreateRoom,
     action,
 }) => {
-    const { api, refreshRooms } = UseMetricCards();
+    const { api } = UseMetricCards();
+    const { refreshRooms } = useRooms();
     const [roomBookings, setRoomBookings] = useState<Awaited<ReturnType<typeof getBookingsForRoom>>>([]);
     const [bookingRoomId, setBookingRoomId] = useState<string | null>(null);
     const [bookingsLoading, setBookingsLoading] = useState(false);

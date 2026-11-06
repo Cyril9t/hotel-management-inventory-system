@@ -12,13 +12,9 @@ export interface FilterProps {
 }
 
 export const tabs = [
-    { id: 'all', label: 'All Activities' },
-    { id: 'checkin', label: 'Check-ins' },
-    { id: 'checkout', label: 'Check-outs' },
+    { id: 'all', label: 'All History' },
     { id: 'booking', label: 'Bookings' },
-    { id: 'roomservice', label: 'Room Service' },
-    { id: 'payment', label: 'Payments' },
-    { id: 'shift', label: 'Shift Handover' },
+    { id: 'shift', label: 'Shifts' },
 ];
 
 export const HistoryFilterBar: React.FC<FilterProps> = ({

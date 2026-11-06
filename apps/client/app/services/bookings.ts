@@ -4,14 +4,14 @@ export type BookingStatus = "RESERVED" | "CHECKED_IN" | "CHECKOUT_DUE" | "OVERDU
 export type BookingPaymentMethod = "CASH" | "TRANSFER" | "CARD" | "CHARGE_TO_ROOM";
 
 export interface BookingRoomSummary {
-    id: string;
-    number: string;
-    categoryId: string;
-    isActive: boolean;
-    category: {
-        id: string;
-        name: string;
-        pricePerNight: string;
+    id?: string;
+    number?: string;
+    categoryId?: string;
+    isActive?: boolean;
+    category?: {
+        id?: string;
+        name?: string;
+        pricePerNight?: string;
     };
 }
 
@@ -31,9 +31,19 @@ export interface BookingRecord {
     actualCheckoutAt: string | null;
     status: BookingStatus;
     createdByUserId: string;
+    createdBy?: { firstName?: string; lastName?: string };
     shiftId: string | null;
     createdAt: string;
     room?: BookingRoomSummary;
+}
+
+export async function getBookingHistory(api: AxiosInstance, filters?: { startDate?: string; endDate?: string }): Promise<BookingRecord[]> {
+    const response = await api.get<ApiSuccess<{ bookings: unknown }>>("/bookings", { params: filters });
+    const bookings = response.data?.data?.bookings;
+    if (!Array.isArray(bookings) || !bookings.every(isBookingRecord)) {
+        throw new Error("Booking history response did not contain a valid bookings list.");
+    }
+    return bookings as BookingRecord[];
 }
 
 /** Fields needed to associate and render a booking from the list endpoint. */
@@ -68,11 +78,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isBookingRoom(value: unknown): value is BookingRoomSummary {
-    if (!isRecord(value) || !isRecord(value.category)) return false;
-    return typeof value.id === "string" && typeof value.number === "string" &&
-        typeof value.categoryId === "string" && typeof value.isActive === "boolean" &&
-        typeof value.category.id === "string" && typeof value.category.name === "string" &&
-        typeof value.category.pricePerNight === "string";
+    if (!isRecord(value)) return false;
+    // The list endpoint currently includes the room's scalar fields, while the
+    // detail endpoint may also include its category relation.
+    if (value.id !== undefined && typeof value.id !== "string") return false;
+    if (value.number !== undefined && typeof value.number !== "string") return false;
+    if (value.categoryId !== undefined && typeof value.categoryId !== "string") return false;
+    if (value.isActive !== undefined && typeof value.isActive !== "boolean") return false;
+    if (value.category !== undefined && value.category !== null && !isRecord(value.category)) return false;
+    return true;
 }
 
 function isBookingRecord(value: unknown): value is BookingRecord {

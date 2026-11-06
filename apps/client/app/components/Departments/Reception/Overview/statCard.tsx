@@ -1,13 +1,13 @@
 import { BedDouble, CircleHelp } from "lucide-react";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 
 function displayStatus(status: string) {
     return status.toLowerCase().split("_").map((part) => part[0]?.toUpperCase() + part.slice(1)).join(" ");
 }
 
 export const StatListCard = () => {
-    const { counts, roomsLoading, roomsError, rooms } = UseMetricCards();
+    const { counts, roomsLoading, roomsError, rooms } = useRooms();
 
     return (
         <div className="flex flex-col gap-2">

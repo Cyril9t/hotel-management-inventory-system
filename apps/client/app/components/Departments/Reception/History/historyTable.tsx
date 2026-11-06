@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import type { ShiftRecord } from '~/services/shifts';
+import type { BookingRecord } from '~/services/bookings';
 
 export interface ActivityRecord {
     id: string;
@@ -29,6 +30,7 @@ export interface ActivityRecord {
     statusColor: string;
     refId: string;
     rawShift?: ShiftRecord;
+    rawBooking?: BookingRecord;
 }
 
 export const HistoryTable: React.FC<{
@@ -51,7 +53,7 @@ export const HistoryTable: React.FC<{
         <div className="rounded-xl border border-border bg-card overflow-hidden ">
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-[14px]">
-                    <thead className="h-16 border-border bg-brand-navy-light text-brand-gold-light font-bold uppercase tracking-wider text-[17px]">
+                    <thead className="h-12 border-b border-border bg-secondary/50 text-muted-foreground font-semibold uppercase tracking-wider text-[11px]">
                         <tr>
                             <th className="p-4 pl-5">Time & Event</th>
                             <th className="p-4">Activity Details</th>
@@ -78,26 +80,26 @@ export const HistoryTable: React.FC<{
                                 </td>
 
 
-                                <td className="p-4 border border-destructive">
-                                    <p className="font-semibold text-[16px] text-foreground">{rec.title}</p>
+                                <td className="p-4">
+                                    <p className="font-semibold text-sm text-foreground capitalize">{rec.title}</p>
                                     <p className="text-[12px] text-muted-foreground">{rec.details}</p>
                                     <p className="text-[12px] text-primary/80 font-mono mt-0.5">{rec.meta}</p>
                                 </td>
 
 
-                                <td className="p-3.5 border border-destructive">
+                                <td className="p-3.5">
                                     <div className="flex items-center gap-2">
                                         <User className="w-4 h-4 text-primary" />
                                         <div>
-                                            <p className="font-semibold text-[16px]">{rec.staffName}</p>
+                                            <p className="max-w-40 truncate font-semibold text-sm" title={rec.staffName}>{rec.staffName}</p>
                                             <p className="text-[12px] text-muted-foreground">{rec.staffRole}</p>
                                         </div>
                                     </div>
                                 </td>
 
 
-                                <td className="p-3.5 font-bold border border-destructive">
-                                    {rec.amount ? (
+                                <td className="p-3.5 font-bold">
+                                    {rec.amount != null ? (
                                         <div>
                                             <p className="text-foreground text-[16px]">₦ {rec.amount.toLocaleString()}</p>
                                             <p className="text-[12px] font-sans font-normal text-muted-foreground">{rec.paymentMethod}</p>
@@ -108,9 +110,9 @@ export const HistoryTable: React.FC<{
                                 </td>
 
 
-                                <td className="p-3.5 border border-destructive">
-                                    <span className={`px-2.5 py-1 rounded-full text-[12px] font-bold `}>
-                                        {rec.status}
+                                <td className="p-3.5">
+                                    <span className="inline-flex rounded-full border border-border bg-secondary px-2.5 py-1 text-[11px] font-semibold capitalize text-foreground">
+                                        {rec.status.toLowerCase().replaceAll('_', ' ')}
                                     </span>
                                 </td>
 

@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { UseMetricCards } from "~/Context/Context";
 import ReceptionRadialBar from "../../Shared/RedalBar";
+import { useRooms } from "~/Context/RoomsContext";
 
 export const OccupancyCard = () => {
-    const { counts, roomsLoading, roomsError, rooms } = UseMetricCards();
+    const { counts, roomsLoading, roomsError, rooms } = useRooms();
     return (
         <div className="flex h-full flex-col gap-7.5">
             <div className="mb-4 flex items-center justify-between">

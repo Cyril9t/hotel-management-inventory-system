@@ -1,6 +1,7 @@
 import { useCallback, useState, type KeyboardEvent } from "react";
 import { Building2, ConciergeBell, Utensils, Package, Wine, Info } from "lucide-react";
 import { UseMetricCards } from "~/Context/Context";
+import { RoomsProvider } from "~/Context/RoomsContext";
 import RoomCreateDialog from "../CreateRoomDialog";
 import AvailableRoomsPage from "~/components/Departments/Reception/Rooms/AvailableRooms";
 import { DepartmentCard, type Department } from "../Department";
@@ -61,11 +62,12 @@ const initialDepartments: Department[] = [
     },
 ];
 
+function RoomsPageWithProvider(props: { onCreateRoom?: () => void; refreshKey?: number }) {
+    return <RoomsProvider><AvailableRoomsPage {...props} allowRoomActions={false} /></RoomsProvider>;
+}
+
 export function HotelDepartments() {
     const { api } = UseMetricCards();
-    const RoomsPage = (props: { onCreateRoom?: () => void; refreshKey?: number }) => (
-        <AvailableRoomsPage {...props} allowRoomActions={false} />
-    );
 
     const [departments, setDepartments] = useState(initialDepartments);
     const [roomDialogOpen, setRoomDialogOpen] = useState(false);
@@ -101,7 +103,7 @@ export function HotelDepartments() {
             <DepartmentDetailView
                 department={selectedDepartment}
                 onBack={() => setSelectedDepartment(null)}
-                RoomsPage={RoomsPage}
+                RoomsPage={RoomsPageWithProvider}
                 roomDialogOpen={roomDialogOpen}
                 setRoomDialogOpen={setRoomDialogOpen}
                 roomsRefreshKey={roomsRefreshKey}

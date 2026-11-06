@@ -5,7 +5,9 @@ import { ShiftCashInputSection } from './OpeningFloat';
 import OpenHeader from './OpenHeader';
 import { Button } from '~/components/ui/button';
 import { Navigate, useLocation, useNavigate } from 'react-router';
-import { UseMetricCards, getDashboardPathForRole } from '~/Context/Context';
+import { getDashboardPathForRole } from '~/Context/Context';
+import { useShift } from '~/Context/ShiftContext';
+import { useAuth } from '~/Context/AuthContext';
 import GlobalLoadingSkeleton from '~/components/shared/LoadingState/LoadingState';
 import { toast } from 'sonner';
 import { logShiftApiFailure } from '~/services/shifts';
@@ -15,10 +17,8 @@ function errorMessage(error: any) {
 }
 
 export const OpenShiftContainer: React.FC = () => {
-    const {
-        token, user, authLoading, authUnavailable, currentShift, currentShiftLoading,
-        currentShiftError, refreshCurrentShift, loadSuggestedOpeningCash, startShift, retrySession,
-    } = UseMetricCards();
+    const { currentShift, currentShiftLoading, currentShiftError, refreshCurrentShift, loadSuggestedOpeningCash, startShift } = useShift();
+    const { token, user, authLoading, authUnavailable, retrySession } = useAuth();
     const [openingCash, setOpeningCash] = useState('');
     const [suggestedCashLoading, setSuggestedCashLoading] = useState(false);
     const [suggestedCashError, setSuggestedCashError] = useState<string | null>(null);

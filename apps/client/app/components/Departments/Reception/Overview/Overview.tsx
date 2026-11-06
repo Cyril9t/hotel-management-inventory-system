@@ -3,11 +3,11 @@ import { OccupancyCard } from "./OccupancyCard";
 import { QuickActionsPanel } from "./QuickAction";
 import { RecentActivityFeed } from "./recentActivities";
 import { StatListCard } from "./statCard";
-import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 import { Button } from "~/components/ui/button";
 
 function Overview() {
-    const { roomsError, refreshRooms } = UseMetricCards();
+    const { roomsError, refreshRooms } = useRooms();
 
     return (
 

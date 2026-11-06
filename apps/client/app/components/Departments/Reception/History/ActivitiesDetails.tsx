@@ -14,7 +14,7 @@ import {
     FileText
 } from 'lucide-react';
 import { type ActivityRecord } from './historyTable';
-import { UseMetricCards } from '~/Context/Context';
+import { useShift } from '~/Context/ShiftContext';
 
 export interface ActivityDetailModalProps {
     isOpen: boolean;
@@ -27,7 +27,7 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
     record,
     onClose,
 }) => {
-    const { loadShiftDetails, shiftDetails } = UseMetricCards();
+    const { loadShiftDetails, shiftDetails } = useShift();
     const [shiftDetailsLoading, setShiftDetailsLoading] = useState(false);
     const [shiftDetailsError, setShiftDetailsError] = useState('');
 

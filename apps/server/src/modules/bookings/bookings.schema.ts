@@ -89,6 +89,10 @@ const bookingWithRoomSchema = bookingRecordSchema.extend({
   room: roomRecordSchema,
 });
 
+const bookingHistoryRecordSchema = bookingWithRoomSchema.extend({
+  createdBy: z.object({ firstName: z.string(), lastName: z.string() }),
+});
+
 const paymentRecordSchema = z.object({
   id: z.uuid(),
   amount: z.string(),
@@ -112,7 +116,7 @@ export const bookingCreatedResponseSchema = apiSuccessSchema(
 // GET /bookings
 export const bookingsListResponseSchema = apiSuccessSchema(
   z.object({
-    bookings: z.array(bookingWithRoomSchema),
+    bookings: z.array(bookingHistoryRecordSchema),
   }),
 );
 

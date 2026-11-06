@@ -21,6 +21,9 @@ export const CreatePassword: FC = () => {
     const { api } = UseMetricCards();
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
+    const firstName = searchParams.get('firstName') as string;
+    const lastName = searchParams.get("lastName") as string;
+
     const navigate = useNavigate();
 
     const handlePasswordSubmit = async (password: string) => {
@@ -126,7 +129,10 @@ export const CreatePassword: FC = () => {
                         </div>
                     ) : (
                         <div className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-brand-navy/5 sm:p-9">
-                            <CreatePasswordHeader />
+
+                            <CreatePasswordHeader firstName={firstName} lastName={lastName} />
+
+
                             {submitError && <div role="alert" aria-live="polite" className="mt-6 rounded-lg border border-destructive/30 bg-destructive/10 p-3.5 text-sm text-destructive">{submitError}</div>}
                             <div className="mt-7">
                                 <CreatePasswordForm onSubmit={handlePasswordSubmit} isSubmitting={isSubmitting} />

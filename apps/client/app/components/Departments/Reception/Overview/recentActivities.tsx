@@ -1,6 +1,6 @@
 import { BedDouble } from "lucide-react";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
-import { UseMetricCards } from "~/Context/Context";
+import { useRooms } from "~/Context/RoomsContext";
 import type { ApiRoom } from "~/components/Departments/Reception/Rooms/type";
 
 function formatStatus(status?: string) {
@@ -8,7 +8,7 @@ function formatStatus(status?: string) {
 }
 
 export const RecentActivityFeed = () => {
-    const { rooms, roomsLoading, roomsError } = UseMetricCards();
+    const { rooms, roomsLoading, roomsError } = useRooms();
 
     return (
         <Card>

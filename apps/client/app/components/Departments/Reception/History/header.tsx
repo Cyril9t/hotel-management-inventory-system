@@ -9,11 +9,11 @@ export const ReceptionHistoryHeader = () => {
                 <div className="flex items-center gap-2">
                     <History className="w-7 h-7 text-primary" />
                     <h1 className="text-3xl font-bold text-foreground">
-                        Front Desk Activity History
+                        History
                     </h1>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Comprehensive audit log for all reception events, check-ins, payments, and shift handovers.
+                    Review booking records and shift history in one place.
                 </p>
             </div>
 
