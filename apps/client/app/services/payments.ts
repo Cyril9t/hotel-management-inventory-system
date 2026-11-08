@@ -81,18 +81,45 @@ export async function getBookingPayments(api: AxiosInstance, bookingId: string):
     return payments;
 }
 
-/** The API exposes payments per booking, with shiftId on each payment, but no shift payment aggregate. */
-export async function getShiftCashPayments(api: AxiosInstance, shiftId: string): Promise<number> {
+/**
+ * Aggregates CASH payments across bookings for a given shift.
+ * Note: Prefer using `GET /shifts/current` which directly provides `expectedCash`
+ * computed as `SUM(payments WHERE shiftId = shift.id AND method = 'CASH')` on the server
+ * without incurring N+1 HTTP requests (`GET /bookings` + `GET /bookings/:id/payments`).
+ */
+export async function getShiftCashPayments(
+    api: AxiosInstance,
+    shiftId: string,
+    openedAt: string,
+    closedAt?: string | null,
+): Promise<number> {
+    const openedAtTime = Date.parse(openedAt);
+    const closedAtTime = closedAt ? Date.parse(closedAt) : Date.now();
+    if (!Number.isFinite(openedAtTime) || (closedAt && !Number.isFinite(closedAtTime))) {
+        throw new Error("The shift does not contain valid timestamps for payment reconciliation.");
+    }
     const bookingResponse = await api.get<ApiSuccess<BookingListResponse>>("/bookings");
     const bookings = bookingResponse.data?.data?.bookings;
     if (!Array.isArray(bookings) || !bookings.every((booking) => typeof booking?.id === "string")) {
         throw new Error("The bookings response did not contain a valid booking list.");
     }
 
-    const bookingPayments = await Promise.all(bookings.map(({ id }) => getBookingPayments(api, id)));
+    const bookingPayments = await Promise.all(bookings.map(async ({ id }) => ({
+        bookingId: id,
+        payments: await getBookingPayments(api, id),
+    })));
+    const seenPaymentIds = new Set<string>();
 
-    return bookingPayments.flat().reduce((total, payment) => {
-        if (payment.shiftId !== shiftId || payment.method !== "CASH") return total;
+    return bookingPayments.flatMap(({ bookingId, payments }) => payments
+        .filter((payment) => {
+            if (payment.bookingId !== bookingId || payment.shiftId !== shiftId || payment.method !== "CASH" || seenPaymentIds.has(payment.id)) return false;
+            const paidAt = Date.parse(payment.paidAt);
+            if (!Number.isFinite(paidAt)) throw new Error("The payment API returned an invalid payment timestamp.");
+            if (paidAt < openedAtTime || paidAt > closedAtTime) return false;
+            seenPaymentIds.add(payment.id);
+            return true;
+        }))
+        .reduce((total, payment) => {
         const amount = Number(payment.amount);
         if (!Number.isFinite(amount) || amount < 0) throw new Error("The payment API returned an invalid amount.");
         return total + amount;

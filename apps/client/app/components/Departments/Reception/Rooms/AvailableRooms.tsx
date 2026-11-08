@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { RoomOccupancyHeader } from "./Header";
 import { RoomFiltersBar } from "./RoomFilter";
 import { RoomCard } from "./RoomsCard";
@@ -60,10 +61,19 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
 
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
     const [bookingRefreshKey, setBookingRefreshKey] = useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         setSelectedRoom((current) => rooms.find((room: any) => room.id === current?.id) ?? rooms[0] ?? null);
     }, [rooms]);
+
+    useEffect(() => {
+        if (searchParams.get("quickAction") !== "booking" || roomsLoading || !selectedRoom) return;
+        setBookRooms(true);
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete("quickAction");
+        setSearchParams(nextParams, { replace: true });
+    }, [roomsLoading, searchParams, selectedRoom, setSearchParams]);
 
     const lastRefreshKey = useRef(refreshKey);
     useEffect(() => {
@@ -98,7 +108,7 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
     return (
         <div >
 
-            <BookRoomModal
+            {allowRoomActions && <BookRoomModal
                 api={api}
                 isOpen={bookRooms}
                 room={selectedRoom as unknown as Parameters<typeof BookRoomModal>[0]["room"]}
@@ -109,7 +119,7 @@ export default function AvailableRoomsPage({ onCreateRoom, refreshKey = 0, allow
                 onClose={() => {
                     setBookRooms(false)
                 }}
-            />
+            />}
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground tracking-wide">Available Rooms</h1>

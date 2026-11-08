@@ -1,9 +1,5 @@
-import StoreManagerDashboard from "~/components/Departments/Store/Overview/StoreManagerDashboard";
+import { StoreManagerView } from "~/components/GM.dashboard/Department/Store/StoreManagerView";
 
-function Overview() {
-    return (
-        <StoreManagerDashboard />
-    );
+export default function StoreOverview() {
+    return <StoreManagerView showSectionNavigation={false} />;
 }
-
-export default Overview;

@@ -87,7 +87,7 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h3 className="text-base font-bold font-serif text-foreground tracking-tight">
+                                <h3 className="text-base font-bold   text-foreground tracking-tight">
                                     Audit Record Details
                                 </h3>
                                 <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-secondary text-primary">
@@ -143,7 +143,7 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                             <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
                                 <User className="w-3 h-3 text-primary" /> Staff on Duty
                             </span>
-                            <p className="font-bold text-foreground">{record.staffName}</p>
+                            <p className="font-bold text-foreground tracking-wide">{record.staffName}</p>
                             <p className="text-[10px] text-muted-foreground">{record.staffRole}</p>
                         </div>
 
@@ -174,7 +174,7 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
                             <div className="border-t border-border/80 pt-2 flex justify-between items-center font-bold text-sm">
                                 <span>Total Amount</span>
-                                <span className="font-serif text-primary">
+                                <span className="  text-primary">
                                     {record.amount ? `₦ ${record.amount.toLocaleString()}` : '₦ 0.00'}
                                 </span>
                             </div>
@@ -182,9 +182,9 @@ export const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                     </div>
 
                     {/* System Audit Footer Callout */}
-                    <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-2 text-[11px]">
+                    <div className="p-3 rounded-lg border border-emerald-500/30 bg-brand-success/10 text-brand-success flex items-center gap-2 text-[11px]">
                         <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        <span>Audit trail verified by Brandy Boutique Grand Resort Property System.</span>
+                        <span>Audit trail verified by Brandy Hotel System.</span>
                     </div>
 
                 </div>

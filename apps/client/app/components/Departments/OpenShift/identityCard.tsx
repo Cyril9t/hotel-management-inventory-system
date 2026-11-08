@@ -24,7 +24,7 @@ export const StaffIdentityCard: React.FC<StaffProfileProps> = ({
                 <div className="flex items-center gap-4">
                     <div className="relative">
 
-                        <div className="w-12 h-12 rounded-full bg-accent border-2 border-primary/40 flex items-center justify-center font-bold font-serif text-lg text-primary">
+                        <div className="w-12 h-12 rounded-full bg-accent border-2 border-primary/40 flex items-center justify-center font-bold   text-lg text-primary">
                             {staffName.split(' ').map(n => n[0]).join('')}
                         </div>
 

@@ -11,7 +11,8 @@ export const DashboardHeader = (
         departments = "",
         staffName = "",
         tabEnd = "",
-        tabs = []
+        tabs = [],
+        tabsScrollable = false,
     },
 
 ) => {
@@ -34,8 +35,8 @@ export const DashboardHeader = (
 
                             <span className="text-xl font-bold text-brand-navy-light">{user?.firstName ? user?.firstName : <Loader className="animate-spin " />} {user?.lastName ? user?.lastName : ""} </span>
                         </div>
-                        {!currentShiftLoading && <p className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-1 justify-end">
-                            <span className={`w-3 h-3 rounded-full ${currentShift ? "bg-brand-success animate-pulse" : "bg-muted-foreground"}`} />
+                        {(!currentShiftLoading || currentShift) && <p className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-1 justify-end">
+                            <span className={`w-2 h-2 rounded-full ${currentShift ? "bg-brand-success animate-pulse" : "bg-muted-foreground"}`} />
                             {currentShift ? "Active shift" : "No active shift"}
                         </p>}
                     </div>
@@ -56,17 +57,17 @@ export const DashboardHeader = (
             </div>
 
 
-            <div className="max-w-7xl mx-auto flex gap-8 border-border/60">
+            <div className={`max-w-7xl mx-auto flex border-border/60 ${tabsScrollable ? "gap-4 overflow-x-auto px-4 sm:gap-7" : "gap-8"}`}>
                 {tabs.map(({ title, link }: any) => (
                     <NavLink
+                        key={link}
                         to={link}
                         end={link === `/${tabEnd}/dashboard`}
                     >
                         {({ isActive }) => (
                             <button
-                                key={title}
-
-                                className={`py-3 text-[15px] font-semibold relative transition-colors ${isActive
+                                type="button"
+                                className={`py-3 text-[17px] font-semibold relative transition-colors ${isActive
                                     ? 'text-primary'
                                     : 'text-muted-foreground hover:text-foreground'
                                     }`}

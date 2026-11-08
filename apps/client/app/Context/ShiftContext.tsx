@@ -32,22 +32,29 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
     const [currentShiftLoading, setCurrentShiftLoading] = useState(true);
     const [currentShiftError, setCurrentShiftError] = useState<string | null>(null);
     const currentShiftRequestRef = useRef<Promise<ShiftRecord | null> | null>(null);
+    const currentShiftGenerationRef = useRef(0);
+    const authIdentityRef = useRef<string | null | undefined>(undefined);
     const [shiftList, setShiftList] = useState<ShiftRecord[]>([]);
     const [shiftListLoading, setShiftListLoading] = useState(false);
     const [shiftListError, setShiftListError] = useState<string | null>(null);
     const [shiftListLoaded, setShiftListLoaded] = useState(false);
     const [shiftDetails, setShiftDetails] = useState<Record<string, ShiftRecord>>({});
+    const shiftDetailsRef = useRef<Record<string, ShiftRecord>>({});
+    shiftDetailsRef.current = shiftDetails;
 
     const refreshCurrentShift = useCallback((): Promise<ShiftRecord | null> => {
         if (currentShiftRequestRef.current) return currentShiftRequestRef.current;
+        const requestGeneration = currentShiftGenerationRef.current;
         setCurrentShiftLoading(true);
         setCurrentShiftError(null);
         const request = getCurrentShift(api)
             .then((shift) => {
+                if (requestGeneration !== currentShiftGenerationRef.current) return null;
                 setCurrentShift(shift);
                 return shift;
             })
             .catch((error: any) => {
+                if (requestGeneration !== currentShiftGenerationRef.current) return null;
                 if (error?.response?.status === 404) {
                     setCurrentShift(null);
                     setCurrentShiftError(null);
@@ -62,8 +69,10 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
                 throw error;
             })
             .finally(() => {
-                currentShiftRequestRef.current = null;
-                setCurrentShiftLoading(false);
+                if (requestGeneration === currentShiftGenerationRef.current) {
+                    currentShiftRequestRef.current = null;
+                    setCurrentShiftLoading(false);
+                }
             });
         currentShiftRequestRef.current = request;
         return request;
@@ -99,12 +108,17 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
         }
         setCurrentShift(null);
         setCurrentShiftError(null);
-        setShiftDetails((existing) => {
-            const next = { ...existing };
-            delete next[shiftId];
-            return next;
-        });
-        await refreshCurrentShift().catch(() => null);
+        const closedShift = asShiftRecord(result);
+        if (closedShift) {
+            setShiftDetails((existing) => ({ ...existing, [shiftId]: closedShift }));
+            setShiftList((existing) => [closedShift, ...existing.filter((shift) => shift.id !== shiftId)]);
+        } else {
+            setShiftDetails((existing) => {
+                const next = { ...existing };
+                delete next[shiftId];
+                return next;
+            });
+        }
         return result;
     }, [currentShift?.id, refreshCurrentShift]);
 
@@ -125,15 +139,31 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const loadShiftDetails = useCallback(async (id: string) => {
-        const existing = shiftDetails[id];
+        const existing = shiftDetailsRef.current[id];
         if (existing) return existing;
         const details = await getShiftDetailsRequest(api, id);
+        shiftDetailsRef.current = { ...shiftDetailsRef.current, [id]: details };
         setShiftDetails((current) => ({ ...current, [id]: details }));
         return details;
-    }, [shiftDetails]);
+    }, []);
 
     useEffect(() => {
         if (authLoading) return;
+        const identity = token ? String(user?.id ?? token) : null;
+        if (authIdentityRef.current !== identity) {
+            authIdentityRef.current = identity;
+            currentShiftGenerationRef.current += 1;
+            currentShiftRequestRef.current = null;
+            setCurrentShift(null);
+            setCurrentShiftError(null);
+            if (identity !== null) {
+                setShiftList([]);
+                setShiftListError(null);
+                setShiftListLoaded(false);
+                setShiftDetails({});
+                shiftDetailsRef.current = {};
+            }
+        }
         const shiftEnabled = token && ["receptionist", "bar staff"].includes(normalizeRole(user?.role));
         if (!shiftEnabled) {
             setCurrentShift(null);
@@ -142,7 +172,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
             return;
         }
         void refreshCurrentShift().catch(() => { });
-    }, [authLoading, token, user?.role, refreshCurrentShift]);
+    }, [authLoading, token, user?.id, user?.role, refreshCurrentShift]);
 
     return <ShiftContext.Provider value={{
         currentShift, currentShiftLoading, currentShiftError, refreshCurrentShift,

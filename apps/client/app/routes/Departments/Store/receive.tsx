@@ -1,10 +1,5 @@
-function ReceivePage() {
-    return (
+import { StoreManagerView } from "~/components/GM.dashboard/Department/Store/StoreManagerView";
 
-        <h1>Receive Stock here
-
-        </h1>
-    );
+export default function ReceivePage() {
+    return <StoreManagerView initialSection="receiving" showSectionNavigation={false} />;
 }
-
-export default ReceivePage;

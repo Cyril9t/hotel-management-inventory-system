@@ -6,7 +6,7 @@ export function Header() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold font-serif text-foreground tracking-tight">Hotel Overview</h1>
+                    <h1 className="text-2xl font-bold   text-foreground tracking-tight">Hotel Overview</h1>
                     <span className="text-muted-foreground">•</span>
                     <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase bg-secondary/60 px-2.5 py-0.5 rounded">
                         Executive Suite

@@ -1,60 +1,32 @@
 import { ExceptionalStaysBanner } from "./Bnaner";
 import { OccupancyCard } from "./OccupancyCard";
 import { QuickActionsPanel } from "./QuickAction";
-import { RecentActivityFeed } from "./recentActivities";
 import { StatListCard } from "./statCard";
+import { MostBookedRooms } from "./MostBookedRooms";
 import { useRooms } from "~/Context/RoomsContext";
 import { Button } from "~/components/ui/button";
 
 function Overview() {
     const { roomsError, refreshRooms } = useRooms();
 
-    return (
+    return <div className="space-y-8">
+        {roomsError && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+            <span>Could not load room data from the Rooms API.</span>
+            <Button variant="outline" size="sm" onClick={() => { void refreshRooms().catch(() => {}); }}>Retry</Button>
+        </div>}
 
-        <div >
-            <div className="">
+        <section aria-label="Room occupancy and status" className="flex flex-col items-stretch gap-6 lg:flex-row">
+            <div className="min-w-0 flex-[1.4] rounded-xl border border-border bg-card p-5 sm:p-6"><OccupancyCard /></div>
+            <div className="min-w-0 flex-[0.8]"><StatListCard /></div>
+        </section>
 
-                {roomsError && <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-                    <span>Could not load room data from the Rooms API.</span>
-                    <Button variant="outline" size="sm" onClick={() => { void refreshRooms().catch(() => {}); }}>Retry</Button>
-                </div>}
+        <section aria-label="Booking performance and actions" className="flex flex-col items-stretch gap-6 lg:flex-row">
+            <div className="min-w-0 flex-[1.5]"><MostBookedRooms /></div>
+            <div className="min-w-0 flex-[0.7]"><QuickActionsPanel /></div>
+        </section>
 
-
-                <div className="flex flex-row gap-10 h-fit p-3">
-                    <div className="w-full grow">
-
-                        <OccupancyCard />
-                    </div>
-                    <div className="w-full ">
-
-                        <StatListCard />
-
-                    </div>
-                </div>
-
-
-                <div className="flex gap-10 w-full mt-10">
-                    <div className="w-full">
-                        <RecentActivityFeed />
-                    </div>
-
-                    <div className="w-full">
-                        <QuickActionsPanel />
-
-                    </div>
-
-                </div>
-
-                <div className="mt-10">
-                    <ExceptionalStaysBanner />
-
-                </div>
-
-            </div>
-
-        </div>
-
-    );
+        <ExceptionalStaysBanner />
+    </div>;
 }
 
 export default Overview;

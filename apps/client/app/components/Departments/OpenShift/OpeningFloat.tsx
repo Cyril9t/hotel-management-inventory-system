@@ -38,7 +38,7 @@ export const ShiftCashInputSection: React.FC<ShiftCashInputProps> = ({
                 </div>
                 {suggestedCashLoading ? <p role="status" className="text-[11px] text-muted-foreground">Loading suggested opening cash…</p> : suggestedCashError ? (
                     <p role="alert" className="text-[11px] text-destructive">{suggestedCashError} You can enter the amount manually.</p>
-                ) : <p className="text-[11px] text-muted-foreground">Suggested opening cash is pre-filled and can be edited.</p>}
+                ) : <p className="text-[11px] text-muted-foreground">Suggested opening cash is pre-filled from your previous closed shift and can be edited to match physical handover cash from the previous shift.</p>}
             </div>
         </div>
     </div>

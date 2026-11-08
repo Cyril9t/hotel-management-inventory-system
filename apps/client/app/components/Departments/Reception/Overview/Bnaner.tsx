@@ -9,7 +9,7 @@ export const ExceptionalStaysBanner: React.FC = () => {
                     <Home className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                    <h4 className="text-sm font-bold font-serif text-foreground">Exceptional Stays</h4>
+                    <h4 className="text-sm font-bold   text-foreground">Exceptional Stays</h4>
                     <p className="text-xs text-muted-foreground mt-0.5">Create memorable experiences for your guests.</p>
                 </div>
             </div>

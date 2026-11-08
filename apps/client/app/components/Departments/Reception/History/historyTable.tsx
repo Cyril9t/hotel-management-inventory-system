@@ -82,8 +82,8 @@ export const HistoryTable: React.FC<{
 
                                 <td className="p-4">
                                     <p className="font-semibold text-sm text-foreground capitalize">{rec.title}</p>
-                                    <p className="text-[12px] text-muted-foreground">{rec.details}</p>
-                                    <p className="text-[12px] text-primary/80 font-mono mt-0.5">{rec.meta}</p>
+                                    <p className="text-[12px] ">{rec.details}</p>
+                                    <p className="text-[13px] text-brand-success font-mono mt-0.5">{rec.meta}</p>
                                 </td>
 
 

@@ -1,46 +1,33 @@
 import React from "react";
-import { Users, Building2 } from "lucide-react";
-import { ThemeToggle } from "~/components/shared/ThemeToggle";
+import { Building2, Layers3 } from "lucide-react";
 
 interface HeaderProps {
-    totalStaff: number;
+    departmentCount: number;
 }
 
-export const HotelDepartmentsHeader: React.FC<HeaderProps> = ({ totalStaff }) => {
-    return (
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-border/60 pb-6">
-            <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                        Hotel Operations
-                    </p>
-                </div>
-                <h1 className="text-3xl font-serif font-bold tracking-tight text-foreground">
-                    Departments
-                </h1>
-                <p className="max-w-2xl text-xs text-muted-foreground">
-                    A snapshot of the teams that keep Brandy Hotel running smoothly.
+export const HotelDepartmentsHeader: React.FC<HeaderProps> = ({ departmentCount }) => (
+    <header className="flex flex-col gap-6 border-b border-border/70 pb-7 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary">
+                <Building2 aria-hidden="true" className="h-3.5 w-3.5" />
+                Hotel operations
+            </div>
+            <div>
+                <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Departments</h1>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+                    Manage and oversee the teams and services that keep your hotel running.
                 </p>
             </div>
-
-            {/* Total Staff KPI Badge */}
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-3.5 rounded-xl border border-border/80 bg-card p-3.5 shadow-sm">
-                    <div className="rounded-lg bg-primary/10 p-2.5 text-primary border border-primary/20">
-                        <Users className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-serif font-bold leading-none text-foreground">
-                            {totalStaff}
-                        </p>
-                        <p className="mt-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            Total Active Staff
-                        </p>
-                    </div>
-                </div>
-                <ThemeToggle />
-            </div>
         </div>
-    );
-};
+
+        <div className="flex w-fit items-center gap-3 rounded-xl border border-border/80 bg-card px-4 py-3 shadow-sm">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Layers3 aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <span>
+                <span className="block text-xl font-semibold leading-none text-foreground">{departmentCount}</span>
+                <span className="mt-1 block text-xs text-muted-foreground">Departments</span>
+            </span>
+        </div>
+    </header>
+);

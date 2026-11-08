@@ -10,7 +10,7 @@ export function DepartmentPerformance() {
         <div className="bg-card border border-border rounded-[var(--radius)] p-6 shadow-sm flex flex-col justify-between h-full">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h3 className="text-base font-bold font-serif text-foreground">Department Performance</h3>
+                    <h3 className="text-base font-bold   text-foreground">Department Performance</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">Target SLA and fulfillment efficiency</p>
                 </div>
                 <span className="px-2.5 py-1 rounded bg-brand-warning/10 text-brand-warning text-[11px] font-semibold">

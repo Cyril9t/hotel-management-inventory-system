@@ -77,12 +77,12 @@ export const RoomServiceDrawer: React.FC<DrawerProps> = ({
                         {record.items.map((item, idx) => (
                             <div key={idx} className="flex justify-between items-center text-xs">
                                 <span className="text-muted-foreground">{item.name} × {item.qty}</span>
-                                <span className="font-serif font-bold text-foreground">₦ {(item.price * item.qty).toLocaleString()}</span>
+                                <span className="  font-bold text-foreground">₦ {(item.price * item.qty).toLocaleString()}</span>
                             </div>
                         ))}
                         <div className="border-t border-border/60 pt-2 flex justify-between items-center font-bold text-xs">
                             <span>Total Bill</span>
-                            <span className="font-serif text-primary text-sm">₦ {totalAmount.toLocaleString()}</span>
+                            <span className="  text-primary text-sm">₦ {totalAmount.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>

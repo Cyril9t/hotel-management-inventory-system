@@ -51,7 +51,7 @@ export const BarDrinksStockTable: React.FC<StockTableProps> = ({
                                 <td className="p-3.5 font-mono text-muted-foreground">
                                     {item.sold}
                                 </td>
-                                <td className="p-3.5 pr-4 text-right font-serif font-bold text-foreground">
+                                <td className="p-3.5 pr-4 text-right   font-bold text-foreground">
                                     {item.valuation ? `₦ ${item.valuation.toLocaleString()}` : item.availableText}
                                 </td>
                             </tr>

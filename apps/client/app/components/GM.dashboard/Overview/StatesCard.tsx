@@ -53,7 +53,7 @@ export function StatCards() {
                         </div>
 
                         <div className="my-3">
-                            <h3 className="text-2xl font-bold font-serif text-foreground">{stat.value}</h3>
+                            <h3 className="text-2xl font-bold   text-foreground">{stat.value}</h3>
                         </div>
 
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

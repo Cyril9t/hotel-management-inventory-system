@@ -12,7 +12,7 @@ export interface ShiftRecord extends Record<string, unknown> {
     openedAt?: string;
     closedAt?: string | null;
     openingCash?: string;
-    expectedCash?: string | null;
+    expectedCash?: string | number | null;
     actualCash?: string | null;
     variance?: string | null;
     status?: "OPEN" | "CLOSED";

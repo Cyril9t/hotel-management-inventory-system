@@ -18,8 +18,11 @@ function nameFrom(parts: Array<unknown>): string {
 function toActivityRecord(shift: ShiftRecord, currentUser: any): ActivityRecord {
     const openedAt = typeof shift.openedAt === 'string' ? new Date(shift.openedAt) : null;
     const validOpenedAt = openedAt && !Number.isNaN(openedAt.valueOf()) ? openedAt : null;
+    const closedAt = typeof shift.closedAt === 'string' ? new Date(shift.closedAt) : null;
+    const validClosedAt = closedAt && !Number.isNaN(closedAt.valueOf()) ? closedAt : null;
     const details = [shift.department, shift.status].filter(Boolean).join(' · ') || 'Shift data returned by the server';
     const amount = shift.actualCash == null ? undefined : Number(shift.actualCash);
+    const cashPaymentsReceived = shift.cashPaymentsReceived;
     return {
         id: shift.id,
         type: 'shift',
@@ -28,8 +31,10 @@ function toActivityRecord(shift: ShiftRecord, currentUser: any): ActivityRecord 
         title: shift.status === 'CLOSED' ? 'Shift closed' : 'Shift opened',
         details,
         meta: [shift.openingCash != null ? `Opening cash: ₦ ${Number(shift.openingCash).toLocaleString()}` : null,
+            typeof cashPaymentsReceived === 'number' || typeof cashPaymentsReceived === 'string' ? `Cash payments: ₦ ${Number(cashPaymentsReceived).toLocaleString()}` : null,
             shift.expectedCash != null ? `Expected cash: ₦ ${Number(shift.expectedCash).toLocaleString()}` : null,
-            shift.variance != null ? `Variance: ₦ ${Number(shift.variance).toLocaleString()}` : null].filter(Boolean).join(' · '),
+            shift.variance != null ? `Variance: ₦ ${Number(shift.variance).toLocaleString()}` : null,
+            validClosedAt ? `Closed: ${validClosedAt.toLocaleString()}` : null].filter(Boolean).join(' · '),
         amount: Number.isFinite(amount) ? amount : undefined,
         staffName: nameFrom([shift.user?.firstName, shift.user?.lastName]) ||
             (shift.userId && shift.userId === currentUser?.id ? nameFrom([currentUser?.firstName, currentUser?.lastName]) : '') || '—',

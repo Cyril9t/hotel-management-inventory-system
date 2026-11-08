@@ -86,17 +86,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const clearSession = useCallback(async (): Promise<boolean> => {
         const logoutGeneration = ++sessionGenerationRef.current;
         try {
-            await api.post("auth/logout");
+            await api.post("/auth/logout");
             if (sessionGenerationRef.current === logoutGeneration) applyClearedSession();
             return true;
         } catch (error: any) {
+            const status = error?.response?.status;
             console.error("[HMS auth] POST /auth/logout failed", {
-                status: error?.response?.status,
+                status,
                 code: error?.response?.data?.error?.code,
                 message: error?.response?.data?.error?.message ?? error?.message ?? "Unknown logout error",
             });
             if (sessionGenerationRef.current === logoutGeneration) applyClearedSession();
-            return false;
+            // If the server returned 401, the session is already invalidated on the  Server
+            return status === 401;
         }
     }, [applyClearedSession]);
 

@@ -29,7 +29,7 @@ export const StoreMetricsGrid: React.FC<MetricsProps> = ({
                 <div className="space-y-1.5">
                     <span className="text-xs font-semibold text-muted-foreground">Stock Health</span>
                     <div className="flex items-baseline gap-2">
-                        <span className="font-serif text-2xl font-bold text-foreground">{healthPercentage}%</span>
+                        <span className="  text-2xl font-bold text-foreground">{healthPercentage}%</span>
                         <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                             Healthy
                         </span>
@@ -91,7 +91,7 @@ export const StoreMetricsGrid: React.FC<MetricsProps> = ({
                         <AlertTriangle className="w-5 h-5" />
                     </div>
                 </div>
-                <p className="font-serif text-3xl font-bold text-destructive">{lowStockTotal}</p>
+                <p className="  text-3xl font-bold text-destructive">{lowStockTotal}</p>
                 <p className="text-[15px] font-semibold text-destructive">Needs attention / Reorder</p>
             </div>
 

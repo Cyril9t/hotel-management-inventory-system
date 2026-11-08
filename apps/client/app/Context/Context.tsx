@@ -79,12 +79,12 @@ export function DashboardRouteGuard({ role, children }: { role: DashboardRole; c
 function ReceptionShiftGuard({ children }: { children: ReactNode }) {
     const { currentShift, currentShiftLoading, currentShiftError, refreshCurrentShift } = useShift();
     const location = useLocation();
-    if (currentShiftLoading) return <div role="status" className="p-6"><GlobalLoadingSkeleton /></div>;
-    if (currentShiftError) return <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
+    if (currentShiftLoading && !currentShift) return <div role="status" className="p-6"><GlobalLoadingSkeleton /></div>;
+    if (currentShiftError && !currentShift) return <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
         <p role="alert" className="text-sm text-destructive">{currentShiftError}</p>
         <button type="button" onClick={() => { void refreshCurrentShift().catch(() => { }); }} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Retry current shift</button>
     </div>;
-    if (!currentShift) return <Navigate to="/OpenShift" replace state={{ returnTo: location.pathname }} />;
+    if (!currentShift && !currentShiftLoading) return <Navigate to="/OpenShift" replace state={{ returnTo: location.pathname }} />;
     return children;
 }
 

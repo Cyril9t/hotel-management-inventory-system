@@ -330,7 +330,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
             return;
         }
         if (formData.checkInDate > todayStr) {
-            setSubmitError('Future arrival dates are not supported by the current booking API. Choose today or ask the backend team to add plannedCheckInAt support.');
+            setSubmitError('Future arrival dates are not supported by the current booking API. Choose today or ask the  Server team to add plannedCheckInAt support.');
             return;
         }
         if (nights < 1) {
@@ -581,7 +581,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                 Book Room {room.number}
                             </h2>
                             <p className="text text-muted-foreground mt-">
-                                {room.type} • <span className='text-foreground text-[20px] font-serif'>{formatNaira(room.pricePerNight)} </span>/ night
+                                {room.type} • <span className='text-foreground text-[20px]  '>{formatNaira(room.pricePerNight)} </span>/ night
                             </p>
                         </div>
                     </div>
@@ -605,7 +605,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             </CardHeader>
 
                             <CardContent>
-                                <p className="font-serif text-[20px] font-bold tracking-tight text-brand-gold-light">
+                                <p className="  text-[20px] font-bold tracking-tight text-brand-gold-light">
                                     {room.number}
                                 </p>
                             </CardContent>
@@ -619,7 +619,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             </CardHeader>
 
                             <CardContent>
-                                <p className="font-serif text-[16px] font-bold tracking-tight text-brand-gold-light">
+                                <p className="  text-[16px] font-bold tracking-tight text-brand-gold-light">
                                     {room.type}
                                 </p>
                             </CardContent>
@@ -650,7 +650,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                             </CardHeader>
 
                             <CardContent>
-                                <p className="font-serif text-xl font-bold text-brand-gold-light">
+                                <p className="  text-xl font-bold text-brand-gold-light">
                                     ₦{room.pricePerNight.toLocaleString()}
                                     <span className="ml-1 font-sans text-xs font-normal tejxt-background">
                                         / night
@@ -799,7 +799,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
 
                             <label
-                                    className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CASH'
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CASH'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -823,7 +823,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
 
                             <label
-                                    className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CARD'
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'CARD'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -846,7 +846,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
 
                             <label
-                                    className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'TRANSFER'
+                                className={`flex items-start gap-3 p-3.5 rounded-[var(--radius)] border cursor-pointer transition-all ${formData.paymentMethod === 'TRANSFER'
                                     ? 'bg-accent/40 border-primary shadow-sm'
                                     : 'bg-card border-input hover:bg-secondary'
                                     }`}
@@ -925,7 +925,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
 
                         <div className="border-t border-border pt-2 flex justify-between font-bold text-sm text-foreground">
                             <span className='text-sm'>Total Payable Amount</span>
-                            <span className="text-xl text-primary font-serif">₦ {grandTotal.toLocaleString()}</span>
+                            <span className="text-xl text-primary  ">₦ {grandTotal.toLocaleString()}</span>
                         </div>
                         <p className="text-[11px] text-muted-foreground">Estimate only. The booking API calculates the stored total from the room category price.</p>
                     </div>

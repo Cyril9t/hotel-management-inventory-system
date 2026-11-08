@@ -1,8 +1,9 @@
 import React from "react";
-import { ChevronLeft, Info } from "lucide-react";
+import { ArrowLeft, Clock3 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import RoomCreateDialog from "../CreateRoomDialog";
 import type { Department } from "../Department";
+import { StoreManagerView } from "../Store/StoreManagerView";
 
 interface DepartmentDetailViewProps {
     department: Department;
@@ -27,73 +28,62 @@ export const DepartmentDetailView: React.FC<DepartmentDetailViewProps> = ({
 }) => {
     const Icon = department.icon;
     const isReception = department.name === "Reception";
+    const isStoreManager = department.name === "Store Manager";
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Top Navigation */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 border-border bg-card text-foreground hover:bg-secondary transition-colors"
-                    onClick={onBack}
-                >
-                    <ChevronLeft className="h-4 w-4 text-primary" />
-                    <span>Back to Departments</span>
+        <div className="space-y-6">
+            <div className="flex items-center border-b border-border/70 pb-4">
+                <Button variant="outline" size="sm" className="gap-2" onClick={onBack}>
+                    <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+                    Back to departments
                 </Button>
             </div>
 
-            {/* Main Detail Content */}
             {isReception ? (
-                <RoomsPage
-                    onCreateRoom={() => setRoomDialogOpen(true)}
-                    refreshKey={roomsRefreshKey}
-                />
+                <RoomsPage onCreateRoom={() => setRoomDialogOpen(true)} refreshKey={roomsRefreshKey} />
+            ) : isStoreManager ? (
+                <StoreManagerView department={department} />
             ) : (
-                <div className="rounded-2xl border border-border bg-card p-8 shadow-xl relative overflow-hidden">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className={`rounded-xl p-4 ${department.accent}`}>
-                            <Icon className="h-8 w-8" />
+                <section className="mx-auto w-full max-w-4xl rounded-2xl border border-border/80 bg-card p-6 shadow-sm sm:p-9">
+                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                        <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${department.accent}`}>
+                            <Icon aria-hidden="true" className="h-6 w-6" />
                         </div>
-                        <span className="rounded-full bg-secondary px-3.5 py-1 text-xs font-mono font-bold text-primary">
-                            {department.code}
-                        </span>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{department.code}</p>
+                            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                                {department.name}
+                            </h1>
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+                                {department.summary}
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="mt-6 space-y-2">
-                        <h1 className="text-3xl font-serif font-bold text-foreground">
-                            {department.name}
-                        </h1>
-                        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                            {department.summary}
-                        </p>
-                    </div>
-
-                    {/* Quick Info Grid */}
-                    <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-border/60 pt-6 text-xs">
-                        <div className="p-3.5 rounded-xl bg-secondary/30 border border-border/40">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Team Lead</span>
-                            <p className="text-sm font-bold text-foreground mt-0.5">{department.lead}</p>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-secondary/30 border border-border/40">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Team Size</span>
-                            <p className="text-sm font-bold text-foreground mt-0.5">{department.staff} Active Staff</p>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-secondary/30 border border-border/40">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Shift Schedule</span>
-                            <p className="text-sm font-bold text-foreground mt-0.5">{department.shift}</p>
+                    <div className="mt-8 rounded-xl border border-dashed border-border bg-muted/35 px-5 py-8 sm:px-8">
+                        <div className="mx-auto flex max-w-lg flex-col items-center text-center">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                                <Clock3 aria-hidden="true" className="h-5 w-5" />
+                            </div>
+                            <h2 className="mt-4 text-base font-semibold text-foreground">
+                                Department workspace
+                            </h2>
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                                This department workspace is not available yet. Its current overview is shown above.
+                            </p>
                         </div>
                     </div>
-                </div>
+                </section>
             )}
 
-            {/* Room Creation Modal Dialog */}
-            <RoomCreateDialog
-                api={api}
-                open={roomDialogOpen}
-                onOpenChange={setRoomDialogOpen}
-                onCreated={handleRoomCreated}
-            />
+            {isReception && (
+                <RoomCreateDialog
+                    api={api}
+                    open={roomDialogOpen}
+                    onOpenChange={setRoomDialogOpen}
+                    onCreated={handleRoomCreated}
+                />
+            )}
         </div>
     );
 };

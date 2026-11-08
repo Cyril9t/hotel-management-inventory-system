@@ -41,7 +41,12 @@ export default [
     route("store_manager/dashboard", "./routes/Departments/Store/Layouts.tsx", [
         index("./routes/Departments/Store/overview.tsx"),
         route("inventory", "./routes/Departments/Store/Inventory.tsx"),
+        route("products", "./routes/Departments/Store/Products.tsx"),
         route("receive", "./routes/Departments/Store/receive.tsx"),
+        route("issue", "./routes/Departments/Store/Issue.tsx"),
+        route("corrections", "./routes/Departments/Store/Corrections.tsx"),
+        route("history", "./routes/Departments/Store/History.tsx"),
+        route("shift", "./routes/Departments/Store/Shift.tsx"),
     ]),
 
     route("accept-invite", "./routes/createAccount.tsx")

@@ -20,15 +20,15 @@ export const OccupancyCard = () => {
             <div className="flex w-full gap-3 border-t border-border pt-4">
                 <Card className="w-full">
                     <CardHeader><h2 className="text-[12px] font-bold uppercase tracking-widest">Available Rooms</h2></CardHeader>
-                    <CardContent><p className="mt-0.5 font-serif text-3xl font-bold text-brand-success">{roomsLoading ? "—" : counts.available}</p></CardContent>
+                    <CardContent><p className="mt-0.5   text-3xl font-bold text-brand-success">{roomsLoading ? "—" : counts.available}</p></CardContent>
                 </Card>
                 <Card className="w-full">
                     <CardHeader><h2 className="text-[12px] font-bold uppercase tracking-widest">Occupied Rooms</h2></CardHeader>
-                    <CardContent><p className="mt-0.5 font-serif text-3xl font-bold text-destructive">{roomsLoading ? "—" : counts.occupied}</p></CardContent>
+                    <CardContent><p className="mt-0.5   text-3xl font-bold text-destructive">{roomsLoading ? "—" : counts.occupied}</p></CardContent>
                 </Card>
                 <Card className="w-full">
                     <CardHeader><h2 className="text-[12px] font-bold uppercase tracking-widest">Checkout Due</h2></CardHeader>
-                    <CardContent><p className="mt-0.5 font-serif text-3xl font-bold text-brand-gold">{roomsLoading ? "—" : counts.checkoutDue}</p></CardContent>
+                    <CardContent><p className="mt-0.5   text-3xl font-bold text-brand-gold">{roomsLoading ? "—" : counts.checkoutDue}</p></CardContent>
                 </Card>
             </div>
         </div>
