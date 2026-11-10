@@ -1,12 +1,8 @@
-import { StaffsTable } from "~/components/CEO.dashboard/Users/StaffsTable";
+import AccountSettings from "~/components/shared/AccountSettings";
 
 function DashboardSettings() {
 
-    return (
-        <div>
-            <h1>dashboard Settings</h1>
-        </div>
-    );
+    return <AccountSettings />;
 }
 
 export default DashboardSettings;

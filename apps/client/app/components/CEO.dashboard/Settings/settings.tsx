@@ -1,9 +1,7 @@
+import AccountSettings from "~/components/shared/AccountSettings";
+
 function Settings() {
-    return (
-        <div>
-            Dashboard Settings
-        </div>
-    );
+    return <AccountSettings />;
 }
 
 export default Settings;
