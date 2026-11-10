@@ -38,6 +38,13 @@ export default [
         route("shifts", "./routes/Departments/Bar/Shift.tsx")
     ]),
 
+    route("kitchen/dashboard", "./routes/Departments/Kitchen/Layouts.tsx", [
+        index("./routes/Departments/Kitchen/Overview.tsx"),
+        route("orders", "./routes/Departments/Kitchen/Orders.tsx"),
+        route("receiving", "./routes/Departments/Kitchen/Receiving.tsx"),
+        route("shifts", "./routes/Departments/Kitchen/Shift.tsx"),
+    ]),
+
     route("store_manager/dashboard", "./routes/Departments/Store/Layouts.tsx", [
         index("./routes/Departments/Store/overview.tsx"),
         route("inventory", "./routes/Departments/Store/Inventory.tsx"),

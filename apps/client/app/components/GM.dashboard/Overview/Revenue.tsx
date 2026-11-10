@@ -1,62 +1,58 @@
-
 import {
     ResponsiveContainer,
     AreaChart,
     Area,
     XAxis,
     YAxis,
-    Tooltip
-} from 'recharts';
+    Tooltip,
+    CartesianGrid,
+} from "recharts";
+import { formatReceptionCurrency, REVENUE_PERIODS, useReceptionRevenue } from "~/Context/ReceptionRevenueContext";
 
-const revenueTrendData = [
-    { time: '6 AM', today: 120, yesterday: 80 },
-    { time: '9 AM', today: 280, yesterday: 190 },
-    { time: '12 PM', today: 350, yesterday: 280 },
-    { time: '2 PM', today: 420, yesterday: 310 },
-    { time: '6 PM', today: 680, yesterday: 420 },
-    { time: '10 PM', today: 650, yesterday: 460 },
-];
+function compactCurrency(value: number) {
+    if (value >= 1_000_000) return `\u20A6${(value / 1_000_000).toFixed(1)}m`;
+    if (value >= 1_000) return `\u20A6${(value / 1_000).toFixed(0)}k`;
+    return `\u20A6${value}`;
+}
 
 export function RevenueOverviewChart() {
+    const { period, setPeriod, buckets, loading, error, retry, total } = useReceptionRevenue();
     return (
-        <div className=" bg-card border border-border rounded-(--radius) p-6 shadow-sm flex flex-col justify-between h-full">
-            <div className="flex items-center justify-between mb-4">
+        <div className="bg-card border border-border rounded-(--radius) p-6 shadow-sm flex flex-col justify-between h-full">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <div>
-                    <h3 className="text-base font-bold text-foreground">Revenue Overview</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">Comparative hourly turnover</p>
+                    <h3 className="text-base font-bold text-foreground">Reception Revenue Overview</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Recorded payments grouped by {period === "daily" ? "hour" : period === "yearly" ? "month" : "day"}.</p>
                 </div>
-                <div className="flex items-center gap-4 text-xs font-medium">
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-                        <span className="text-foreground">Today</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground/40" />
-                        <span className="text-muted-foreground">Yesterday</span>
-                    </div>
-                </div>
+                <select aria-label="Revenue reporting period" value={period} onChange={(event) => setPeriod(event.target.value as typeof period)} className="h-9 rounded-md border border-input bg-card px-3 text-xs font-medium text-foreground">
+                    {REVENUE_PERIODS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
             </div>
 
-            <div className="w-full h-56 mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={revenueTrendData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                        <defs>
-                            <linearGradient id="todayGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
-                                <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
-                            </linearGradient>
-                        </defs>
-                        <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: 'var(--radius)' }}
-                            itemStyle={{ fontSize: '12px' }}
-                        />
-                        <Area type="monotone" dataKey="yesterday" stroke="var(--muted-foreground)" strokeDasharray="3 3" fill="none" strokeWidth={1.5} />
-                        <Area type="monotone" dataKey="today" stroke="var(--primary)" fillOpacity={1} fill="url(#todayGrad)" strokeWidth={2.5} dot={{ fill: 'var(--primary)', r: 4 }} />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
+            {error ? <div role="alert" className="flex min-h-56 flex-col items-center justify-center gap-3 text-center text-sm text-destructive">
+                <p>Reception revenue could not be loaded: {error}</p>
+                <button type="button" onClick={retry} className="font-semibold underline">Retry</button>
+            </div> : <>
+                <div className="relative w-full h-56 mt-2">
+                    {loading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/70 text-sm text-muted-foreground">Loading payment records…</div>}
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={buckets} margin={{ top: 10, right: 10, left: 4, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="receptionRevenueGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.35} />
+                                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                            <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} interval={period === "daily" ? 2 : period === "monthly" ? 2 : 0} />
+                            <YAxis axisLine={false} tickLine={false} tickFormatter={compactCurrency} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} width={68} />
+                            <Tooltip contentStyle={{  backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "var(--radius)" }} formatter={(value) => [formatReceptionCurrency(Number(value)), "Reception Revenue"]} />
+                            <Area type="monotone" dataKey="amount" name="Reception Revenue" stroke="var(--primary)" fill="url(#receptionRevenueGradient)" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+                {!loading && total === 0 && <p className="mt-2 text-center text-xs text-muted-foreground">No successful Reception payments in this period.</p>}
+            </>}
         </div>
     );
 }

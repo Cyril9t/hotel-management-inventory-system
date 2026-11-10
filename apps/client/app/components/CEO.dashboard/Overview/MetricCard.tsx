@@ -1,22 +1,20 @@
 import { BedDouble, CalendarIcon, ChevronDown, DollarSign, Download, Hotel, House, ShoppingBag, TrendingUp, Users } from "lucide-react";
-import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "~/components/ui/card";
 import { useRooms } from "~/Context/RoomsContext";
+import { formatReceptionCurrency, useReceptionRevenue } from "~/Context/ReceptionRevenueContext";
 
 export function MetricCards({ user = "" }) {
 
     const { counts } = useRooms()
-    const [activeTab, setActiveTab] = useState('Today');
+    const { period, setPeriod, total, loading: revenueLoading, error: revenueError, retry } = useReceptionRevenue();
     const tabs = ['Today', 'Week', 'Month', 'Year'];
-
-    const revenueFromRooom = counts.occupied
 
     const CARDS = [
         {
-            title: "Total Revenue",
+            title: "Reception Revenue",
             icons: <DollarSign className="w-4 h-4 text-primary" />,
-            figure: "3,482,000"
+            figure: revenueLoading ? "Loading…" : revenueError ? "Unavailable" : formatReceptionCurrency(total)
         },
         {
             title: "Occupancy Rate",
@@ -45,8 +43,11 @@ export function MetricCards({ user = "" }) {
                         {tabs.map((tab) => (
                             <button
                                 key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-3 py-2 text-xs font-medium rounded-md transition-all ${activeTab === tab
+                                onClick={() => {
+                                    setPeriod(tab === "Today" ? "daily" : tab === "Week" ? "weekly" : tab === "Month" ? "monthly" : "yearly");
+                                }}
+                                aria-pressed={period === (tab === "Today" ? "daily" : tab === "Week" ? "weekly" : tab === "Month" ? "monthly" : "yearly")}
+                                className={`px-3 py-2 text-xs font-medium rounded-md transition-all ${period === (tab === "Today" ? "daily" : tab === "Week" ? "weekly" : tab === "Month" ? "monthly" : "yearly")
                                     ? 'bg-card text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                                     }`}
@@ -101,7 +102,7 @@ export function MetricCards({ user = "" }) {
                 </Card>
                 {CARDS.map((card) => {
                     return (
-                        <Card className="w-full">
+                        <Card key={card.title} className="w-full">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{card.title}</span>
@@ -116,9 +117,8 @@ export function MetricCards({ user = "" }) {
                             <CardContent>
                                 <CardDescription >
                                     <div className="">
-                                        <h3 className="text-2xl font-bold text-foreground">
-                                            {card.title === "Total Revenue" ? `₦${card.figure}` : card.figure}
-                                        </h3>
+                                        <h3 className="text-2xl font-bold text-foreground">{card.figure}</h3>
+                                        {card.title === "Reception Revenue" && revenueError && <div className="mt-2 flex items-center gap-2 text-xs text-destructive"><span>{revenueError}</span><button type="button" onClick={retry} className="font-semibold underline">Retry</button></div>}
                                     </div>
                                 </CardDescription>
                             </CardContent>

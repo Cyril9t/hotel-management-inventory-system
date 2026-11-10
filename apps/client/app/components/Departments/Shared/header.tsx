@@ -48,7 +48,7 @@ export const DashboardHeader = (
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive" />
                         </Button>
                         <Button className="w-10 h-10 rounded-full bg-secondary border border-input flex items-center justify-center font-bold text-xs text-foreground">
-                            {user?.firstName[0]}{user?.lastName[0]}
+                            {user?.firstName?.[0] ?? staffName?.[0] ?? "K"}{user?.lastName?.[0] ?? ""}
                         </Button>
                     </div>
 

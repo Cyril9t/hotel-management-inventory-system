@@ -2,10 +2,11 @@ import { MetricCards } from "~/components/CEO.dashboard/Overview/MetricCard";
 import { RevenueOverviewChart } from "./Revenue";
 import { DepartmentPerformance } from "./Dep.performance";
 import { RecentActivitiesAndActions } from "./RecentActivities";
+import { ReceptionRevenueProvider } from "~/Context/ReceptionRevenueContext";
 
 function Overview() {
     return (
-        <div>
+        <ReceptionRevenueProvider><div>
             <MetricCards user="General Manager" />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10 mt-9">
@@ -19,7 +20,7 @@ function Overview() {
             </div>
 
             <RecentActivitiesAndActions />
-        </div>
+        </div></ReceptionRevenueProvider>
     );
 }
 

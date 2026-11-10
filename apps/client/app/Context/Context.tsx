@@ -7,7 +7,7 @@ import { useShift } from "~/Context/ShiftContext";
 
 
 const RoomsStat = createContext<any | null>(null);
-export type DashboardRole = "owner" | "general-manager" | "receptionist" | "bar" | "store_manager";
+export type DashboardRole = "owner" | "general-manager" | "receptionist" | "bar" | "store_manager" | "kitchen";
 function normalizeRole(role: unknown) {
     return typeof role === "string"
         ? role.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ")
@@ -25,6 +25,8 @@ export function getDashboardPathForRole(role: unknown) {
         receptionist: "receptionist",
         "bar staff": "bar",
         "store manager": "store_manager",
+        "kitchen staff": "kitchen",
+        kitchen: "kitchen",
     };
     const dashboard = roleDashboards[normalizedRole];
     return dashboard ? DASHBOARD_PATHS[dashboard] : null;
@@ -35,7 +37,8 @@ const DASHBOARD_PATHS: Record<DashboardRole, string> = {
     "general-manager": "/general/dashboard",
     receptionist: "/receptionist/dashboard",
     bar: "/bar/dashboard",
-    store_manager: "/store_manager/dashboard"
+    store_manager: "/store_manager/dashboard",
+    kitchen: "/kitchen/dashboard"
 };
 
 export function RoomsMetric({ children }: { children: ReactNode }) {

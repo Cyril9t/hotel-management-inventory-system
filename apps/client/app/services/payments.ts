@@ -82,6 +82,37 @@ export async function getBookingPayments(api: AxiosInstance, bookingId: string):
 }
 
 /**
+ * Loads persisted Reception booking payment records. The API exposes payment
+ * lists per booking rather than a global payment/revenue endpoint, so callers
+ * should load this once and aggregate locally for period changes.
+ */
+export async function getReceptionBookingPayments(api: AxiosInstance): Promise<RecordedBookingPayment[]> {
+    const response = await api.get<ApiSuccess<BookingListResponse>>("/bookings");
+    const bookings = response.data?.data?.bookings;
+    if (!Array.isArray(bookings) || !bookings.every((booking) => typeof booking?.id === "string" && booking.id.length > 0)) {
+        throw new Error("The bookings response did not contain a valid booking list.");
+    }
+
+    const paymentLists: RecordedBookingPayment[][] = [];
+    const batchSize = 6;
+    for (let index = 0; index < bookings.length; index += batchSize) {
+        const batch = bookings.slice(index, index + batchSize);
+        const results = await Promise.all(batch.map(async ({ id }) => {
+            const payments = await getBookingPayments(api, id);
+            return payments.filter((payment) => payment.bookingId === id && payment.saleId === null);
+        }));
+        paymentLists.push(...results);
+    }
+
+    const seenIds = new Set<string>();
+    return paymentLists.flat().filter((payment) => {
+        if (seenIds.has(payment.id)) return false;
+        seenIds.add(payment.id);
+        return payment.method === "CASH" || payment.method === "TRANSFER" || payment.method === "CARD";
+    });
+}
+
+/**
  * Aggregates CASH payments across bookings for a given shift.
  * Note: Prefer using `GET /shifts/current` which directly provides `expectedCash`
  * computed as `SUM(payments WHERE shiftId = shift.id AND method = 'CASH')` on the server

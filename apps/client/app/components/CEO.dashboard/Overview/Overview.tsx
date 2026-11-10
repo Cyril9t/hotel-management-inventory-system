@@ -1,14 +1,12 @@
 import { MetricCards } from "./MetricCard";
 import { RevenueChart } from "./RevenueChart";
+import { ReceptionRevenueProvider } from "~/Context/ReceptionRevenueContext";
 
 function Overview() {
-    return (
-        <div>
-            <MetricCards user="Owner" />
-            <RevenueChart />
-        </div>
-
-    );
+    return <ReceptionRevenueProvider><div>
+        <MetricCards user="Owner" />
+        <RevenueChart />
+    </div></ReceptionRevenueProvider>;
 }
 
 export default Overview;
