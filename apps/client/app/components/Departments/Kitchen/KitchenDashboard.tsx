@@ -1,216 +1,85 @@
-import React, { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { CalendarClock, ChefHat } from "lucide-react";
 import { KitchenMetricsGrid } from "./Overview/KitchenMetricsGrid";
 import { KitchenShiftBanner } from "./Overview/KitchenShiftBanner";
-import { KitchenOrdersBoard } from "./Orders/KitchenOrdersBoard";
+import { KitchenOrdersTable } from "./Orders/KitchenOrdersTable";
 import { OrderDetailsDrawer } from "./OrderDetails/OrderDetailsDrawer";
 import { StockReceivingSection } from "./StockReceiving/StockReceivingSection";
-import { KitchenShiftModal } from "./Shift/KitchenShiftModal";
-import {
-  initialKitchenOrders,
-  initialStockDeliveries,
-  initialShiftState,
-} from "./mockData";
-import type {
-  KitchenOrder,
-  KitchenOrderStatus,
-  StockDeliveryItem,
-  KitchenShiftState,
-  KitchenMetrics,
-} from "./types";
+import { useKitchenOperations } from "~/Context/KitchenOperationsContext";
+import type { KitchenOrder } from "~/services/kitchen";
 
-export const KitchenDashboard: React.FC = () => {
-  // Local state for interactive prototype
-  const [orders, setOrders] = useState<KitchenOrder[]>(initialKitchenOrders);
-  const [deliveries, setDeliveries] = useState<StockDeliveryItem[]>(initialStockDeliveries);
-  const [shiftState, setShiftState] = useState<KitchenShiftState>(initialShiftState);
+function isToday(value: string) {
+    const date = new Date(value);
+    const now = new Date();
+    return !Number.isNaN(date.getTime()) && date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+}
 
-  const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+export function KitchenDashboard() {
+    const {
+        orders, orderDetails, orderDetailErrors, orderDetailsLoading, orderLoading, orderError,
+        pendingOrderIds, refreshOrders, loadOrderDetails, advanceOrder,
+    } = useKitchenOperations();
+    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
-  const [shiftModalMode, setShiftModalMode] = useState<"OPEN" | "CLOSE">("OPEN");
+    const metrics = useMemo(() => ({
+        incomingCount: orders.filter((order) => order.status === "INCOMING").length,
+        preparingCount: orders.filter((order) => order.status === "PREPARING").length,
+        readyCount: orders.filter((order) => order.status === "READY").length,
+        // The API has no deliveredAt field, so completion date cannot be counted accurately.
+        completedTodayCount: null,
+        totalTodayCount: orders.filter((order) => isToday(order.createdAt)).length,
+    }), [orders]);
 
-  const [activeStatusFilter, setActiveStatusFilter] = useState<KitchenOrderStatus | "ALL">("ALL");
-  const [isRefreshing, setIsRefreshing] = useState(false);
+    const selectedOrder = orders.find((order) => order.id === selectedOrderId) ?? null;
 
-  // Compute live metrics dynamically from orders list
-  const metrics: KitchenMetrics = useMemo(() => {
-    const incoming = orders.filter((o) => o.status === "INCOMING").length;
-    const preparing = orders.filter((o) => o.status === "PREPARING").length;
-    const ready = orders.filter((o) => o.status === "READY").length;
-    const completed = orders.filter((o) => o.status === "DELIVERED").length;
-    const total = orders.length;
-
-    return {
-      incomingCount: incoming,
-      preparingCount: preparing,
-      readyCount: ready,
-      completedTodayCount: completed,
-      totalTodayCount: total,
-    };
-  }, [orders]);
-
-  // Handle Order Status Transitions: INCOMING -> PREPARING -> READY -> DELIVERED
-  const handleAdvanceStatus = (orderId: string, nextStatus: KitchenOrderStatus) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) return order;
-
-        return {
-          ...order,
-          status: nextStatus,
-          preparationStartedAt:
-            nextStatus === "PREPARING" ? new Date().toISOString() : order.preparationStartedAt,
-          readyAt: nextStatus === "READY" ? new Date().toISOString() : order.readyAt,
-          deliveredAt: nextStatus === "DELIVERED" ? new Date().toISOString() : order.deliveredAt,
-        };
-      })
-    );
-
-    // Keep drawer in sync if open
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder((prev) => (prev ? { ...prev, status: nextStatus } : null));
+    async function selectOrder(order: KitchenOrder) {
+        setSelectedOrderId(order.id);
+        setDrawerOpen(true);
+        try { await loadOrderDetails(order.id); } catch { /* Drawer presents the request error and retry action. */ }
     }
-  };
 
-  // Handle Order selection to open drawer
-  const handleSelectOrder = (order: KitchenOrder) => {
-    setSelectedOrder(order);
-    setIsDrawerOpen(true);
-  };
+    async function retrySelectedDetails() {
+        if (!selectedOrderId) return;
+        try { await loadOrderDetails(selectedOrderId); } catch { /* Drawer presents the request error and retry action. */ }
+    }
 
-  // Handle Stock Acknowledging
-  const handleAcknowledgeDelivery = (
-    deliveryId: string,
-    actualQuantity: number,
-    note?: string
-  ) => {
-    setDeliveries((prev) =>
-      prev.map((del) => {
-        if (del.id !== deliveryId) return del;
+    return (
+        <div className="mx-auto w-full max-w-[1600px] space-y-8">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex items-start gap-3">
+                    <span className="mt-1 rounded-xl bg-primary/10 p-3 text-primary"><ChefHat className="h-6 w-6" /></span>
+                    <div><p className="text-sm font-medium text-muted-foreground">Kitchen Operations</p><h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kitchen Dashboard</h1><p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">Review food orders, update preparation status, and verify stock issued to Kitchen.</p></div>
+                </div>
+                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground"><CalendarClock className="h-4 w-4" />{new Date().toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}</div>
+            </header>
 
-        const isMatch = actualQuantity === del.issuedQuantity;
-        return {
-          ...del,
-          acknowledgedQuantity: actualQuantity,
-          acknowledgedAt: new Date().toISOString(),
-          acknowledgedByStaffName: `${shiftState.staffName} (Kitchen Staff)`,
-          status: isMatch ? "ACKNOWLEDGED" : "DISCREPANCY",
-          notes: note || del.notes,
-        };
-      })
+            <section aria-label="Kitchen order summary"><KitchenMetricsGrid metrics={metrics} /></section>
+            <KitchenShiftBanner />
+
+            <section aria-label="Kitchen orders"><KitchenOrdersTable
+                orders={orders}
+                loading={orderLoading}
+                error={orderError}
+                pendingOrderIds={pendingOrderIds}
+                onRefresh={() => { void refreshOrders(); }}
+                onSelectOrder={selectOrder}
+                onAdvanceStatus={advanceOrder}
+            /></section>
+
+            <section aria-label="Kitchen stock receiving"><StockReceivingSection /></section>
+
+            <OrderDetailsDrawer
+                order={selectedOrder}
+                details={selectedOrderId ? orderDetails[selectedOrderId] ?? null : null}
+                isOpen={drawerOpen}
+                isLoading={selectedOrderId ? Boolean(orderDetailsLoading[selectedOrderId]) : false}
+                error={selectedOrderId ? orderDetailErrors[selectedOrderId] ?? "" : ""}
+                isPending={selectedOrderId ? pendingOrderIds.includes(selectedOrderId) : false}
+                onClose={() => { setDrawerOpen(false); setSelectedOrderId(null); }}
+                onRetry={() => { void retrySelectedDetails(); }}
+                onAdvanceStatus={advanceOrder}
+            />
+        </div>
     );
-  };
-
-  // Shift controls
-  const handleOpenShift = (cashAmount: number) => {
-    setShiftState({
-      hasActiveShift: true,
-      shiftId: `shf-kitchen-${Math.floor(1000 + Math.random() * 9000)}`,
-      openedAt: new Date().toISOString(),
-      staffName: "Chef Marco",
-      department: "KITCHEN",
-      openingCash: cashAmount,
-    });
-  };
-
-  const handleCloseShift = (cashAmount: number) => {
-    setShiftState((prev) => ({
-      ...prev,
-      hasActiveShift: false,
-      shiftId: null,
-      openedAt: null,
-    }));
-  };
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 600);
-  };
-
-  return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* 1. Compact Shift Status Area */}
-      <KitchenShiftBanner
-        shiftState={shiftState}
-        onOpenShiftClick={() => {
-          setShiftModalMode("OPEN");
-          setIsShiftModalOpen(true);
-        }}
-        onCloseShiftClick={() => {
-          setShiftModalMode("CLOSE");
-          setIsShiftModalOpen(true);
-        }}
-      />
-
-      {/* 2. Dashboard Overview: 5 Summary Cards */}
-      <section aria-label="Kitchen Dashboard Metrics">
-        <KitchenMetricsGrid
-          metrics={metrics}
-          activeStatusFilter={activeStatusFilter}
-          onSelectFilter={(status) => setActiveStatusFilter(status)}
-        />
-      </section>
-
-      {/* 3. Kitchen Orders Management Area (4 Columns Kanban) */}
-      <section aria-label="Live Kitchen Order Management" className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Active Culinary Tickets & Station Prep
-          </h2>
-          <span className="text-xs text-muted-foreground font-medium">
-            Click any ticket to inspect ingredients & guest details
-          </span>
-        </div>
-
-        <KitchenOrdersBoard
-          orders={
-            activeStatusFilter === "ALL"
-              ? orders
-              : orders.filter((o) => o.status === activeStatusFilter)
-          }
-          onSelectOrder={handleSelectOrder}
-          onAdvanceStatus={handleAdvanceStatus}
-          onRefresh={handleRefresh}
-          isRefreshing={isRefreshing}
-        />
-      </section>
-
-      {/* 4. Stock Receiving Section */}
-      <section aria-label="Kitchen Stock Receiving" className="space-y-3 pt-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Inventory Intake & Ingredient Verification
-          </h2>
-        </div>
-
-        <StockReceivingSection
-          deliveries={deliveries}
-          onAcknowledge={handleAcknowledgeDelivery}
-        />
-      </section>
-
-      {/* 5. Order Details Drawer */}
-      <OrderDetailsDrawer
-        order={selectedOrder}
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-          setSelectedOrder(null);
-        }}
-        onAdvanceStatus={handleAdvanceStatus}
-      />
-
-      {/* 6. Shift Modal */}
-      <KitchenShiftModal
-        shiftState={shiftState}
-        isOpen={isShiftModalOpen}
-        mode={shiftModalMode}
-        onClose={() => setIsShiftModalOpen(false)}
-        onConfirm={shiftModalMode === "OPEN" ? handleOpenShift : handleCloseShift}
-      />
-    </div>
-  );
-};
+}

@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "cn";
 import { Clock, Flame, CheckCircle2, PackageCheck, Ban } from "lucide-react";
-import type { KitchenOrderStatus } from "../types";
+import type { KitchenOrderStatus } from "~/services/kitchen";
 
 export interface KitchenOrderStatusBadgeProps {
   status: KitchenOrderStatus;
@@ -21,23 +21,23 @@ const statusConfig: Record<
 > = {
   INCOMING: {
     label: "Incoming",
-    bg: "bg-amber-500/15",
-    text: "text-amber-800 dark:text-amber-300",
-    border: "border-amber-500/30",
+    bg: "bg-brand-warning/10",
+    text: "text-brand-warning",
+    border: "border-brand-warning/30",
     icon: Clock,
   },
   PREPARING: {
     label: "Preparing",
-    bg: "bg-blue-500/15",
-    text: "text-blue-800 dark:text-blue-300",
-    border: "border-blue-500/30",
+    bg: "bg-primary/10",
+    text: "text-primary",
+    border: "border-primary/30",
     icon: Flame,
   },
   READY: {
     label: "Ready for Pickup",
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-800 dark:text-emerald-300",
-    border: "border-emerald-500/30",
+    bg: "bg-brand-success/10",
+    text: "text-brand-success",
+    border: "border-brand-success/30",
     icon: CheckCircle2,
   },
   DELIVERED: {

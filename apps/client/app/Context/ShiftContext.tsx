@@ -106,7 +106,9 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
             if (error?.response?.status === 404) await refreshCurrentShift();
             throw error;
         }
-        saveClosedShiftCashHandover({ actualCash, shiftId, closedAt: new Date().toISOString() });
+        if (normalizeRole(currentShift?.department) !== "kitchen") {
+            saveClosedShiftCashHandover({ actualCash, shiftId, closedAt: new Date().toISOString() });
+        }
         setCurrentShift(null);
         setCurrentShiftError(null);
         const closedShift = asShiftRecord(result);
@@ -165,7 +167,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
                 shiftDetailsRef.current = {};
             }
         }
-        const shiftEnabled = token && ["receptionist", "bar staff"].includes(normalizeRole(user?.role));
+        const shiftEnabled = token && ["receptionist", "bar staff", "kitchen staff", "kitchen"].includes(normalizeRole(user?.role));
         if (!shiftEnabled) {
             setCurrentShift(null);
             setCurrentShiftError(null);

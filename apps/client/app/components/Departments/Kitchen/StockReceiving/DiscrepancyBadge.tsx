@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle } from "lucide-react";
 export interface DiscrepancyBadgeProps {
   issuedQuantity: number;
   acknowledgedQuantity: number | null;
-  unit: string;
+  unit?: string;
 }
 
 export const DiscrepancyBadge: React.FC<DiscrepancyBadgeProps> = ({
@@ -25,17 +25,17 @@ export const DiscrepancyBadge: React.FC<DiscrepancyBadgeProps> = ({
 
   if (difference === 0) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+      <span className="inline-flex items-center gap-1 rounded border border-brand-success/30 bg-brand-success/10 px-2 py-0.5 text-xs font-semibold text-brand-success">
         <CheckCircle className="size-3" />
-        Full Match ({acknowledgedQuantity} {unit})
+        Received {acknowledgedQuantity}{unit ? ` ${unit}` : ""} · full match
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+    <span className="inline-flex items-center gap-1 rounded border border-brand-warning/30 bg-brand-warning/10 px-2 py-0.5 text-xs font-bold text-brand-warning">
       <AlertTriangle className="size-3" />
-      Discrepancy: {difference > 0 ? `+${difference}` : difference} {unit}
+      Discrepancy: {difference > 0 ? `+${difference}` : difference}{unit ? ` ${unit}` : ""}
     </span>
   );
 };

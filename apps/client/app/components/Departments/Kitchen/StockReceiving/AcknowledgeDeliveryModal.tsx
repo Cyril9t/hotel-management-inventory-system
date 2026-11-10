@@ -1,151 +1,80 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "~/components/ui/dialog";
+import { useEffect, useState } from "react";
+import { AlertTriangle, CheckCircle2, LoaderCircle, PackageCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { PackageCheck, AlertTriangle, CheckCircle2, Boxes } from "lucide-react";
-import type { StockDeliveryItem } from "../types";
+import type { StockMovement } from "~/services/stock";
 
-export interface AcknowledgeDeliveryModalProps {
-  item: StockDeliveryItem | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: (deliveryId: string, actualQuantity: number, note?: string) => void;
-}
-
-export const AcknowledgeDeliveryModal: React.FC<AcknowledgeDeliveryModalProps> = ({
-  item,
-  isOpen,
-  onClose,
-  onConfirm,
-}) => {
-  if (!item) return null;
-
-  const [receivedQty, setReceivedQty] = useState<number>(item.issuedQuantity);
-  const [receivingNote, setReceivingNote] = useState<string>("");
-
-  const difference = receivedQty - item.issuedQuantity;
-  const hasMismatch = difference !== 0;
-
-  const handleConfirm = () => {
-    onConfirm(item.id, receivedQty, receivingNote);
-    onClose();
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-card border border-border">
-        <DialogHeader className="space-y-1">
-          <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1">
-            <PackageCheck className="size-5" />
-          </div>
-          <DialogTitle className="text-base font-bold text-foreground">
-            Acknowledge Ingredient Delivery
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Verify actual quantities received from Store to credit Kitchen balance.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-2 text-xs">
-          {/* Item details card */}
-          <div className="rounded-xl border border-border bg-muted/40 p-3.5 space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="font-bold text-sm text-foreground">{item.productName}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  Category: {item.category} • Sent by {item.fromDepartment}
-                </p>
-              </div>
-              <span className="font-mono text-xs text-muted-foreground">
-                #{item.movementId.slice(0, 10)}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between pt-1 border-t border-border/50">
-              <span className="text-muted-foreground">Issued by Store:</span>
-              <span className="font-bold font-mono text-foreground">
-                {item.issuedQuantity} {item.unit}
-              </span>
-            </div>
-          </div>
-
-          {/* Actual received input */}
-          <div className="space-y-2">
-            <Label htmlFor="actual-qty" className="text-xs font-semibold">
-              Actual Count Received ({item.unit})
-            </Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="actual-qty"
-                type="number"
-                min={0}
-                max={item.issuedQuantity}
-                value={receivedQty}
-                onChange={(e) => setReceivedQty(Number(e.target.value))}
-                className="font-mono text-base font-bold h-10"
-              />
-              <span className="text-xs font-medium text-muted-foreground shrink-0 w-16">
-                {item.unit}
-              </span>
-            </div>
-          </div>
-
-          {/* Discrepancy Live Warning */}
-          {hasMismatch ? (
-            <div className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300 space-y-1">
-              <div className="flex items-center gap-1.5 font-bold">
-                <AlertTriangle className="size-4 shrink-0 text-amber-600" />
-                <span>Quantity Discrepancy Detected</span>
-              </div>
-              <p className="text-[11px] text-amber-700 dark:text-amber-300/80">
-                You are acknowledging {receivedQty} of {item.issuedQuantity} {item.unit} (
-                {difference} {item.unit} variance). This discrepancy will be logged in the daily departmental audit report.
-              </p>
-            </div>
-          ) : (
-            <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-              <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
-              <span>Full clean delivery count matches issued manifest.</span>
-            </div>
-          )}
-
-          {/* Optional reason note */}
-          <div className="space-y-1">
-            <Label htmlFor="rec-note" className="text-[11px] text-muted-foreground">
-              Verification Notes (Required if damaged or missing items)
-            </Label>
-            <Input
-              id="rec-note"
-              placeholder={hasMismatch ? "e.g. 2 damaged packages returned to storekeeper" : "Optional comments..."}
-              value={receivingNote}
-              onChange={(e) => setReceivingNote(e.target.value)}
-              className="text-xs h-8"
-            />
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2 sm:justify-end">
-          <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleConfirm}
-            className="text-xs font-semibold bg-primary text-primary-foreground gap-1.5"
-          >
-            <CheckCircle2 className="size-3.5" />
-            Confirm Acknowledgement
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+type Props = {
+    movement: StockMovement | null;
+    isOpen: boolean;
+    isPending?: boolean;
+    onClose: () => void;
+    onConfirm: (movementId: string, receivedQuantity: number) => Promise<void>;
 };
+
+export function AcknowledgeDeliveryModal({ movement, isOpen, isPending = false, onClose, onConfirm }: Props) {
+    const [receivedQuantity, setReceivedQuantity] = useState("");
+    const [error, setError] = useState("");
+    useEffect(() => {
+        if (!movement || !isOpen) return;
+        setReceivedQuantity(String(movement.acknowledgedQuantity ?? movement.quantity));
+        setError("");
+    }, [movement?.id, isOpen]);
+
+    if (!movement) return null;
+    const movementId = movement.id;
+    const isAcknowledged = movement.acknowledgedAt !== null || movement.acknowledgedQuantity !== null;
+    const quantity = Number(receivedQuantity);
+    const hasValidQuantity = receivedQuantity.trim() !== "" && Number.isInteger(quantity) && quantity >= 0;
+    const difference = hasValidQuantity ? quantity - movement.quantity : 0;
+
+    async function submit() {
+        if (!hasValidQuantity || isAcknowledged || isPending) return;
+        setError("");
+        try {
+            await onConfirm(movementId, quantity);
+            onClose();
+        } catch (requestError: any) {
+            setError(requestError?.response?.data?.error?.message ?? requestError?.message ?? "Could not acknowledge this delivery.");
+        }
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="border border-border bg-card sm:max-w-lg">
+                <DialogHeader>
+                    <div className="mb-1 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><PackageCheck className="size-5" /></div>
+                    <DialogTitle className="text-lg font-semibold text-foreground">{isAcknowledged ? "Delivery acknowledgement" : "Acknowledge stock delivery"}</DialogTitle>
+                    <DialogDescription className="text-sm leading-relaxed text-muted-foreground">Enter the quantity physically received. The Kitchen API accepts a non-negative whole number and records discrepancies against the issued quantity.</DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-5 py-2">
+                    <dl className="grid gap-4 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
+                        <div className="sm:col-span-2"><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Product</dt><dd className="mt-1 font-medium text-foreground">{movement.product?.name ?? `Product ID ${movement.productId}`}</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Issued quantity</dt><dd className="mt-1 font-mono font-semibold text-foreground">{movement.quantity}</dd></div>
+                        <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Source</dt><dd className="mt-1 font-medium text-foreground">{movement.fromDepartment ?? "Not provided"}</dd></div>
+                    </dl>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="kitchen-received-quantity">Actual quantity received</Label>
+                        <Input id="kitchen-received-quantity" type="number" min={0} step={1} inputMode="numeric" value={receivedQuantity} disabled={isAcknowledged || isPending} onChange={(event) => setReceivedQuantity(event.target.value)} className="h-11 text-base" />
+                    </div>
+
+                    {isAcknowledged && movement.acknowledgedQuantity !== null ? <p className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">Recorded quantity: <strong className="text-foreground">{movement.acknowledgedQuantity}</strong></p>
+                        : hasValidQuantity && difference !== 0 ? <div className="flex gap-3 rounded-lg border border-brand-warning/30 bg-brand-warning/5 p-4 text-sm text-foreground"><AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-brand-warning" /><span>Discrepancy: {difference > 0 ? `+${difference}` : difference}. The received quantity differs from the {movement.quantity} issued.</span></div>
+                            : hasValidQuantity ? <div className="flex gap-3 rounded-lg border border-brand-success/30 bg-brand-success/5 p-4 text-sm text-foreground"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-success" /><span>The received quantity matches the issued quantity.</span></div> : null}
+                    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+                </div>
+
+                <DialogFooter className="gap-2">
+                    <Button type="button" variant="outline" onClick={onClose}>Close</Button>
+                    {!isAcknowledged && <Button type="button" onClick={() => void submit()} disabled={!hasValidQuantity || isPending} className="gap-2">
+                        {isPending && <LoaderCircle className="h-4 w-4 animate-spin" />}{isPending ? "Saving…" : "Confirm received quantity"}
+                    </Button>}
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}

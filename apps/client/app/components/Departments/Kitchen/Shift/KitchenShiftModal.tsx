@@ -1,121 +1,40 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "~/components/ui/dialog";
+import { CheckCircle2, ChefHat, LoaderCircle, Power } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Power, ChefHat, CheckCircle2 } from "lucide-react";
-import type { KitchenShiftState } from "../types";
 
-export interface KitchenShiftModalProps {
-  shiftState: KitchenShiftState;
-  isOpen: boolean;
-  mode: "OPEN" | "CLOSE";
-  onClose: () => void;
-  onConfirm: (cashAmount: number) => void;
-}
-
-export const KitchenShiftModal: React.FC<KitchenShiftModalProps> = ({
-  shiftState,
-  isOpen,
-  mode,
-  onClose,
-  onConfirm,
-}) => {
-  const [cashAmount, setCashAmount] = useState<number>(0);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onConfirm(cashAmount);
-    onClose();
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-card border border-border">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <DialogHeader className="space-y-1">
-            <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1">
-              <ChefHat className="size-5" />
-            </div>
-            <DialogTitle className="text-base font-bold text-foreground">
-              {mode === "OPEN" ? "Open Kitchen Shift" : "Close Active Kitchen Shift"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              {mode === "OPEN"
-                ? "Start your kitchen shift to log meal preparation and inventory intake."
-                : `Closing active shift for ${shiftState.staffName} (${shiftState.shiftId}).`}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 py-2 text-xs">
-            <div className="p-3 rounded-lg bg-muted/40 border border-border space-y-1">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Staff Member:</span>
-                <span className="font-bold text-foreground">{shiftState.staffName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Department:</span>
-                <span className="font-semibold text-foreground">Kitchen Operations</span>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="cash-float" className="text-xs font-semibold">
-                {mode === "OPEN" ? "Opening Cash Float (₦)" : "Closing Cash Count (₦)"}
-              </Label>
-              <Input
-                id="cash-float"
-                type="number"
-                min={0}
-                step={100}
-                value={cashAmount}
-                onChange={(e) => setCashAmount(Number(e.target.value))}
-                placeholder="0"
-                className="font-mono text-base font-bold h-10"
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Kitchen stations typically operate with a ₦0 cash float unless petty cash is assigned.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2 sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-              className="text-xs"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              size="sm"
-              className="text-xs font-semibold bg-primary text-primary-foreground gap-1.5"
-            >
-              {mode === "OPEN" ? (
-                <>
-                  <Power className="size-3.5" />
-                  Confirm Open Shift
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="size-3.5" />
-                  Confirm Close Shift
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+type Props = {
+    isOpen: boolean;
+    mode: "OPEN" | "CLOSE";
+    staffName: string;
+    shiftId?: string;
+    isSubmitting?: boolean;
+    error?: string;
+    onClose: () => void;
+    onConfirm: () => void;
 };
+
+export function KitchenShiftModal({ isOpen, mode, staffName, shiftId, isSubmitting = false, error = "", onClose, onConfirm }: Props) {
+    return (
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="border border-border bg-card sm:max-w-md">
+                <DialogHeader>
+                    <div className="mb-1 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><ChefHat className="size-5" /></div>
+                    <DialogTitle className="text-lg font-semibold text-foreground">{mode === "OPEN" ? "Open Kitchen Shift" : "Close Kitchen Shift"}</DialogTitle>
+                    <DialogDescription className="text-sm leading-relaxed text-muted-foreground">{mode === "OPEN" ? "Start a Kitchen shift to record preparation and stock receiving activity." : "Close the current Kitchen shift when operations are complete."}</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 py-2">
+                    <div className="rounded-lg border border-border bg-background p-4 text-sm"><p><span className="text-muted-foreground">Staff: </span><strong className="text-foreground">{staffName}</strong></p>{shiftId && <p className="mt-2 break-all"><span className="text-muted-foreground">Shift ID: </span><span className="font-mono text-xs text-foreground">{shiftId}</span></p>}</div>
+                    <p className="text-sm text-muted-foreground">Kitchen shift actions record no cash float.</p>
+                    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+                </div>
+                <DialogFooter className="gap-2">
+                    <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+                    <Button type="button" onClick={onConfirm} disabled={isSubmitting} className="gap-2">
+                        {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : mode === "OPEN" ? <Power className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                        {isSubmitting ? "Saving…" : mode === "OPEN" ? "Open shift" : "Close shift"}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}

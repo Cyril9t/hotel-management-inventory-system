@@ -1,215 +1,88 @@
-import React, { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AlertCircle, LoaderCircle, PackageCheck, RefreshCw, Truck } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { useKitchenOperations } from "~/Context/KitchenOperationsContext";
 import { DiscrepancyBadge } from "./DiscrepancyBadge";
 import { AcknowledgeDeliveryModal } from "./AcknowledgeDeliveryModal";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
-import {
-  Package,
-  PackageCheck,
-  AlertTriangle,
-  Clock,
-  CheckCircle2,
-  Boxes,
-  Truck,
-  ArrowDownLeft,
-} from "lucide-react";
-import type { StockDeliveryItem } from "../types";
+import type { StockMovement } from "~/services/stock";
 
-export interface StockReceivingSectionProps {
-  deliveries: StockDeliveryItem[];
-  onAcknowledge?: (deliveryId: string, actualQuantity: number, note?: string) => void;
+function isAcknowledged(movement: StockMovement) {
+    return movement.acknowledgedAt !== null || movement.acknowledgedQuantity !== null;
 }
 
-export const StockReceivingSection: React.FC<StockReceivingSectionProps> = ({
-  deliveries,
-  onAcknowledge,
-}) => {
-  const [selectedItem, setSelectedItem] = useState<StockDeliveryItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filterPending, setFilterPending] = useState(false);
+function formatDate(value: string) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
 
-  const displayedDeliveries = filterPending
-    ? deliveries.filter((d) => d.status === "PENDING_VERIFICATION")
-    : deliveries;
+export function StockReceivingSection() {
+    const { stockMovements, stockLoading, stockError, pendingStockIds, refreshStock, acknowledgeStock } = useKitchenOperations();
+    const [filter, setFilter] = useState<"ALL" | "PENDING">("ALL");
+    const [selectedMovement, setSelectedMovement] = useState<StockMovement | null>(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
-  const pendingCount = deliveries.filter((d) => d.status === "PENDING_VERIFICATION").length;
-  const discrepancyCount = deliveries.filter((d) => d.status === "DISCREPANCY").length;
+    useEffect(() => { void refreshStock(); }, [refreshStock]);
 
-  const handleOpenModal = (item: StockDeliveryItem) => {
-    setSelectedItem(item);
-    setIsModalOpen(true);
-  };
+    const pendingCount = stockMovements.filter((movement) => !isAcknowledged(movement)).length;
+    const discrepancyCount = stockMovements.filter((movement) => movement.acknowledgedQuantity !== null && movement.acknowledgedQuantity !== movement.quantity).length;
+    const visibleMovements = useMemo(() => filter === "PENDING" ? stockMovements.filter((movement) => !isAcknowledged(movement)) : stockMovements, [filter, stockMovements]);
 
-  return (
-    <Card className="border border-border bg-card">
-      <CardHeader className="p-4 sm:p-5 border-b border-border">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="space-y-0.5">
-            <CardTitle className="text-base font-bold flex items-center gap-2">
-              <Truck className="size-4 text-primary" />
-              Kitchen Stock Deliveries & Intake
-            </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              Verify incoming ingredients issued from the Store before crediting Kitchen inventory.
-            </CardDescription>
-          </div>
+    function openMovement(movement: StockMovement) {
+        setSelectedMovement(movement);
+        setDialogOpen(true);
+    }
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            {pendingCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
-                {pendingCount} Pending Verification
-              </span>
-            )}
+    async function confirmAcknowledgement(movementId: string, quantity: number) {
+        await acknowledgeStock(movementId, quantity);
+    }
 
-            {discrepancyCount > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-destructive/15 text-destructive">
-                <AlertTriangle className="size-3" />
-                {discrepancyCount} Discrepancy Logged
-              </span>
-            )}
-          </div>
-        </div>
-      </CardHeader>
+    return (
+        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div className="flex items-start gap-3">
+                    <span className="rounded-lg bg-primary/10 p-2.5 text-primary"><Truck className="h-5 w-5" /></span>
+                    <div><h2 className="text-lg font-semibold text-foreground">Stock Receiving</h2><p className="mt-1 text-sm text-muted-foreground">Check quantities issued to Kitchen by Store, then record what physically arrived.</p></div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">{pendingCount} awaiting count</span>
+                    {discrepancyCount > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-warning/30 bg-brand-warning/5 px-3 py-1.5 text-xs text-brand-warning"><AlertCircle className="h-3.5 w-3.5" />{discrepancyCount} discrepancy</span>}
+                    <Button type="button" variant="outline" onClick={() => void refreshStock(true)} disabled={stockLoading} className="h-9 gap-2"><RefreshCw className={`h-4 w-4 ${stockLoading ? "animate-spin" : ""}`} />Refresh</Button>
+                </div>
+            </div>
 
-      <CardContent className="p-0">
-        {/* Responsive Table / Card Layout */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-muted/40 text-muted-foreground border-b border-border font-semibold">
-              <tr>
-                <th className="py-3 px-4">Ingredient / Product</th>
-                <th className="py-3 px-3 text-center">Issued Qty</th>
-                <th className="py-3 px-3 text-center">Actual Received</th>
-                <th className="py-3 px-3 text-center">Verification Status</th>
-                <th className="py-3 px-4 text-right">Intake Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {displayedDeliveries.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-muted-foreground">
-                    No stock deliveries matching criteria.
-                  </td>
-                </tr>
-              ) : (
-                displayedDeliveries.map((delivery) => {
-                  const isPending = delivery.status === "PENDING_VERIFICATION";
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3 sm:px-6">
+                <p className="text-sm text-muted-foreground">Store issues addressed to Kitchen</p>
+                <label className="sr-only" htmlFor="kitchen-stock-filter">Filter stock deliveries</label>
+                <select id="kitchen-stock-filter" value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)} className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"><option value="ALL">All deliveries</option><option value="PENDING">Awaiting count</option></select>
+            </div>
 
-                  return (
-                    <tr
-                      key={delivery.id}
-                      className="hover:bg-muted/20 transition-colors"
-                    >
-                      {/* Product Name & Source */}
-                      <td className="py-3 px-4">
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-foreground text-sm flex items-center gap-1.5">
-                            <Boxes className="size-3.5 text-primary shrink-0" />
-                            {delivery.productName}
-                          </p>
-                          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                            <span>From: {delivery.fromDepartment}</span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="size-3" />
-                              {new Date(delivery.createdAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          </div>
-                          {delivery.notes && (
-                            <p className="text-[11px] text-muted-foreground/80 italic">
-                              "{delivery.notes}"
-                            </p>
-                          )}
-                        </div>
-                      </td>
+            {stockError && <div role="alert" className="flex flex-col gap-2 border-b border-destructive/20 bg-destructive/5 px-5 py-3 text-sm text-destructive sm:flex-row sm:items-center sm:justify-between sm:px-6"><span>{stockError}</span><button type="button" onClick={() => void refreshStock(true)} className="self-start font-semibold underline sm:self-auto">Retry</button></div>}
 
-                      {/* Issued Quantity */}
-                      <td className="py-3 px-3 text-center">
-                        <span className="font-mono text-sm font-bold text-foreground">
-                          {delivery.issuedQuantity}{" "}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            {delivery.unit}
-                          </span>
-                        </span>
-                      </td>
+            <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-left text-sm">
+                    <thead className="bg-muted/40 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><tr>
+                        <th scope="col" className="px-5 py-4">Item</th><th scope="col" className="px-4 py-4 text-right">Issued quantity</th><th scope="col" className="px-4 py-4 text-right">Received quantity</th><th scope="col" className="px-4 py-4">Status</th><th scope="col" className="px-5 py-4 text-right">Action</th>
+                    </tr></thead>
+                    <tbody className="divide-y divide-border">
+                        {stockLoading && stockMovements.length === 0 ? <tr><td colSpan={5} className="px-5 py-12 text-center text-sm text-muted-foreground"><span className="inline-flex items-center gap-2"><LoaderCircle className="h-4 w-4 animate-spin" />Loading stock deliveries…</span></td></tr>
+                            : stockError && stockMovements.length === 0 ? <tr><td colSpan={5} className="px-5 py-12 text-center text-sm text-muted-foreground">Stock deliveries could not be loaded. Retry the request above.</td></tr>
+                            : visibleMovements.length === 0 ? <tr><td colSpan={5} className="px-5 py-12 text-center"><PackageCheck className="mx-auto h-6 w-6 text-muted-foreground" /><p className="mt-2 font-medium text-foreground">{filter === "PENDING" ? "No deliveries are awaiting verification" : "No stock deliveries found"}</p><p className="mt-1 text-sm text-muted-foreground">Kitchen deliveries will appear here when Store issues stock to this department.</p></td></tr>
+                                : visibleMovements.map((movement) => {
+                                    const received = movement.acknowledgedQuantity;
+                                    const pending = pendingStockIds.includes(movement.id);
+                                    return <tr key={movement.id} className="align-middle transition-colors hover:bg-muted/20">
+                                        <td className="px-5 py-4"><p className="font-medium text-foreground">{movement.product?.name ?? `Product ID ${movement.productId.slice(0, 8)}`}</p><p className="mt-1 text-xs text-muted-foreground">From {movement.fromDepartment ?? "not provided"} · {formatDate(movement.createdAt)}</p></td>
+                                        <td className="px-4 py-4 text-right font-mono font-medium text-foreground">{movement.quantity}</td>
+                                        <td className="px-4 py-4 text-right font-mono font-medium text-foreground">{received === null ? <span className="font-sans text-muted-foreground">Not counted</span> : received}</td>
+                                        <td className="px-4 py-4"><DiscrepancyBadge issuedQuantity={movement.quantity} acknowledgedQuantity={received} /></td>
+                                        <td className="px-5 py-4 text-right"><Button type="button" variant={isAcknowledged(movement) ? "outline" : "default"} size="sm" disabled={pending} onClick={() => openMovement(movement)} className="h-9 gap-2">{pending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : isAcknowledged(movement) ? <PackageCheck className="h-4 w-4" /> : null}{pending ? "Saving…" : isAcknowledged(movement) ? "View" : "Acknowledge"}</Button></td>
+                                    </tr>;
+                                })}
+                    </tbody>
+                </table>
+            </div>
 
-                      {/* Actual Received Quantity */}
-                      <td className="py-3 px-3 text-center">
-                        {delivery.acknowledgedQuantity !== null ? (
-                          <span className="font-mono text-sm font-bold text-foreground">
-                            {delivery.acknowledgedQuantity}{" "}
-                            <span className="text-xs font-normal text-muted-foreground">
-                              {delivery.unit}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="text-xs italic text-muted-foreground">
-                            Unconfirmed
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Discrepancy & Verification Badge */}
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                          <DiscrepancyBadge
-                            issuedQuantity={delivery.issuedQuantity}
-                            acknowledgedQuantity={delivery.acknowledgedQuantity}
-                            unit={delivery.unit}
-                          />
-                          {delivery.acknowledgedByStaffName && (
-                            <span className="text-[10px] text-muted-foreground">
-                              By {delivery.acknowledgedByStaffName}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Action Button */}
-                      <td className="py-3 px-4 text-right">
-                        {isPending ? (
-                          <Button
-                            size="sm"
-                            onClick={() => handleOpenModal(delivery)}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-8 gap-1.5 shadow-xs"
-                          >
-                            <PackageCheck className="size-3.5" />
-                            Acknowledge Delivery
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleOpenModal(delivery)}
-                            className="text-xs h-8 gap-1 border-border text-muted-foreground hover:text-foreground"
-                          >
-                            <CheckCircle2 className="size-3.5 text-emerald-500" />
-                            View Verification
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </CardContent>
-
-      {/* Modal Dialog */}
-      <AcknowledgeDeliveryModal
-        item={selectedItem}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={(deliveryId, actualQty, note) => {
-          onAcknowledge?.(deliveryId, actualQty, note);
-        }}
-      />
-    </Card>
-  );
-};
+            <AcknowledgeDeliveryModal movement={selectedMovement} isOpen={dialogOpen} isPending={selectedMovement ? pendingStockIds.includes(selectedMovement.id) : false} onClose={() => setDialogOpen(false)} onConfirm={confirmAcknowledgement} />
+        </section>
+    );
+}

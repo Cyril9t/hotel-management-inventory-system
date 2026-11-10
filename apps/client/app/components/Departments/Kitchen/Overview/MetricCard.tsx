@@ -4,7 +4,7 @@ import { Card, CardContent } from "~/components/ui/card";
 
 export interface MetricCardProps {
   title: string;
-  count: number;
+  count: number | string | null;
   label?: string;
   icon: React.ReactNode;
   variant?: "warning" | "info" | "success" | "muted" | "gold";
@@ -24,25 +24,25 @@ const variantStyles: Record<
   }
 > = {
   warning: {
-    bg: "bg-amber-500/5 dark:bg-amber-500/10",
-    border: "border-amber-500/30",
-    iconBg: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
-    iconColor: "text-amber-600 dark:text-amber-400",
-    badge: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    bg: "bg-brand-warning/5",
+    border: "border-brand-warning/30",
+    iconBg: "bg-brand-warning/10 text-brand-warning",
+    iconColor: "text-brand-warning",
+    badge: "bg-brand-warning/10 text-brand-warning",
   },
   info: {
-    bg: "bg-blue-500/5 dark:bg-blue-500/10",
-    border: "border-blue-500/30",
-    iconBg: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
-    iconColor: "text-blue-600 dark:text-blue-400",
-    badge: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+    bg: "bg-primary/5",
+    border: "border-primary/30",
+    iconBg: "bg-primary/10 text-primary",
+    iconColor: "text-primary",
+    badge: "bg-primary/10 text-primary",
   },
   success: {
-    bg: "bg-emerald-500/5 dark:bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    iconBg: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-    badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    bg: "bg-brand-success/5",
+    border: "border-brand-success/30",
+    iconBg: "bg-brand-success/10 text-brand-success",
+    iconColor: "text-brand-success",
+    badge: "bg-brand-success/10 text-brand-success",
   },
   muted: {
     bg: "bg-muted/40",
@@ -90,14 +90,14 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             </p>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                {count}
+                {count === null ? "—" : count}
               </span>
               <span className="text-xs text-muted-foreground font-medium">
-                {count === 1 ? label.replace(/s$/, "") : label}
+                {count === null ? "unavailable" : typeof count === "number" && count === 1 ? label.replace(/s$/, "") : label}
               </span>
             </div>
             {trendText && (
-              <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1 font-medium">
+              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1 font-medium">
                 {trendText}
               </p>
             )}

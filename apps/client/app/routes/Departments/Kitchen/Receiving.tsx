@@ -1,47 +1,12 @@
-import React, { useState } from "react";
+import { PackageCheck } from "lucide-react";
 import { StockReceivingSection } from "~/components/Departments/Kitchen/StockReceiving/StockReceivingSection";
-import { initialStockDeliveries } from "~/components/Departments/Kitchen/mockData";
-import type { StockDeliveryItem } from "~/components/Departments/Kitchen/types";
 
 export default function KitchenReceivingPage() {
-  const [deliveries, setDeliveries] = useState<StockDeliveryItem[]>(initialStockDeliveries);
-
-  const handleAcknowledgeDelivery = (
-    deliveryId: string,
-    actualQuantity: number,
-    note?: string
-  ) => {
-    setDeliveries((prev) =>
-      prev.map((del) => {
-        if (del.id !== deliveryId) return del;
-        const isMatch = actualQuantity === del.issuedQuantity;
-        return {
-          ...del,
-          acknowledgedQuantity: actualQuantity,
-          acknowledgedAt: new Date().toISOString(),
-          acknowledgedByStaffName: "Chef Marco (Kitchen Staff)",
-          status: isMatch ? "ACKNOWLEDGED" : "DISCREPANCY",
-          notes: note || del.notes,
-        };
-      })
-    );
-  };
-
-  return (
-    <div className="max-w-7xl mx-auto space-y-4">
-      <div className="space-y-1">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Stock Receiving & Ingredient Intake
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Confirm physical shipments issued from the Store to credit Kitchen balance.
-        </p>
-      </div>
-
-      <StockReceivingSection
-        deliveries={deliveries}
-        onAcknowledge={handleAcknowledgeDelivery}
-      />
-    </div>
-  );
+    return <div className="mx-auto w-full max-w-[1600px] space-y-6">
+        <header className="flex items-start gap-3">
+            <span className="mt-1 rounded-xl bg-primary/10 p-3 text-primary"><PackageCheck className="h-6 w-6" /></span>
+            <div><h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Stock Receiving</h1><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Verify stock issues addressed to Kitchen and record the quantity physically received.</p></div>
+        </header>
+        <StockReceivingSection />
+    </div>;
 }

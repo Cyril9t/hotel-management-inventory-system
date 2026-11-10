@@ -1,59 +1,29 @@
-import React, { useState } from "react";
-import { KitchenOrdersBoard } from "~/components/Departments/Kitchen/Orders/KitchenOrdersBoard";
+import { useState } from "react";
+import { KitchenOrdersTable } from "~/components/Departments/Kitchen/Orders/KitchenOrdersTable";
 import { OrderDetailsDrawer } from "~/components/Departments/Kitchen/OrderDetails/OrderDetailsDrawer";
-import { initialKitchenOrders } from "~/components/Departments/Kitchen/mockData";
-import type { KitchenOrder, KitchenOrderStatus } from "~/components/Departments/Kitchen/types";
+import { useKitchenOperations } from "~/Context/KitchenOperationsContext";
+import type { KitchenOrder } from "~/services/kitchen";
 
 export default function KitchenOrdersPage() {
-  const [orders, setOrders] = useState<KitchenOrder[]>(initialKitchenOrders);
-  const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const { orders, orderDetails, orderDetailErrors, orderDetailsLoading, orderLoading, orderError, pendingOrderIds, refreshOrders, loadOrderDetails, advanceOrder } = useKitchenOperations();
+    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const selectedOrder = orders.find((order) => order.id === selectedOrderId) ?? null;
 
-  const handleAdvanceStatus = (orderId: string, nextStatus: KitchenOrderStatus) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) return order;
-        return {
-          ...order,
-          status: nextStatus,
-        };
-      })
-    );
-
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder((prev) => (prev ? { ...prev, status: nextStatus } : null));
+    async function selectOrder(order: KitchenOrder) {
+        setSelectedOrderId(order.id);
+        setDrawerOpen(true);
+        try { await loadOrderDetails(order.id); } catch { /* Drawer shows retry state. */ }
     }
-  };
 
-  return (
-    <div className="max-w-7xl mx-auto space-y-4">
-      <div className="space-y-1">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Live Culinary Orders & Station Dispatch
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Real-time Kanban workflow for restaurant and room service food orders.
-        </p>
-      </div>
+    async function retryDetails() {
+        if (!selectedOrderId) return;
+        try { await loadOrderDetails(selectedOrderId); } catch { /* Drawer shows retry state. */ }
+    }
 
-      <KitchenOrdersBoard
-        orders={orders}
-        onSelectOrder={(order) => {
-          setSelectedOrder(order);
-          setIsDrawerOpen(true);
-        }}
-        onAdvanceStatus={handleAdvanceStatus}
-      />
-
-      <OrderDetailsDrawer
-        order={selectedOrder}
-        isOpen={isDrawerOpen}
-        onClose={() => {
-          setIsDrawerOpen(false);
-          setSelectedOrder(null);
-        }}
-        onAdvanceStatus={handleAdvanceStatus}
-      />
-    </div>
-  );
+    return <div className="mx-auto w-full max-w-[1600px] space-y-6">
+        <header><h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kitchen Orders</h1><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Review order details and move tickets through preparation and delivery.</p></header>
+        <KitchenOrdersTable orders={orders} loading={orderLoading} error={orderError} pendingOrderIds={pendingOrderIds} onRefresh={() => { void refreshOrders(); }} onSelectOrder={selectOrder} onAdvanceStatus={advanceOrder} />
+        <OrderDetailsDrawer order={selectedOrder} details={selectedOrderId ? orderDetails[selectedOrderId] ?? null : null} isOpen={drawerOpen} isLoading={selectedOrderId ? Boolean(orderDetailsLoading[selectedOrderId]) : false} error={selectedOrderId ? orderDetailErrors[selectedOrderId] ?? "" : ""} isPending={selectedOrderId ? pendingOrderIds.includes(selectedOrderId) : false} onClose={() => { setDrawerOpen(false); setSelectedOrderId(null); }} onRetry={() => { void retryDetails(); }} onAdvanceStatus={advanceOrder} />
+    </div>;
 }

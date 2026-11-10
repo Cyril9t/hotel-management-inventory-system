@@ -1,140 +1,22 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
+import { Clock3, Fingerprint, ShieldCheck } from "lucide-react";
 import { KitchenShiftBanner } from "~/components/Departments/Kitchen/Overview/KitchenShiftBanner";
-import { KitchenShiftModal } from "~/components/Departments/Kitchen/Shift/KitchenShiftModal";
-import { initialShiftState } from "~/components/Departments/Kitchen/mockData";
-import { ChefHat, Clock, Power, ShieldCheck, History, Calendar } from "lucide-react";
-import type { KitchenShiftState } from "~/components/Departments/Kitchen/types";
+import { useShift } from "~/Context/ShiftContext";
 
 export default function KitchenShiftPage() {
-  const [shiftState, setShiftState] = useState<KitchenShiftState>(initialShiftState);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"OPEN" | "CLOSE">("OPEN");
-
-  const handleOpenShift = (cashAmount: number) => {
-    setShiftState({
-      hasActiveShift: true,
-      shiftId: `shf-kitchen-${Math.floor(1000 + Math.random() * 9000)}`,
-      openedAt: new Date().toISOString(),
-      staffName: "Chef Marco",
-      department: "KITCHEN",
-      openingCash: cashAmount,
-    });
-  };
-
-  const handleCloseShift = () => {
-    setShiftState((prev) => ({
-      ...prev,
-      hasActiveShift: false,
-      shiftId: null,
-      openedAt: null,
-    }));
-  };
-
-  return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          Kitchen Staff Shift Operations
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Active duty monitoring and workstation shift reconciliation.
-        </p>
-      </div>
-
-      <KitchenShiftBanner
-        shiftState={shiftState}
-        onOpenShiftClick={() => {
-          setModalMode("OPEN");
-          setIsModalOpen(true);
-        }}
-        onCloseShiftClick={() => {
-          setModalMode("CLOSE");
-          setIsModalOpen(true);
-        }}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Current Shift Card */}
-        <Card className="border border-border bg-card">
-          <CardHeader className="p-4 sm:p-5 border-b border-border">
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <ShieldCheck className="size-4 text-primary" />
-              Current Workstation Shift Details
-            </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              Parameters recorded upon shift initialization.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-5 space-y-3 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-border/50">
-              <span className="text-muted-foreground">Staff Member:</span>
-              <span className="font-bold text-foreground">{shiftState.staffName}</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-border/50">
-              <span className="text-muted-foreground">Department:</span>
-              <span className="font-semibold text-foreground">Kitchen</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-border/50">
-              <span className="text-muted-foreground">Status:</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                {shiftState.hasActiveShift ? "Active / In Progress" : "Shift Closed"}
-              </span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-border/50">
-              <span className="text-muted-foreground">Opening Cash Float:</span>
-              <span className="font-mono font-bold text-foreground">
-                ₦ {shiftState.openingCash.toLocaleString()}
-              </span>
-            </div>
-            {shiftState.openedAt && (
-              <div className="flex justify-between py-1.5">
-                <span className="text-muted-foreground">Session Start:</span>
-                <span className="font-mono text-foreground">
-                  {new Date(shiftState.openedAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })}
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Shift Guidelines */}
-        <Card className="border border-border bg-card">
-          <CardHeader className="p-4 sm:p-5 border-b border-border">
-            <CardTitle className="text-sm font-bold flex items-center gap-2">
-              <History className="size-4 text-primary" />
-              Kitchen Shift Protocol
-            </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              Standard operating procedures for meal prep sessions.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-5 space-y-2.5 text-xs text-muted-foreground">
-            <p>
-              • <strong>Shift Opening:</strong> Kitchen staff must have an active shift session before acknowledging stock deliveries or transitioning order statuses.
-            </p>
-            <p>
-              • <strong>Financial Scope:</strong> Kitchen operations do not directly collect guest payments. Cash floats remain ₦0 unless authorized petty cash is logged.
-            </p>
-            <p>
-              • <strong>Shift Handover:</strong> Always verify that all preparing tickets are either delivered or transferred before ending your shift.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <KitchenShiftModal
-        shiftState={shiftState}
-        isOpen={isModalOpen}
-        mode={modalMode}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={modalMode === "OPEN" ? handleOpenShift : handleCloseShift}
-      />
-    </div>
-  );
+    const { currentShift, currentShiftLoading, currentShiftError } = useShift();
+    const openedAt = currentShift?.openedAt ? new Date(currentShift.openedAt) : null;
+    return <div className="mx-auto w-full max-w-5xl space-y-6">
+        <header><h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Kitchen Shift</h1><p className="mt-2 text-sm leading-relaxed text-muted-foreground">View the active Kitchen work session and manage its opening or closure.</p></header>
+        <KitchenShiftBanner />
+        <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+            <div className="flex items-center gap-3"><span className="rounded-lg bg-primary/10 p-2.5 text-primary"><ShieldCheck className="h-5 w-5" /></span><div><h2 className="font-semibold text-foreground">Current shift details</h2><p className="mt-1 text-sm text-muted-foreground">Shift information returned by the authenticated shifts API.</p></div></div>
+            {currentShiftLoading ? <p role="status" className="mt-6 text-sm text-muted-foreground">Loading current shift…</p>
+                : currentShiftError ? <p role="alert" className="mt-6 text-sm text-destructive">{currentShiftError}</p>
+                    : currentShift ? <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                        <div className="rounded-lg border border-border bg-background p-4"><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Shift ID</dt><dd className="mt-2 break-all font-mono text-sm text-foreground"><Fingerprint className="mr-2 inline h-4 w-4 text-muted-foreground" />{currentShift.id}</dd></div>
+                        <div className="rounded-lg border border-border bg-background p-4"><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Department</dt><dd className="mt-2 text-sm font-medium text-foreground">{currentShift.department ?? "Not provided"}</dd></div>
+                        <div className="rounded-lg border border-border bg-background p-4 sm:col-span-2"><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Opened at</dt><dd className="mt-2 text-sm text-foreground"><Clock3 className="mr-2 inline h-4 w-4 text-muted-foreground" />{openedAt && !Number.isNaN(openedAt.getTime()) ? openedAt.toLocaleString() : "Not provided"}</dd></div>
+                    </dl> : <p className="mt-6 text-sm text-muted-foreground">There is no active Kitchen shift.</p>}
+        </section>
+    </div>;
 }

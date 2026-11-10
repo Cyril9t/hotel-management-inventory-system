@@ -7,21 +7,15 @@ import {
   PackageCheck,
   UtensilsCrossed,
 } from "lucide-react";
-import type { KitchenMetrics, KitchenOrderStatus } from "../types";
+import type { KitchenMetrics } from "../types";
 
 export interface KitchenMetricsGridProps {
   metrics: KitchenMetrics;
-  activeStatusFilter?: KitchenOrderStatus | "ALL";
-  onSelectFilter?: (status: KitchenOrderStatus | "ALL") => void;
 }
 
-export const KitchenMetricsGrid: React.FC<KitchenMetricsGridProps> = ({
-  metrics,
-  activeStatusFilter = "ALL",
-  onSelectFilter,
-}) => {
+export const KitchenMetricsGrid: React.FC<KitchenMetricsGridProps> = ({ metrics }) => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
       {/* 1. Incoming Orders */}
       <MetricCard
         title="Incoming Orders"
@@ -29,9 +23,7 @@ export const KitchenMetricsGrid: React.FC<KitchenMetricsGridProps> = ({
         label="pending"
         icon={<Clock className="size-5 animate-pulse" />}
         variant="warning"
-        trendText="Awaiting kitchen acceptance"
-        isActiveFilter={activeStatusFilter === "INCOMING"}
-        onClick={() => onSelectFilter?.(activeStatusFilter === "INCOMING" ? "ALL" : "INCOMING")}
+        trendText="Awaiting kitchen preparation"
       />
 
       {/* 2. Preparing Orders */}
@@ -41,9 +33,7 @@ export const KitchenMetricsGrid: React.FC<KitchenMetricsGridProps> = ({
         label="cooking"
         icon={<Flame className="size-5" />}
         variant="info"
-        trendText="Currently in preparation"
-        isActiveFilter={activeStatusFilter === "PREPARING"}
-        onClick={() => onSelectFilter?.(activeStatusFilter === "PREPARING" ? "ALL" : "PREPARING")}
+        trendText="Currently being prepared"
       />
 
       {/* 3. Ready Orders */}
@@ -53,25 +43,21 @@ export const KitchenMetricsGrid: React.FC<KitchenMetricsGridProps> = ({
         label="dishes"
         icon={<CheckCircle2 className="size-5" />}
         variant="success"
-        trendText="Awaiting waitstaff pickup"
-        isActiveFilter={activeStatusFilter === "READY"}
-        onClick={() => onSelectFilter?.(activeStatusFilter === "READY" ? "ALL" : "READY")}
+        trendText="Waiting for pickup"
       />
 
       {/* 4. Completed Orders Today */}
       <MetricCard
-        title="Completed Today"
+        title="Completed Orders Today"
         count={metrics.completedTodayCount}
-        label="served"
+        label="orders"
         icon={<PackageCheck className="size-5" />}
         variant="muted"
-        trendText="Delivered to guests"
-        isActiveFilter={activeStatusFilter === "DELIVERED"}
-        onClick={() => onSelectFilter?.(activeStatusFilter === "DELIVERED" ? "ALL" : "DELIVERED")}
+        trendText={metrics.completedTodayCount === null ? "Completion time is not provided by the API" : "Delivered today"}
       />
 
       {/* 5. Total Orders Today */}
-      <div className="col-span-2 sm:col-span-1">
+      <div>
         <MetricCard
           title="Total Orders Today"
           count={metrics.totalTodayCount}
@@ -79,8 +65,6 @@ export const KitchenMetricsGrid: React.FC<KitchenMetricsGridProps> = ({
           icon={<UtensilsCrossed className="size-5" />}
           variant="gold"
           trendText="All day order volume"
-          isActiveFilter={activeStatusFilter === "ALL"}
-          onClick={() => onSelectFilter?.("ALL")}
         />
       </div>
     </div>
