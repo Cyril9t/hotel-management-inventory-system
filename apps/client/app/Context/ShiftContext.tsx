@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { api } from "~/lib/api";
 import { useAuth } from "~/Context/AuthContext";
-import { asShiftRecord, closeShift as closeShiftRequest, getCurrentShift, getShiftDetails as getShiftDetailsRequest, getShifts, getSuggestedOpeningCash, logShiftApiFailure, openShift as openShiftRequest, type ShiftRecord } from "~/services/shifts";
+import { asShiftRecord, closeShift as closeShiftRequest, getCurrentShift, getShiftDetails as getShiftDetailsRequest, getShifts, getSuggestedOpeningCash, logShiftApiFailure, openShift as openShiftRequest, saveClosedShiftCashHandover, type ShiftRecord } from "~/services/shifts";
 
 type ShiftContextValue = {
     currentShift: ShiftRecord | null;
@@ -106,6 +106,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
             if (error?.response?.status === 404) await refreshCurrentShift();
             throw error;
         }
+        saveClosedShiftCashHandover({ actualCash, shiftId, closedAt: new Date().toISOString() });
         setCurrentShift(null);
         setCurrentShiftError(null);
         const closedShift = asShiftRecord(result);

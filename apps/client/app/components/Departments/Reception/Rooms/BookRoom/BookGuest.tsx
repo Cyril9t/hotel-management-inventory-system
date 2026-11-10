@@ -749,7 +749,7 @@ export const BookRoomModal: React.FC<BookRoomModalProps> = ({
                                     onChange={(e) => handleInputChange('checkInDate', e.target.value)}
                                     className="w-full px-3 py-2 text-sm rounded-[var(--radius)] border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                                 />
-                                <p className="text-xs text-muted-foreground">The API does not store arrival dates. Future arrivals are blocked so the date is not silently ignored.</p>
+
                             </div>
 
                             <div className="space-y-1.5">

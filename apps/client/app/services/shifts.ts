@@ -28,6 +28,46 @@ export interface ReceptionSnapshot {
     roomSnapshotClose: Array<{ id: string; number: string; status: string }> | null;
 }
 
+export const LAST_CLOSED_SHIFT_CASH_KEY = "hms_last_closed_shift_cash";
+
+export interface ClosedShiftCashHandover {
+    actualCash: number;
+    shiftId: string;
+    closedAt: string;
+}
+
+export function getClosedShiftCashHandover(): ClosedShiftCashHandover | null {
+    try {
+        const raw = window.localStorage.getItem(LAST_CLOSED_SHIFT_CASH_KEY);
+        if (raw === null) return null;
+        const value: unknown = JSON.parse(raw);
+        if (!isRecord(value) || typeof value.actualCash !== "number" || !Number.isFinite(value.actualCash) || value.actualCash < 0 ||
+            typeof value.shiftId !== "string" || !value.shiftId.trim() || typeof value.closedAt !== "string" || !value.closedAt.trim()) {
+            window.localStorage.removeItem(LAST_CLOSED_SHIFT_CASH_KEY);
+            return null;
+        }
+        return { actualCash: value.actualCash, shiftId: value.shiftId, closedAt: value.closedAt };
+    } catch {
+        return null;
+    }
+}
+
+export function saveClosedShiftCashHandover(record: ClosedShiftCashHandover): void {
+    try {
+        window.localStorage.setItem(LAST_CLOSED_SHIFT_CASH_KEY, JSON.stringify(record));
+    } catch {
+        // Storage may be unavailable; shift closure itself must still complete.
+    }
+}
+
+export function clearClosedShiftCashHandover(): void {
+    try {
+        window.localStorage.removeItem(LAST_CLOSED_SHIFT_CASH_KEY);
+    } catch {
+        // Storage may be unavailable; shift opening itself must still complete.
+    }
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null && !Array.isArray(value);
 }

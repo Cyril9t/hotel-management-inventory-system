@@ -46,7 +46,7 @@ export function configureApiClient(
         const requestInterceptor = api.interceptors.request.use((config) => {
             const trackedConfig = config as typeof config & { _sonnerToastId?: string | number };
             const url = config.url ?? "";
-            const isLoginOrRefresh = /(?:^|\/)auth\/(?:login|refresh)(?:$|[/?])/.test(url);
+            const isLoginOrRefresh = /(?:^|\/)auth\/(?:login|refresh|forgot-password|reset-password)(?:$|[/?])/.test(url);
             const isShiftApiRequest = /(?:^|\/)shifts(?:\/|$)/.test(url);
             const isBookingApiRequest = /(?:^|\/)bookings(?:\/|$)/.test(url);
             const token = getActiveHandlers().getAccessToken();
@@ -77,7 +77,7 @@ export function configureApiClient(
                 const request = error?.config as (TrackedRequestConfig & { _retry?: boolean }) | undefined;
                 const url = request?.url ?? "";
                 const isExpectedNoOpenShift = error?.response?.status === 404 && /(?:^|\/)shifts\/current(?:$|[/?])/.test(url);
-                const isAuthRequest = /(?:^|\/)auth\/(?:login|logout|refresh)(?:$|[/?])/.test(url)
+                const isAuthRequest = /(?:^|\/)auth\/(?:login|logout|refresh|forgot-password|reset-password)(?:$|[/?])/.test(url)
                     || /(?:^|\/)users\/invites\/[^/]+\/verify(?:$|[/?])/.test(url)
                     || /(?:^|\/)users\/invites\/accept(?:$|[/?])/.test(url);
 

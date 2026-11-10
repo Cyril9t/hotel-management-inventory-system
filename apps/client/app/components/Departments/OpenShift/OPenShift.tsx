@@ -10,7 +10,7 @@ import { useShift } from '~/Context/ShiftContext';
 import { useAuth } from '~/Context/AuthContext';
 import GlobalLoadingSkeleton from '~/components/shared/LoadingState/LoadingState';
 import { toast } from 'sonner';
-import { logShiftApiFailure } from '~/services/shifts';
+import { clearClosedShiftCashHandover, getClosedShiftCashHandover, logShiftApiFailure } from '~/services/shifts';
 
 function errorMessage(error: any) {
     return error?.response?.data?.error?.message ?? error?.message ?? 'Could not open the shift. Please try again.';
@@ -36,10 +36,12 @@ export const OpenShiftContainer: React.FC = () => {
     useEffect(() => {
         if (!token || authLoading || currentShiftLoading || currentShift || currentShiftError) return;
         let cancelled = false;
+        const handover = getClosedShiftCashHandover();
+        if (handover) setOpeningCash(String(handover.actualCash));
         setSuggestedCashLoading(true);
         setSuggestedCashError(null);
         void loadSuggestedOpeningCash().then((amount: number) => {
-            if (!cancelled) setOpeningCash(String(amount));
+            if (!cancelled && !handover) setOpeningCash(String(amount));
         }).catch((error: unknown) => {
             logShiftApiFailure('GET /shifts/suggested-opening-cash', error);
             if (!cancelled) setSuggestedCashError(error instanceof Error ? error.message : 'Could not load suggested opening cash.');
@@ -71,6 +73,7 @@ export const OpenShiftContainer: React.FC = () => {
         try {
             const result = await startShift(amount);
             if (!result?.shift) throw new Error('The shift was not returned by the server. Refresh the current shift and try again.');
+            if (!result.alreadyOpen) clearClosedShiftCashHandover();
             if (result.alreadyOpen) toast.info('You already have an open shift.');
             else toast.success('Shift opened successfully.');
             navigate(returnTo ?? dashboardPath, { replace: true });

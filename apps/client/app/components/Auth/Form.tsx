@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { useLocation, useNavigate, } from "react-router";
+import { Link, useLocation, useNavigate, } from "react-router";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { getDashboardPathForRole, UseMetricCards } from "~/Context/Context";
@@ -128,9 +128,9 @@ export function LoginForm() {
                         />
                         <span className="text-xs font-medium text-[var(--muted-foreground)]">Remember me</span>
                     </label>
-                    <a href="#forgot" className="text-xs font-medium text-[var(--primary)] hover:underline">
+                    <Link to="/forgot-password" className="text-xs font-medium text-[var(--primary)] hover:underline">
                         Forgot password?
-                    </a>
+                    </Link>
                 </div>
 
 

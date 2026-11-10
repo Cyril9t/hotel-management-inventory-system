@@ -49,6 +49,8 @@ export default [
         route("shift", "./routes/Departments/Store/Shift.tsx"),
     ]),
 
-    route("accept-invite", "./routes/createAccount.tsx")
+    route("accept-invite", "./routes/createAccount.tsx"),
+    route("forgot-password", "./routes/forgotPassword.tsx"),
+    route("reset-password", "./routes/resetPassword.tsx")
 
 ] satisfies RouteConfig;
