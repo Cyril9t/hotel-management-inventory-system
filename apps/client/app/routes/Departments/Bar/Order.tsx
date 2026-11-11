@@ -1,9 +1,7 @@
+import { IncomingOrdersPage } from "~/components/Departments/Bar/Orders/IncomingOrdersPage";
+
 function Orders() {
-    return (
-        <div>
-            Order
-        </div>
-    );
+    return <IncomingOrdersPage/>;
 }
 
 export default Orders;

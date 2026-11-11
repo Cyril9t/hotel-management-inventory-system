@@ -453,7 +453,7 @@ export const MOCK_RECENT_SALES: BarSale[] = [
 
 export const MOCK_OVERVIEW_METRICS: BarOverviewMetrics = {
   todaySales: 284500,
-  totalRevenue: 3420000,
+  totalStock: MOCK_BAR_PRODUCTS.reduce((total, product) => total + product.inStock, 0),
   completedSales: 42,
   outstandingRoomCharges: 45000,
   salesGrowthPercent: 14.2,

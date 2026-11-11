@@ -90,9 +90,28 @@ export interface BarShiftInfo {
 
 export interface BarOverviewMetrics {
   todaySales: number;
-  totalRevenue: number;
+  totalStock: number;
   completedSales: number;
   outstandingRoomCharges: number;
   salesGrowthPercent: number;
   pendingRoomChargesCount: number;
+}
+
+export type BarIncomingOrderStatus = "Pending" | "Delivered";
+
+export interface BarIncomingOrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface BarIncomingOrder {
+  id: string;
+  reference: string;
+  source: string;
+  createdAt: string;
+  status: BarIncomingOrderStatus;
+  items: BarIncomingOrderItem[];
+  totalAmount: number;
 }
