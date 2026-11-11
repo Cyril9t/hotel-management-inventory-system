@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { CalendarClock, ChefHat } from "lucide-react";
 import { KitchenMetricsGrid } from "./Overview/KitchenMetricsGrid";
-import { KitchenShiftBanner } from "./Overview/KitchenShiftBanner";
+
 import { KitchenOrdersTable } from "./Orders/KitchenOrdersTable";
 import { OrderDetailsDrawer } from "./OrderDetails/OrderDetailsDrawer";
 import { StockReceivingSection } from "./StockReceiving/StockReceivingSection";
@@ -55,7 +55,7 @@ export function KitchenDashboard() {
             </header>
 
             <section aria-label="Kitchen order summary"><KitchenMetricsGrid metrics={metrics} /></section>
-            <KitchenShiftBanner />
+
 
             <section aria-label="Kitchen orders"><KitchenOrdersTable
                 orders={orders}

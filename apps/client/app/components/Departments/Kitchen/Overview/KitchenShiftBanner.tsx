@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ChefHat, Clock3, LoaderCircle, Power, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
 import { useAuth } from "~/Context/AuthContext";
 import { useShift } from "~/Context/ShiftContext";
@@ -10,8 +12,9 @@ function describeError(error: any) {
 }
 
 export function KitchenShiftBanner() {
-    const { user } = useAuth();
+    const { user, clearSession } = useAuth();
     const { currentShift, currentShiftLoading, currentShiftError, refreshCurrentShift, startShift, finishShift } = useShift();
+    const navigate = useNavigate();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [mode, setMode] = useState<"OPEN" | "CLOSE">("OPEN");
     const [submitting, setSubmitting] = useState(false);
@@ -26,16 +29,26 @@ export function KitchenShiftBanner() {
     }
 
     async function confirmShiftAction() {
+        if (submitting) return;
         setSubmitting(true);
         setActionError("");
         try {
             if (mode === "OPEN") {
                 const result = await startShift(0);
                 if (!result?.shift) throw new Error("The API did not return the opened Kitchen shift.");
+                setDialogOpen(false);
+                return;
+            }
+
+            await finishShift(0);
+            const logoutConfirmed = await clearSession();
+            if (logoutConfirmed) {
+                toast.success("Kitchen shift closed. You have been logged out.");
             } else {
-                await finishShift(0);
+                toast.warning("Kitchen shift closed and your local session was cleared, but server logout could not be verified.");
             }
             setDialogOpen(false);
+            navigate("/", { replace: true });
         } catch (error) {
             setActionError(describeError(error));
         } finally {

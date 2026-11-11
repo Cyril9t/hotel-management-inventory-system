@@ -88,14 +88,14 @@ function parseOrder(value: unknown, requireDetails = false): KitchenOrder | Kitc
 }
 
 export async function listKitchenOrders(api: AxiosInstance): Promise<KitchenOrder[]> {
-    const response = await api.get<ApiEnvelope<{ kitchenOrders: unknown }>>("/kitchen-orders");
+    const response = await api.get<ApiEnvelope<{ kitchenOrders: unknown }>>("/orders/kitchen-orders");
     const orders = response.data?.data?.kitchenOrders;
     if (!Array.isArray(orders)) throw new Error("The Kitchen API did not return an order list.");
     return orders.map((order) => parseOrder(order) as KitchenOrder);
 }
 
 export async function getKitchenOrderDetails(api: AxiosInstance, orderId: string): Promise<KitchenOrderDetails> {
-    const response = await api.get<ApiEnvelope<{ kitchenOrder: unknown }>>(`/kitchen-orders/${encodeURIComponent(orderId)}`);
+    const response = await api.get<ApiEnvelope<{ kitchenOrder: unknown }>>(`/orders/kitchen-orders/${encodeURIComponent(orderId)}`);
     const order = response.data?.data?.kitchenOrder;
     return parseOrder(order, true) as KitchenOrderDetails;
 }
@@ -108,5 +108,5 @@ export function getNextKitchenOrderStatus(status: KitchenOrderStatus): KitchenOr
 }
 
 export async function updateKitchenOrderStatus(api: AxiosInstance, orderId: string, status: KitchenOrderTransition): Promise<void> {
-    await api.patch(`/kitchen-orders/${encodeURIComponent(orderId)}/status`, { status });
+    await api.patch(`/orders/kitchen-orders/${encodeURIComponent(orderId)}/status`, { status });
 }

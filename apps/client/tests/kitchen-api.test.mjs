@@ -65,7 +65,7 @@ test("lists documented Kitchen orders and reads individual product details", asy
   const api = {
     get: async (path) => {
       calls.push(path);
-      if (path === "/kitchen-orders") {
+      if (path === "/orders/kitchen-orders") {
         return { data: { success: true, data: { kitchenOrders: [order] } } };
       }
       return {
@@ -86,7 +86,7 @@ test("lists documented Kitchen orders and reads individual product details", asy
   const orders = await listKitchenOrders(api);
   const details = await getKitchenOrderDetails(api, "order/1");
 
-  assert.deepEqual(calls, ["/kitchen-orders", "/kitchen-orders/order%2F1"]);
+  assert.deepEqual(calls, ["/orders/kitchen-orders", "/orders/kitchen-orders/order%2F1"]);
   assert.equal(orders[0].items[0].product, undefined);
   assert.equal(details.items[0].product.name, "Rice");
   assert.equal(details.sale.sourceDepartment, "RESTAURANT");
@@ -104,7 +104,7 @@ test("sends the documented Kitchen order status patch", async () => {
   let call;
   const api = { patch: async (...args) => { call = args; } };
   await updateKitchenOrderStatus(api, "order/1", "PREPARING");
-  assert.deepEqual(call, ["/kitchen-orders/order%2F1/status", { status: "PREPARING" }]);
+  assert.deepEqual(call, ["/orders/kitchen-orders/order%2F1/status", { status: "PREPARING" }]);
 });
 
 test("requests Kitchen stock issues and records an acknowledged quantity", async () => {

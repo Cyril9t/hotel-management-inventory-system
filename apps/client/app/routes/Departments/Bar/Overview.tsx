@@ -1,9 +1,9 @@
-import Overview from "~/components/Departments/Bar/Overview/Overview";
+import { BarDashboard } from "~/components/Departments/Bar/BarDashboard";
 
 
 function BarOverview() {
     return (
-        <Overview />
+        <BarDashboard />
     );
 }
 

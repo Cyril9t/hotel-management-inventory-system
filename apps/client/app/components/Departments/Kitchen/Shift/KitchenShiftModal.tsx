@@ -20,7 +20,7 @@ export function KitchenShiftModal({ isOpen, mode, staffName, shiftId, isSubmitti
                 <DialogHeader>
                     <div className="mb-1 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><ChefHat className="size-5" /></div>
                     <DialogTitle className="text-lg font-semibold text-foreground">{mode === "OPEN" ? "Open Kitchen Shift" : "Close Kitchen Shift"}</DialogTitle>
-                    <DialogDescription className="text-sm leading-relaxed text-muted-foreground">{mode === "OPEN" ? "Start a Kitchen shift to record preparation and stock receiving activity." : "Close the current Kitchen shift when operations are complete."}</DialogDescription>
+                    <DialogDescription className="text-sm leading-relaxed text-muted-foreground">{mode === "OPEN" ? "Start a Kitchen shift to record preparation and stock receiving activity." : "Close the current Kitchen shift and log out of your account."}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3 py-2">
                     <div className="rounded-lg border border-border bg-background p-4 text-sm"><p><span className="text-muted-foreground">Staff: </span><strong className="text-foreground">{staffName}</strong></p>{shiftId && <p className="mt-2 break-all"><span className="text-muted-foreground">Shift ID: </span><span className="font-mono text-xs text-foreground">{shiftId}</span></p>}</div>
@@ -31,7 +31,7 @@ export function KitchenShiftModal({ isOpen, mode, staffName, shiftId, isSubmitti
                     <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
                     <Button type="button" onClick={onConfirm} disabled={isSubmitting} className="gap-2">
                         {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : mode === "OPEN" ? <Power className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                        {isSubmitting ? "Saving…" : mode === "OPEN" ? "Open shift" : "Close shift"}
+                        {isSubmitting ? "Saving…" : mode === "OPEN" ? "Open shift" : "Close shift & log out"}
                     </Button>
                 </DialogFooter>
             </DialogContent>
