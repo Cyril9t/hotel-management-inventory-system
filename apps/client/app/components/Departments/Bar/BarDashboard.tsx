@@ -80,6 +80,6 @@ export function BarDashboard() {
     {loadError && <div role="alert" className="rounded-lg border border-destructive/30 p-3 text-sm text-destructive">{loadError} <button className="underline" onClick={() => setRefreshKey((key) => key + 1)}>Retry</button></div>}
     <BarOverviewCards metrics={todaySummary ? { todaySales: todaySummary.revenue, completedSales: todaySummary.salesCount } : null} loading={loading} />
     <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]"><div>{loading ? <p role="status" className="p-6 text-sm text-muted-foreground">Loading Bar products…</p> : <BarProductCatalog products={productsForUi} onAdd={addProduct} />}</div><BarCart items={cart} onQuantity={changeQuantity} onRemove={(id) => setCart((items) => items.filter((item) => item.product.id !== id))} payment={payment} onPayment={setPayment} bookingRef={bookingRef} onBookingRef={setBookingRef} onSubmit={() => void submitSale()} submitting={submitting} error={saleError} /></div>
-    <BarRecentSales sales={saleCards} loading={loading} />
+    
   </div>;
 }

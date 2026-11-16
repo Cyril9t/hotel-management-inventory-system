@@ -12,7 +12,7 @@ export function MetricCards({ user = "" }) {
 
     const CARDS = [
         {
-            title: "Reception Revenue",
+            title: "Total Revenue",
             icons: <DollarSign className="w-4 h-4 text-primary" />,
             figure: revenueLoading ? "Loading…" : revenueError ? "Unavailable" : formatReceptionCurrency(total)
         },
@@ -118,7 +118,7 @@ export function MetricCards({ user = "" }) {
                                 <CardDescription >
                                     <div className="">
                                         <h3 className="text-2xl font-bold text-foreground">{card.figure}</h3>
-                                        {card.title === "Reception Revenue" && revenueError && <div className="mt-2 flex items-center gap-2 text-xs text-destructive"><span>{revenueError}</span><button type="button" onClick={retry} className="font-semibold underline">Retry</button></div>}
+                                        {card.title === "Total Revenue" && revenueError && <div className="mt-2 flex items-center gap-2 text-xs text-destructive"><span>{revenueError}</span><button type="button" onClick={retry} className="font-semibold underline">Retry</button></div>}
                                     </div>
                                 </CardDescription>
                             </CardContent>

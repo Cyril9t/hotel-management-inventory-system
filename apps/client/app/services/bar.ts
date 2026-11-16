@@ -6,7 +6,7 @@ export type BarSaleRecord = {
   id: string; sourceDepartment: string; totalAmount: string; paymentMethod: "CASH" | "TRANSFER" | "CARD" | "CHARGE_TO_ROOM";
   paymentState: "UNPAID" | "PAID"; chargeToRoomBookingId: string | null; status: "COMPLETED" | "VOID_REQUESTED" | "VOIDED";
   voidReason: string | null; shiftId: string; createdByUserId: string; createdAt: string;
-  items: Array<{ id: string; saleId: string; productId: string; quantity: number; unitPriceAtSale: string; lineTotal: string; product?: BarProductRecord }>;
+  items?: Array<{ id: string; saleId: string; productId: string; quantity: number; unitPriceAtSale: string; lineTotal: string; product?: BarProductRecord }>;
 };
 
 export async function getBarProducts(api: AxiosInstance) {

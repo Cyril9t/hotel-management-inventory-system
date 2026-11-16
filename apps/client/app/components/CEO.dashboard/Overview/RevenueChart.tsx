@@ -6,6 +6,7 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
+    Legend,
 } from "recharts";
 import { formatReceptionCurrency, REVENUE_PERIODS, useReceptionRevenue } from "~/Context/ReceptionRevenueContext";
 
@@ -22,8 +23,8 @@ export function RevenueChart() {
         <div className="bg-card border border-border rounded-radius p-6 shadow-sm mt-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
-                    <h3 className="text-base font-bold text-foreground">Reception Revenue Trend</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">Recorded Reception payments grouped by {period === "daily" ? "hour" : period === "yearly" ? "month" : "day"}.</p>
+                    <h3 className="text-base font-bold text-foreground">Department Revenue Trend</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Reception payments and completed Bar and Restaurant sales grouped by {period === "daily" ? "hour" : period === "yearly" ? "month" : "day"}.</p>
                 </div>
                 <select aria-label="Revenue reporting period" value={period} onChange={(event) => setPeriod(event.target.value as typeof period)} className="h-9 rounded-md border border-input bg-card px-3 text-xs font-medium text-foreground">
                     {REVENUE_PERIODS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -31,7 +32,7 @@ export function RevenueChart() {
             </div>
 
             {error ? <div role="alert" className="flex h-72 flex-col items-center justify-center gap-3 text-center text-sm text-destructive">
-                <p>Reception revenue could not be loaded: {error}</p>
+                <p>Department revenue could not be loaded: {error}</p>
                 <button type="button" onClick={retry} className="font-semibold underline">Retry</button>
             </div> : <>
                 <div className="relative w-full h-72">
@@ -41,12 +42,15 @@ export function RevenueChart() {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                             <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} interval={period === "daily" ? 2 : period === "monthly" ? 2 : 0} dy={10} />
                             <YAxis axisLine={false} tickLine={false} tickFormatter={compactCurrency} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} width={68} />
-                            <Tooltip cursor={{ fill: "var(--secondary)", opacity: 0.5 }} formatter={(value) => [formatReceptionCurrency(Number(value)), "Reception Revenue"]} contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "var(--radius)", fontSize: 12 }} />
-                            <Bar dataKey="amount" name="Reception Revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} maxBarSize={38} />
+                            <Tooltip cursor={{ fill: "var(--secondary)", opacity: 0.5 }} formatter={(value) => formatReceptionCurrency(Number(value))} contentStyle={{ backgroundColor: "var(--card)", borderColor: "var(--border)", borderRadius: "var(--radius)", fontSize: 12 }} />
+                            <Legend />
+                            <Bar dataKey="receptionAmount" name="Reception" stackId="revenue" fill="var(--primary)" maxBarSize={38} />
+                            <Bar dataKey="barAmount" name="Bar" stackId="revenue" fill="var(--brand-success)" maxBarSize={38} />
+                            <Bar dataKey="restaurantAmount" name="Restaurant" stackId="revenue" fill="var(--brand-gold)" radius={[4, 4, 0, 0]} maxBarSize={38} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
-                {!loading && total === 0 && <p className="mt-2 text-center text-xs text-muted-foreground">No successful Reception payments in this period.</p>}
+                {!loading && total === 0 && <p className="mt-2 text-center text-xs text-muted-foreground">No recorded revenue in this period.</p>}
             </>}
         </div>
     );

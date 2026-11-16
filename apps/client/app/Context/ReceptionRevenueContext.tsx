@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api } from "~/lib/api";
 import { getReceptionBookingPayments, type RecordedBookingPayment } from "~/services/payments";
-import { aggregateReceptionRevenue, type RevenueBucket, type RevenuePeriod } from "~/services/revenue";
+import { aggregateDepartmentRevenue, getDepartmentRevenueSales, type DepartmentRevenueBucket, type DepartmentRevenueSale, type RevenuePeriod } from "~/services/revenue";
 type RevenueContextValue = {
     period: RevenuePeriod;
     setPeriod: (period: RevenuePeriod) => void;
     total: number;
-    buckets: RevenueBucket[];
+    buckets: DepartmentRevenueBucket[];
     loading: boolean;
     error: string;
     retry: () => void;
@@ -17,6 +17,7 @@ const RevenueContext = createContext<RevenueContextValue | null>(null);
 export function ReceptionRevenueProvider({ children }: { children: ReactNode }) {
     const [period, setPeriod] = useState<RevenuePeriod>("daily");
     const [payments, setPayments] = useState<RecordedBookingPayment[]>([]);
+    const [sales, setSales] = useState<DepartmentRevenueSale[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [retryVersion, setRetryVersion] = useState(0);
@@ -25,12 +26,15 @@ export function ReceptionRevenueProvider({ children }: { children: ReactNode }) 
         let cancelled = false;
         setLoading(true);
         setError("");
-        getReceptionBookingPayments(api)
-            .then((nextPayments) => { if (!cancelled) setPayments(nextPayments); })
+        Promise.all([getReceptionBookingPayments(api), getDepartmentRevenueSales(api)])
+            .then(([nextPayments, nextSales]) => {
+                if (!cancelled) { setPayments(nextPayments); setSales(nextSales); }
+            })
             .catch((requestError: any) => {
                 if (cancelled) return;
                 setPayments([]);
-                setError(requestError?.response?.data?.error?.message ?? requestError?.message ?? "Could not load Reception payment records.");
+                setSales([]);
+                setError(requestError?.response?.data?.error?.message ?? requestError?.message ?? "Could not load revenue records.");
             })
             .finally(() => { if (!cancelled) setLoading(false); });
         return () => { cancelled = true; };
@@ -38,11 +42,11 @@ export function ReceptionRevenueProvider({ children }: { children: ReactNode }) 
 
     const result = useMemo(() => {
         try {
-            return { ...aggregateReceptionRevenue(payments, period, new Date()), aggregationError: "" };
+            return { ...aggregateDepartmentRevenue(payments, sales, period, new Date()), aggregationError: "" };
         } catch (aggregationError: any) {
-            return { total: 0, buckets: [] as RevenueBucket[], aggregationError: aggregationError?.message ?? "Could not calculate Reception revenue." };
+            return { total: 0, buckets: [] as DepartmentRevenueBucket[], aggregationError: aggregationError?.message ?? "Could not calculate department revenue." };
         }
-    }, [payments, period]);
+    }, [payments, sales, period]);
 
     const retry = useCallback(() => setRetryVersion((version) => version + 1), []);
     const value = useMemo<RevenueContextValue>(() => ({

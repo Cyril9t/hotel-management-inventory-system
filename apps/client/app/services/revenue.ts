@@ -1,7 +1,19 @@
 import type { RecordedBookingPayment } from "./payments";
+import type { AxiosInstance } from "axios";
 
 export type RevenuePeriod = "daily" | "weekly" | "monthly" | "yearly";
 export type RevenueBucket = { label: string; amount: number };
+export type DepartmentRevenueBucket = RevenueBucket & { receptionAmount: number; barAmount: number; restaurantAmount: number };
+export type DepartmentRevenueSale = { id: string; sourceDepartment: "BAR" | "RESTAURANT"; totalAmount: string; status: "COMPLETED" | "VOID_REQUESTED" | "VOIDED"; createdAt: string };
+
+type ApiSuccess<T> = { success: true; data: T };
+
+export async function getDepartmentRevenueSales(api: AxiosInstance): Promise<DepartmentRevenueSale[]> {
+    const response = await api.get<ApiSuccess<{ sales: DepartmentRevenueSale[] }>>("/orders/sales");
+    const sales = response.data?.data?.sales;
+    if (!Array.isArray(sales)) throw new Error("The sales response did not contain a valid department sales list.");
+    return sales.filter((sale) => sale.sourceDepartment === "BAR" || sale.sourceDepartment === "RESTAURANT");
+}
 
 function startOfPeriod(now: Date, period: RevenuePeriod) {
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -58,4 +70,44 @@ export function aggregateReceptionRevenue(payments: RecordedBookingPayment[], pe
         total: totals.reduce((sum, amount) => sum + amount, 0) / 100,
         buckets: dates.map((date, index) => ({ label: formatBucket(date, period), amount: totals[index] / 100 })),
     };
+}
+
+export function aggregateDepartmentRevenue(
+    payments: RecordedBookingPayment[],
+    sales: DepartmentRevenueSale[],
+    period: RevenuePeriod,
+    now: Date,
+) {
+    const reception = aggregateReceptionRevenue(payments, period, now);
+    const start = startOfPeriod(now, period);
+    const end = period === "daily" ? new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1)
+        : period === "weekly" ? new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7)
+            : period === "monthly" ? new Date(start.getFullYear(), start.getMonth() + 1, 1)
+                : new Date(start.getFullYear() + 1, 0, 1);
+    const base = reception.buckets.map((bucket) => ({ ...bucket, receptionAmount: bucket.amount, barAmount: 0, restaurantAmount: 0 }));
+    const totalsInCents = base.map((bucket) => ({
+        reception: Math.round(bucket.receptionAmount * 100), bar: 0, restaurant: 0,
+    }));
+    for (const sale of sales) {
+        if (sale.status !== "COMPLETED") continue;
+        const timestamp = Date.parse(sale.createdAt);
+        const amount = Number(sale.totalAmount);
+        if (!Number.isFinite(timestamp) || !Number.isFinite(amount) || amount < 0) {
+            throw new Error("A department sale has an invalid amount or timestamp.");
+        }
+        if (timestamp < start.getTime() || timestamp >= end.getTime()) continue;
+        const date = new Date(timestamp);
+        const index = bucketIndex(date, start, period);
+        if (index < 0 || index >= base.length) continue;
+        const department = sale.sourceDepartment === "BAR" ? "bar" : "restaurant";
+        totalsInCents[index][department] += Math.round(amount * 100);
+    }
+    const buckets: DepartmentRevenueBucket[] = base.map((bucket, index) => ({
+        label: bucket.label,
+        receptionAmount: totalsInCents[index].reception / 100,
+        barAmount: totalsInCents[index].bar / 100,
+        restaurantAmount: totalsInCents[index].restaurant / 100,
+        amount: (totalsInCents[index].reception + totalsInCents[index].bar + totalsInCents[index].restaurant) / 100,
+    }));
+    return { total: buckets.reduce((sum, bucket) => sum + bucket.amount, 0), buckets };
 }
