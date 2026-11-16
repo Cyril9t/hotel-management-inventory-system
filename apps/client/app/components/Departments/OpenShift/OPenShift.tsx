@@ -35,13 +35,21 @@ export const OpenShiftContainer: React.FC = () => {
 
     useEffect(() => {
         if (!token || authLoading || currentShiftLoading || currentShift || currentShiftError) return;
+        if (String(user?.department ?? '').toUpperCase() === 'BAR' || String(user?.role ?? '').toUpperCase() === 'BAR_STAFF') {
+            setOpeningCash('');
+            setSuggestedCashLoading(false);
+            setSuggestedCashError('The API suggestion is based on this user’s previous shift and does not confirm the department. Enter the Bar opening cash amount.');
+            return;
+        }
         let cancelled = false;
         const handover = getClosedShiftCashHandover();
-        if (handover) setOpeningCash(String(handover.actualCash));
+        const userDepartment = String(user?.department ?? '').toUpperCase();
+        const matchingHandover = handover?.department.toUpperCase() === userDepartment && handover?.userId === String(user?.id ?? '') ? handover : null;
+        if (matchingHandover) setOpeningCash(String(matchingHandover.actualCash));
         setSuggestedCashLoading(true);
         setSuggestedCashError(null);
         void loadSuggestedOpeningCash().then((amount: number) => {
-            if (!cancelled && !handover) setOpeningCash(String(amount));
+            if (!cancelled && !matchingHandover) setOpeningCash(String(amount));
         }).catch((error: unknown) => {
             logShiftApiFailure('GET /shifts/suggested-opening-cash', error);
             if (!cancelled) setSuggestedCashError(error instanceof Error ? error.message : 'Could not load suggested opening cash.');
@@ -49,7 +57,7 @@ export const OpenShiftContainer: React.FC = () => {
             if (!cancelled) setSuggestedCashLoading(false);
         });
         return () => { cancelled = true; };
-    }, [token, authLoading, currentShiftLoading, currentShift, currentShiftError, loadSuggestedOpeningCash]);
+    }, [token, authLoading, currentShiftLoading, currentShift, currentShiftError, user?.department, user?.role, loadSuggestedOpeningCash]);
 
     if (authLoading || currentShiftLoading) return <div role="status" className="p-6"><GlobalLoadingSkeleton /></div>;
     if (authUnavailable) return <div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">

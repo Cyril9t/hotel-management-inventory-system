@@ -34,6 +34,8 @@ export interface ClosedShiftCashHandover {
     actualCash: number;
     shiftId: string;
     closedAt: string;
+    department: string;
+    userId: string;
 }
 
 export function getClosedShiftCashHandover(): ClosedShiftCashHandover | null {
@@ -42,11 +44,12 @@ export function getClosedShiftCashHandover(): ClosedShiftCashHandover | null {
         if (raw === null) return null;
         const value: unknown = JSON.parse(raw);
         if (!isRecord(value) || typeof value.actualCash !== "number" || !Number.isFinite(value.actualCash) || value.actualCash < 0 ||
-            typeof value.shiftId !== "string" || !value.shiftId.trim() || typeof value.closedAt !== "string" || !value.closedAt.trim()) {
+            typeof value.shiftId !== "string" || !value.shiftId.trim() || typeof value.closedAt !== "string" || !value.closedAt.trim() ||
+            typeof value.department !== "string" || !value.department.trim() || typeof value.userId !== "string" || !value.userId.trim()) {
             window.localStorage.removeItem(LAST_CLOSED_SHIFT_CASH_KEY);
             return null;
         }
-        return { actualCash: value.actualCash, shiftId: value.shiftId, closedAt: value.closedAt };
+        return { actualCash: value.actualCash, shiftId: value.shiftId, closedAt: value.closedAt, department: value.department, userId: value.userId };
     } catch {
         return null;
     }

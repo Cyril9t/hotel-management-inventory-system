@@ -32,6 +32,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
     const navigate = useNavigate();
     const shiftId = currentShift?.id;
     const shiftOpenedAt = currentShift?.openedAt;
+    const isBarShift = currentShift?.department === 'BAR';
 
     useEffect(() => {
         if (isOpen) void refreshCurrentShift().catch(() => {});
@@ -44,6 +45,12 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
 
     useEffect(() => {
         if (!isOpen) return;
+        if (isBarShift) {
+            setCashPaymentsReceived(null);
+            setPaymentsError('Cash payment breakdown is not available for Bar shifts. Expected Cash is taken from the shift API.');
+            setPaymentsLoading(false);
+            return;
+        }
         if (!shiftId || !shiftOpenedAt) {
             setCashPaymentsReceived(null);
             setPaymentsError(shiftId ? 'The current shift is missing its opening timestamp.' : '');
@@ -62,7 +69,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
             if (!cancelled) setPaymentsLoading(false);
         });
         return () => { cancelled = true; };
-    }, [api, isOpen, shiftId, shiftOpenedAt, paymentsRetryKey]);
+    }, [api, isOpen, shiftId, shiftOpenedAt, paymentsRetryKey, isBarShift]);
 
     if (!isOpen) return null;
     if (currentShiftLoading && !currentShift) return <div role="status" className="p-6"><GlobalLoadingSkeleton /></div>;
@@ -75,6 +82,9 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
         <Button type="button" onClick={() => navigate('/OpenShift')}>Open a shift</Button>
     </div>;
 
+    const isBarUser = String(user?.department ?? '').toUpperCase() === 'BAR' || String(user?.role ?? '').toUpperCase() === 'BAR_STAFF';
+    if (isBarUser && currentShift.department !== 'BAR') return <div role="alert" className="mx-auto max-w-xl p-6 text-center text-sm text-destructive">The current shift is not confirmed as a Bar shift. Refresh or contact a manager before reconciling.</div>;
+
     const activeShift = currentShift;
     const fullName = [user?.firstName, user?.lastName].filter((part): part is string => typeof part === 'string' && part.length > 0).join(' ') || 'Authenticated staff member';
     const department = typeof user?.department === 'string' ? user.department : String(user?.role ?? 'Staff');
@@ -86,19 +96,19 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
     const expectedCash = expectedValue !== null && expectedValue !== undefined && String(expectedValue).trim() !== '' && Number.isFinite(Number(expectedValue)) && Number(expectedValue) >= 0
         ? Number(expectedValue)
         : null;
-    const businessExpectedCash = openingCash !== null && Number.isFinite(openingCash) && cashPaymentsReceived !== null
+    const businessExpectedCash = !isBarShift && openingCash !== null && Number.isFinite(openingCash) && cashPaymentsReceived !== null
         ? openingCash + cashPaymentsReceived
         : null;
-    const serverExpectedMismatch = expectedCash !== null && businessExpectedCash !== null && Math.round(expectedCash * 100) !== Math.round(businessExpectedCash * 100);
+    const serverExpectedMismatch = !isBarShift && expectedCash !== null && businessExpectedCash !== null && Math.round(expectedCash * 100) !== Math.round(businessExpectedCash * 100);
     const expectedCashError = currentShiftError ?? (expectedCash === null
         ? 'The current shift did not return a valid Expected Cash value.'
         : openingCash === null
             ? 'The current shift did not return a valid Opening Cash value.'
             : null);
-    const reconciliationReady = !currentShiftLoading && !currentShiftError && expectedCash !== null && openingCash !== null &&
-        cashPaymentsReceived !== null && !paymentsLoading && !paymentsError && !serverExpectedMismatch;
+    const reconciliationReady = !currentShiftLoading && !currentShiftError && expectedCash !== null && (isBarShift || (openingCash !== null &&
+        cashPaymentsReceived !== null && !paymentsLoading && !paymentsError && !serverExpectedMismatch));
     const isActualCashValid = actualCash.trim() !== '' && Number.isFinite(Number(actualCash)) && Number(actualCash) >= 0;
-    const exceedsExpectedCash = expectedCash !== null && isActualCashValid && Number(actualCash) > expectedCash;
+    const exceedsExpectedCash = !isBarShift && expectedCash !== null && isActualCashValid && Number(actualCash) > expectedCash;
     const isFormValid = reconciliationReady &&
         isActualCashValid && !exceedsExpectedCash && !currentShiftLoading && !isSubmitting;
 
@@ -111,7 +121,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         if (isSubmitting) return;
-        if (expectedCash === null || cashPaymentsReceived === null || paymentsLoading || paymentsError) {
+        if (expectedCash === null || (!isBarShift && (cashPaymentsReceived === null || paymentsLoading || paymentsError))) {
             setSubmitError('Expected cash and recorded cash payments must be available before closing this shift.');
             return;
         }
@@ -152,7 +162,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
     return <div>
         <CloseShiftHeader staffName={fullName} department={department} shiftId={activeShift.id} />
         <form onSubmit={handleSubmit} className="mt-10 flex-1 overflow-y-auto">
-            <ShiftReconciliationCard
+            {isBarShift ? <section className="mt-6 rounded-xl border border-border bg-card p-5"><h2 className="font-semibold">Bar shift reconciliation</h2><p className="mt-2 text-sm text-muted-foreground">Expected Cash is supplied by the current shift API. The API does not expose a Bar payment breakdown in this client.</p>{expectedCashError && <div role="alert" className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"><span>{expectedCashError}</span><Button type="button" variant="outline" size="sm" onClick={() => { void refreshCurrentShift().catch(() => {}); }}>Retry</Button></div>}<dl className="mt-4 rounded-lg bg-muted/40 p-4"><dt className="text-xs font-semibold uppercase text-muted-foreground">Expected cash</dt><dd className="mt-1 text-lg font-semibold">{expectedCash === null ? 'Unavailable' : `₦ ${expectedCash.toLocaleString()}`}</dd></dl><label htmlFor="actual-cash" className="mt-4 block text-sm font-medium">Actual cash counted</label><input id="actual-cash" type="number" min="0" step="0.01" required disabled={isSubmitting || expectedCash === null} value={actualCash} onChange={(event) => { setActualCash(event.target.value); setSubmitError(''); }} className="mt-2 h-12 w-full rounded-md border border-input bg-background px-3" /></section> : <ShiftReconciliationCard
                 actualCash={actualCash}
                 onActualCashChange={(value) => { setActualCash(value); setSubmitError(''); }}
                 openingCash={Number.isFinite(openingCash) ? openingCash : null}
@@ -168,7 +178,7 @@ export const CloseShift: React.FC<CloseShiftContainerProps> = ({ isOpen = true, 
                 businessExpectedCash={businessExpectedCash}
                 reconciliationReady={reconciliationReady}
                 disabled={isSubmitting}
-            />
+            />}
             {exceedsExpectedCash && <p role="alert" className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">Actual cash cannot exceed the server Expected Cash of ₦ {expectedCash?.toLocaleString()}.</p>}
             {submitError && <p role="alert" className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{submitError}</p>}
             <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-border pt-4 sm:flex-row">

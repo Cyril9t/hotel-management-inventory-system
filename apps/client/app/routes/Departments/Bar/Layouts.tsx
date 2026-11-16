@@ -2,7 +2,6 @@ import { Outlet } from "react-router";
 import { DashboardHeader } from "../../../components/Departments/Shared/header";
 import { DashboardRouteGuard } from "~/Context/Context";
 import { ShiftProvider } from "~/Context/ShiftContext";
-import { BarOrdersProvider } from "~/components/Departments/Bar/Orders/BarOrdersContext";
 
 
 
@@ -34,7 +33,7 @@ function DepartmentsDashboard() {
 
     return (
 
-        <ShiftProvider><BarOrdersProvider>
+        <ShiftProvider>
         <DashboardRouteGuard role="bar">
             <div>
                 <DashboardHeader departments="Bar" staffName="Patrick" tabs={tabs} tabEnd="bar" />
@@ -44,7 +43,7 @@ function DepartmentsDashboard() {
                 </main>
             </div>
         </DashboardRouteGuard>
-        </BarOrdersProvider></ShiftProvider>);
+        </ShiftProvider>);
 }
 
 export default DepartmentsDashboard;

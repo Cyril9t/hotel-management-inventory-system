@@ -16,14 +16,14 @@ export interface BarCategoryOption {
 export interface BarProduct {
   id: string;
   name: string;
-  category: Exclude<BarProductCategory, 'all'>;
+  category?: Exclude<BarProductCategory, 'all'>;
   price: number;
-  inStock: number;
+  inStock?: number;
   unit: string;
   volume?: string;
   description?: string;
   badge?: 'Popular' | 'Low Stock' | 'Special' | 'Out of Stock';
-  sku: string;
+  sku?: string;
 }
 
 export interface BarCartItem {

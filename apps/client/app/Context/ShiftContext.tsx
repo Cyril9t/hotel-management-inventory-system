@@ -107,7 +107,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
             throw error;
         }
         if (normalizeRole(currentShift?.department) !== "kitchen") {
-            saveClosedShiftCashHandover({ actualCash, shiftId, closedAt: new Date().toISOString() });
+            saveClosedShiftCashHandover({ actualCash, shiftId, closedAt: new Date().toISOString(), department: currentShift?.department ?? "", userId: currentShift?.userId ?? "" });
         }
         setCurrentShift(null);
         setCurrentShiftError(null);
@@ -123,7 +123,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
             });
         }
         return result;
-    }, [currentShift?.id, refreshCurrentShift]);
+    }, [currentShift?.id, currentShift?.department, refreshCurrentShift]);
 
     const loadShiftList = useCallback(async () => {
         setShiftListLoading(true);

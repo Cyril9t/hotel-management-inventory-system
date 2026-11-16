@@ -21,6 +21,9 @@ export function BarCart({
   onPayment,
   bookingRef,
   onBookingRef,
+  onSubmit,
+  submitting = false,
+  error,
 }: {
   items: BarCartItem[];
   onQuantity: (id: string, quantity: number) => void;
@@ -29,6 +32,9 @@ export function BarCart({
   onPayment: (payment: PaymentMethod) => void;
   bookingRef: string;
   onBookingRef: (ref: string) => void;
+  onSubmit: () => void;
+  submitting?: boolean;
+  error?: string | null;
 }) {
   const total = items.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
@@ -116,7 +122,7 @@ export function BarCart({
                 type="button"
                 key={option.id}
                 size="sm"
-                variant={payment === option.id ? "secondary" : "outline"}
+                variant={payment === option.id ? "default" : "secondary"}
                 className="h-auto min-h-9 whitespace-normal"
                 onClick={() => onPayment(option.id)}
               >
@@ -127,17 +133,18 @@ export function BarCart({
         </fieldset>
         {payment === "charge_to_room" && (
           <div className="space-y-1.5">
-            <Label htmlFor="bar-booking-ref">Booking reference</Label>
+            <Label htmlFor="bar-booking-ref">Booking ID</Label>
             <Input
               id="bar-booking-ref"
-              placeholder="e.g. BK-78401"
+              placeholder="Enter the booking UUID"
               value={bookingRef}
               onChange={(event) => onBookingRef(event.target.value)}
             />
           </div>
         )}
-        <Button className="bg-foreground text-background w-full h-10" disabled={!items.length}>
-          Complete sale <span className="ml-auto">{formatNaira(total)}</span>
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        <Button type="button" onClick={onSubmit} className="bg-brand-success text-background w-full h-10" disabled={!items.length || submitting || (payment === "charge_to_room" && !bookingRef.trim())}>
+          {submitting ? "Submitting…" : "Complete sale"} <span className="ml-auto">{formatNaira(total)}</span>
         </Button>
        
       </CardContent>

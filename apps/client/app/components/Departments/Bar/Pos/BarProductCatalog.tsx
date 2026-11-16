@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Card, CardContent } from "~/components/ui/card";
-import { BAR_CATEGORIES, formatNaira } from "../mockData";
+import { formatNaira } from "../mockData";
 import type { BarProduct, BarProductCategory } from "../types";
 
 export function BarProductCatalog({
@@ -49,7 +49,7 @@ export function BarProductCatalog({
         className="flex gap-2 overflow-x-auto pb-1"
         aria-label="Product categories"
       >
-        {BAR_CATEGORIES.map((item) => (
+        {[{ id: "all" as const, label: "All Products" }].map((item) => (
           <Button
             key={item.id}
             size="sm"
@@ -64,7 +64,7 @@ export function BarProductCatalog({
       {filtered.length ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((product) => {
-            const lowStock = product.inStock <= 10;
+            const lowStock = product.inStock !== undefined && product.inStock <= 10;
             return (
               <Card
                 key={product.id}
@@ -76,7 +76,7 @@ export function BarProductCatalog({
                     <span
                       className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${lowStock ? "bg-accent text-accent-foreground" : "bg-brand-success/10 text-brand-success"}`}
                     >
-                      {lowStock ? "Low stock" : "In stock"}
+                      {product.inStock === undefined ? "Stock not available" : lowStock ? "Low stock" : "In stock"}
                     </span>
                   </div>
                   <div className="mt-4 flex items-end justify-between gap-2">
@@ -85,7 +85,7 @@ export function BarProductCatalog({
                         {formatNaira(product.price)}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {product.inStock} in stock
+                        {product.inStock === undefined ? "Stock quantity unavailable" : `${product.inStock} in stock`}
                       </p>
                     </div>
                     <Button
